@@ -76,10 +76,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Api\ApiClient.cs" />
+    <Compile Include="Api\Paths.cs" />
+    <Compile Include="Api\ProblemsRepo.cs" />
     <Compile Include="Arithmetic.cs" />
     <Compile Include="DiofantEquationSolver\DiofantEquation.cs" />
     <Compile Include="Api\SnapshotRefJson.cs" />
     <Compile Include="DiofantEquationSolver\DiofantEquationSolver_Sould.cs" />
+    <Compile Include="ImperfectSolver.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="Facet.cs" />

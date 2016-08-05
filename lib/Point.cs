@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -100,7 +101,14 @@ namespace lib
 			var k = a.ScalarProd(b)*2/b.Length2;
 			return mirror.Start + b*k-a;
 		}
+
+		public static Point[] ToPoints(this string points)
+		{
+			return points.Split(' ').Select(Point.Parse).ToArray();
+		}
 	}
+
+
 
 	[TestFixture]
 	public class Point_Should
