@@ -14,7 +14,8 @@ namespace lib.DiofantEquationSolver
         readonly BigInteger[] weights;
         readonly BigInteger Sum;
 
-        public int PoolSize = 10;
+  
+        public int PoolSize = 25;
 
         public DiofantEquation(params Rational[] areas)
         {
@@ -47,7 +48,8 @@ namespace lib.DiofantEquationSolver
         }
 
         Dictionary<int[], double> solutions;
-        
+
+
         int[] Generate()
         {
 
@@ -61,6 +63,17 @@ namespace lib.DiofantEquationSolver
             return s;
         }
 
+
+        int[] Cross(int[] a, int[] b)
+        {
+            var r = new int[a.Length];
+            var p = rnd.Next(a.Length);
+            for (int i=0;i<r.Length;i++)
+            {
+                r[i] = i < p ? a[i] : b[i];
+            }
+            return r;
+        }
 
         void Mutate(int[] solution)
         {
@@ -89,35 +102,48 @@ namespace lib.DiofantEquationSolver
                 .ToDictionary(z => z.Key, z => z.Value);
         }
 
+        void AddSolution(int[] solution)
+        {
+            solutions[solution] = Evaluate(solution);
+        }
+
         void Iteration()
         {
-            foreach(var e in solutions.Keys.ToList())
+
+            var old = solutions.Keys.ToList();
+
+            for (int i=0;i<PoolSize;i++)
+                AddSolution(Cross(old[rnd.Next(old.Count)], old[rnd.Next(old.Count)]));
+
+
+            foreach(var e in old)
             {
                 var c = Clone(e);
                 Mutate(c);
-                solutions[c] = Evaluate(c);
+                AddSolution(c);
             }
+
+            for (int i = 0; i < PoolSize / 4; i++)
+                AddSolution(Generate());
             Clean();
         }
 
-        public int[] Solve(int seed)
+        public int[] Solve(int seed, int iterationsLimit=int.MaxValue)
         {
             solutions = new Dictionary<int[], double>();
             rnd = new Random(seed);
 
             for (int i=0;i<PoolSize;i++)
-            {
-                var s = Generate();
-                solutions[s] = Evaluate(s);
-            }
+                AddSolution(Generate());
 
-            while(true)
+            for (int i=0;i<iterationsLimit;i++)
             {
                 if (solutions.First().Value == 0)
                     return solutions.First().Key;
                 Iteration();
-                Console.WriteLine(solutions.Select(z => z.Value.ToString()).StrJoin(" "));
+                Console.WriteLine(solutions.Take(10).Select(z => z.Value.ToString("0.000")).StrJoin(" "));
             }
+            return null;
         }
 
         public bool Check(int[] solution)
