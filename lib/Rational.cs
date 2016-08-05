@@ -95,6 +95,24 @@ namespace lib
 				r1.Denomerator * r2.Denomerator
 				).Reduce();
 		}
+		public static Rational operator -(Rational r1, Rational r2)
+		{
+			return new Rational(
+				r1.Numerator * r2.Denomerator - r2.Numerator * r1.Denomerator,
+				r1.Denomerator * r2.Denomerator
+				).Reduce();
+		}
+
+		public static Rational operator *(Rational a, Rational b)
+		{
+			return new Rational(a.Numerator * b.Numerator, a.Denomerator * b.Denomerator);
+		}
+
+		public static Rational operator /(Rational a, Rational b)
+		{
+			return new Rational(a.Numerator * b.Denomerator, a.Denomerator * b.Numerator);
+		}
+
 
 		public static Rational operator +(Rational r1, int n2)
 		{
@@ -103,6 +121,10 @@ namespace lib
 		public static Rational operator -(Rational r)
 		{
 			return new Rational(-r.Numerator, r.Denomerator);
+		}
+		public static implicit operator Rational(int r)
+		{
+			return new Rational(r, 1);
 		}
 
 		public static Rational operator +(int n2, Rational r1)
