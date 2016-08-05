@@ -16,6 +16,17 @@ namespace lib
 			Segments = segments;
 		}
 
+		public ProblemSpec MoveToOrigin()
+		{
+			var vs = Polygons.SelectMany(p => p.Vertices).ToList();
+			var minX = vs.Select(p => p.X).Min();
+			var minY = vs.Select(p => p.Y).Min();
+			return new ProblemSpec(
+				Polygons.Select(p => p.Move(-minX, -minY)).ToArray(),
+				Segments.Select(s => s.Move(-minX, -minY)).ToArray()
+				);
+		}
+
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
@@ -38,6 +49,5 @@ namespace lib
 				.Select(Segment.Parse).ToArray();
 			return new ProblemSpec(ps, ss);
 		}
-
 	}
 }

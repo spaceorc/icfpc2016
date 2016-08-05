@@ -31,5 +31,10 @@ namespace lib
 				.ToArray();
 			return new Polygon(ps);
 		}
+
+		public Polygon Move(Rational shiftX, Rational shiftY)
+		{
+			return new Polygon(Vertices.Select(p => new Point(p.X + shiftX, p.Y +shiftY)).ToArray());
+		}
 	}
 }

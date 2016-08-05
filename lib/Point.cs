@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.Contracts;
 
 namespace lib
 {
@@ -42,5 +43,11 @@ namespace lib
 			return $"{X},{Y}";
 		}
 		#endregion
+
+		[Pure]
+		public Point Move(Rational shiftX, Rational shiftY)
+		{
+			return new Point(X + shiftX, Y + shiftY);
+		}
 	}
 }

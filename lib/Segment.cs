@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.Contracts;
 
 namespace lib
 {
@@ -22,6 +23,11 @@ namespace lib
 		public override string ToString()
 		{
 			return $"{Start} {End}";
+		}
+		[Pure]
+		public Segment Move(Rational shiftX, Rational shiftY)
+		{
+			return new Segment(Start.Move(shiftX, shiftY), End.Move(shiftX, shiftY));
 		}
 	}
 }
