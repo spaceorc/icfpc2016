@@ -8,17 +8,18 @@ using System.Threading.Tasks;
 
 namespace Runner
 {
-    public class PointProjectionSolver
+	public class EdgeInfo
+	{
+		public Segment segment;
+		public Rational length;
+		public override string ToString()
+		{
+			return segment.ToString();
+		}
+	}
+	public class PointProjectionSolver
     {
-        public class EdgeInfo
-        {
-            public Segment segment;
-            public Rational length;
-            public override string ToString()
-            {
-                return segment.ToString();
-            }
-        }
+
 
         public class NodeInfo
         {

@@ -4,11 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using NUnit.Framework;
 
 namespace lib
@@ -51,7 +49,7 @@ namespace lib
 		{
 			return JObject.Parse(Query(query));
 		}
-
+		
 		public string PostSolution(int problemId, SolutionSpec solution)
 		{
 			using (var client = CreateClient())
@@ -70,6 +68,7 @@ namespace lib
 				return res.Content.ReadAsStringAsync().Result;
 			}
 		}
+
 
 		private string Query(string query)
 		{
