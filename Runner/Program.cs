@@ -2,9 +2,12 @@
 using lib.DiofantEquationSolver;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Runner
 {
@@ -53,14 +56,35 @@ namespace Runner
 
         static void Main(string[] args)
         {
-           
 
-            var equation = new DiofantEquation(getRandomWeights(new Random(1),40,100));
+            var spec = ProblemSpec.Parse(File.ReadAllText("...\\..\\..\\problems\\018.spec.txt"));
+            spec = spec.MoveToOrigin();
 
-            int seed = 1;
-            while (equation.Solve(seed++) == null) Console.WriteLine("\n\n\n\n\n");
-            
+            var q = spec.Segments.Where(z => Arithmetic.IsSquare(z.QuadratOfLength)).ToList();
                 
+            
+
+            var wnd = new Form() { ClientSize = new Size(800, 600) };
+
+            wnd.Paint += (s, a) =>
+              {
+                  var g = a.Graphics;
+                  var p = new Painter();
+                  p.Paint(g, 600, spec);
+                  Color[] cs = new[] { Color.Blue, Color.Cyan, Color.Orange, Color.Green, Color.Magenta };
+
+                  for (int i=0;i<q.Count;i++)
+                  {
+                      p.PaintSegment(g, cs[i % cs.Length], q[i]);
+                  }
+              };
+
+
+
+
+            Application.Run(wnd);        
+            
+
         }
     }
 }
