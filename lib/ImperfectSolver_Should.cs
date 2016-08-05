@@ -16,10 +16,12 @@ namespace lib
 		{
 			ImperfectSolver solver = new ImperfectSolver();
 			Console.WriteLine($"problemId = {problemId}");
-			var spec = new ProblemsRepo().Get(problemId);
+			var repo = new ProblemsRepo();
+			var spec = repo.Get(problemId);
 			var solution = solver.SolveMovingInitialSquare(spec);
 			var res = new ApiClient().PostSolution(problemId, solution);
 			Console.WriteLine(res);
+			repo.PutResponse(problemId, res);
 			Thread.Sleep(1000);
 		}
 	}
