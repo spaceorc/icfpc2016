@@ -88,6 +88,7 @@ namespace lib
 	public class VisualizerForm_Should
 	{
 		[Test]
+		[Explicit]
 		public void DoSomething_WhenSomething()
 		{
 			new VisualizerForm(@"c:\work\icfpc2016\problems", p => new ImperfectSolver().SolveMovingInitialSquare(p)).ShowDialog();
