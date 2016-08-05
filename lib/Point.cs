@@ -87,6 +87,7 @@ namespace lib
 		}
 
 		public double Length => Math.Sqrt(X * X + Y * Y);
+		public Rational Length2 => X * X + Y * Y;
 
 	}
 
@@ -96,22 +97,24 @@ namespace lib
 		{
 			var b = mirror.End - mirror.Start;
 			var a = p - mirror.Start;
-			return new Point(0, 0);
-			//var side = mirror.End - mirror.Start;
-			//var n = new Point(-side.Y, side.X).Normalize();
-			//return p + n * 2;
+			var k = a.ScalarProd(b)*2/b.Length2;
+			return mirror.Start + b*k-a;
 		}
 	}
 
 	[TestFixture]
 	public class Point_Should
 	{
-		[Test]
-		public void BeMirrored()
+		[TestCase("0,0 1,1", "0,1", "1,0")]
+		[TestCase("0,0 1,0", "0,1", "0,-1")]
+		[TestCase("10,10 11,10", "10,11", "10,9")]
+		public void BeMirrored(string segment, string point, string expectedPoint)
 		{
-			Segment s = "0,0 1,0";
-			Point p = "1,1";
-			p.Reflect(s).Should().Be(Point.Parse("1,-1"));
+			Segment s = segment;
+			Point p = point;
+			var p2 = Point.Parse(expectedPoint);
+			p.Reflect(s).Should().Be(p2);
+			p2.Reflect(s).Should().Be(p);
 		}
 	}
 }
