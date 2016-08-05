@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using lib;
 using lib.Graphs;
 using NUnit.Framework;
@@ -10,13 +12,43 @@ namespace Runner
 	public class GraphExt_Should
 	{
 		[Test]
+		[Explicit]
 		public void DoSomething_WhenSomething()
 		{
 			var problemsRepo = new ProblemsRepo();
-			var problemSpec = problemsRepo.Get(15);
+			var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
+			var apiClient = new ApiClient();
+			foreach (var p in goodTasks)
+			{
+				try
+				{
+					Console.WriteLine($"!solving: {p}");
+					var problemSpec = problemsRepo.Get(p);
+					var solutionSpec = GraphExt.Solve(problemSpec);
+					var postSolution = apiClient.PostSolution(p, solutionSpec);
+					Console.WriteLine(postSolution);
+					problemsRepo.PutResponse(p, postSolution);
+				}
+				catch (Exception)
+				{
+				}
+				Thread.Sleep(1000);
+			}
+		}
+
+		[Test]
+		[Explicit]
+		public void DoSomething_WhenSomething2()
+		{
+			var problemsRepo = new ProblemsRepo();
+			var problemSpec = problemsRepo.Get(11);
+			Console.WriteLine("problem");
+			Console.WriteLine(problemSpec);
 			problemSpec.CreateVisualizerForm().ShowDialog();
 			var solutionSpec = GraphExt.Solve(problemSpec);
 			solutionSpec.CreateVisualizerForm().ShowDialog();
+			Console.WriteLine("solution");
+			Console.WriteLine(solutionSpec);
 		}
 	}
 

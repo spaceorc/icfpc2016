@@ -20,5 +20,10 @@ namespace lib
 		{
 			return ProblemSpec.Parse(File.ReadAllText(Path.Combine(problemsDir, $"{id:000}.spec.txt")));
 		}
+
+		public void PutResponse(int id, string response)
+		{
+			File.WriteAllText(Path.Combine(problemsDir, $"{id:000}.response.txt"), response);
+		}
 	}
 }
