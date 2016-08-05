@@ -21,6 +21,7 @@ namespace lib
 			var solution = solver.SolveMovingInitialSquare(spec);
 			var res = new ApiClient().PostSolution(problemId, solution);
 			Console.WriteLine(res);
+			repo.PutSolution(problemId, solution);
 			repo.PutResponse(problemId, res);
 			Thread.Sleep(1000);
 		}

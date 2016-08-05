@@ -25,5 +25,10 @@ namespace lib
 		{
 			File.WriteAllText(Path.Combine(problemsDir, $"{id:000}.response.txt"), response);
 		}
+
+		public void PutSolution(int id, SolutionSpec solutionSpec)
+		{
+			File.WriteAllText(Path.Combine(problemsDir, $"{id:000}.solution.txt"), solutionSpec.ToString());
+		}
 	}
 }

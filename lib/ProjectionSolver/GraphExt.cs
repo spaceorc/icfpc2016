@@ -28,6 +28,7 @@ namespace Runner
 					var solutionSpec = GraphExt.Solve(problemSpec);
 					var postSolution = apiClient.PostSolution(p, solutionSpec);
 					Console.WriteLine(postSolution);
+					problemsRepo.PutSolution(p, solutionSpec);
 					problemsRepo.PutResponse(p, postSolution);
 				}
 				catch (Exception)
