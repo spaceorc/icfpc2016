@@ -29,7 +29,12 @@ namespace lib
 			Denomerator = denomerator;
 		}
 
-		private BigInteger GCD(BigInteger a, BigInteger b)
+        public static BigInteger LCM(BigInteger a, BigInteger b)
+        {
+            return a * b / GCD(a, b);
+        }
+
+		public static BigInteger GCD(BigInteger a, BigInteger b)
 		{
 			BigInteger c;
 			while (!a.IsZero)

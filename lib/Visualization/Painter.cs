@@ -27,13 +27,26 @@ namespace lib
 				Color color = ColorTranslator.FromHtml("#" + ColourValues[i++]);
 				PaintPolygon(g, color, polygon);
 			}
+
+            int cyan = 0;
+
 			foreach (var segment in spec2.Segments)
 			{
-				PaintSegment(g, Color.Black, segment);
+                var color = Color.Black;
+
+                if (Arithmetic.IsSquare(segment.QuadratOfLength))
+                {
+                    color = Color.FromArgb(0, 255 - cyan, 255 - cyan);
+                    cyan = cyan += 30;
+                    if (cyan > 150) cyan = 0;
+                }
+
+                PaintSegment(g, color, segment);
 			}
 		}
 
-		private void PaintSegment(Graphics g, Color color, Segment segment)
+        
+		public void PaintSegment(Graphics g, Color color, Segment segment)
 		{
 			g.DrawLine(new Pen(color, 0.01f), segment.Start.X, segment.Start.Y, segment.End.X, segment.End.Y);
 		}

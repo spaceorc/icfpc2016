@@ -13,10 +13,23 @@ namespace lib
 			End = end;
 		}
 
+        public Rational QuadratOfLength
+        {
+            get
+            {
+                var result= (End.X - Start.X) * (End.X - Start.X) +
+                (End.Y - Start.Y) * (End.Y - Start.Y);
+
+                result.Reduce();
+                return result;
+            }
+        }
+
 		public static implicit operator Segment(string s)
 		{
 			return Parse(s);
 		}
+        
 
 		public static Segment Parse(string s)
 		{
