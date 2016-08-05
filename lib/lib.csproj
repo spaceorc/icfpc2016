@@ -84,10 +84,13 @@
     <Compile Include="DiofantEquationSolver\DiofantEquationSolver_Sould.cs" />
     <Compile Include="Graphs\Graph.cs" />
     <Compile Include="ImperfectSolver.cs" />
+    <Compile Include="ImperfectSolver_Should.cs" />
     <Compile Include="ObjectExtensions.cs" />
-    <Compile Include="Point.cs" />
+    <Compile Include="Vector.cs" />
     <Compile Include="Facet.cs" />
+    <Compile Include="VectorExtensions.cs" />
     <Compile Include="PointToPolygonPositionExtensions.cs" />
+    <Compile Include="Vector_Should.cs" />
     <Compile Include="Polygon.cs" />
     <Compile Include="PolygonExtensions.cs" />
     <Compile Include="ProblemSpec.cs" />

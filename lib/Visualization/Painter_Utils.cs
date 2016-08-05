@@ -30,6 +30,7 @@ namespace lib
 		}
 
 		[TestCase(15)]
+		[Explicit]
 		public void PaintOne(int index)
 		{
 			var painter = new Painter();

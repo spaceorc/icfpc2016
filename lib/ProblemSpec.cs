@@ -8,7 +8,7 @@ namespace lib
 	public class ProblemSpec
 	{
 		public readonly Polygon[] Polygons;
-		public readonly Segment[] Segments;
+		public  Segment[] Segments;
 
 		public ProblemSpec(Polygon[] polygons, Segment[] segments)
 		{
