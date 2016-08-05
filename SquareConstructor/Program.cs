@@ -10,6 +10,7 @@ namespace SquareConstructor
 	{
 		static void Main(string[] args)
 		{
+			
 		}
 	}
 }
