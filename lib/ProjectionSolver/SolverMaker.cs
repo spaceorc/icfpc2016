@@ -69,7 +69,7 @@ namespace Runner
 
         public static PointProjectionSolver CreateSolver(ProblemSpec spec)
         {
-            spec = spec.MoveToOrigin();
+//            spec = spec.MoveToOrigin();
 
             var solver = new PointProjectionSolver(spec);
             return solver;

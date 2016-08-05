@@ -17,6 +17,7 @@ namespace Runner
 		{
 			var problemsRepo = new ProblemsRepo();
 			var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
+//			var goodTasks = new[] { 13 };
 			var apiClient = new ApiClient();
 			foreach (var p in goodTasks)
 			{
@@ -41,7 +42,7 @@ namespace Runner
 		public void DoSomething_WhenSomething2()
 		{
 			var problemsRepo = new ProblemsRepo();
-			var problemSpec = problemsRepo.Get(11);
+			var problemSpec = problemsRepo.Get(13);
 			Console.WriteLine("problem");
 			Console.WriteLine(problemSpec);
 			problemSpec.CreateVisualizerForm().ShowDialog();
