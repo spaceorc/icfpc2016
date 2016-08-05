@@ -100,6 +100,10 @@
     <Compile Include="SolutionSpec_Should.cs" />
     <Compile Include="Visualization\Painter.cs" />
     <Compile Include="Visualization\Painter_Utils.cs" />
+    <Compile Include="Visualization\VisualizationExtensions.cs" />
+    <Compile Include="Visualization\VisualizerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

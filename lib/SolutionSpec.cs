@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -17,6 +18,13 @@ namespace lib
 			SourcePoints = sourcePoints;
 			Facets = facets;
 			DestPoints = destPoints;
+		}
+
+		public Polygon[] Polygons => Facets.Select(FacetToPolygon).ToArray();
+
+		private Polygon FacetToPolygon(Facet f)
+		{
+			return new Polygon(f.Vertices.Select(i => SourcePoints[i]).ToArray());
 		}
 
 		public override string ToString()

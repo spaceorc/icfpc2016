@@ -1,0 +1,1 @@
+start "" SolutionVisalizer\bin\Debug\viz.exe

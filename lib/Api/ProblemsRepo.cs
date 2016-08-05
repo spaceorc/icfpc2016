@@ -7,7 +7,7 @@ namespace lib
 		private readonly string problemsDir;
 
 		public ProblemsRepo()
-			:this(Paths.ProblemsDir())
+			: this(Paths.ProblemsDir())
 		{
 		}
 
