@@ -17,6 +17,7 @@ namespace lib
 		private ListBox list;
 		private Panel problemPanel;
 		private Panel solutionPanel;
+		private double score;
 		private SplitContainer splitContainer;
 
 		public VisualizerForm(string problemsDir, Func<ProblemSpec, SolutionSpec> solve = null)
@@ -52,6 +53,11 @@ namespace lib
 		{
 			problem = ProblemSpec.Parse(File.ReadAllText(Path.Combine(problemsDir, (string) list.SelectedItem)));
 			solution = solve?.Invoke(problem);
+			if (solution != null)
+			{
+				score = SolutionEvaluator.EvaluateX(problem, solution, 100);
+				Text = $"Score: {score}";
+			}
 			splitContainer.Panel1.Invalidate();
 			splitContainer.Panel2.Invalidate();
 		}
