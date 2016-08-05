@@ -18,32 +18,35 @@ namespace Runner
 		{
 			spec = new ProblemSpec(spec.Polygons, solver.Segments.ToArray());
 			var wnd = new Form();
-			wnd.Paint += (s, a) => { new Painter().Paint(a.Graphics, 200, spec); };
+			wnd.Paint += (s, a) => { new Painter().Paint(a.Graphics, 500, spec); };
 			Application.Run(wnd);
 		}
 
 
 		static void Main(string[] args)
 		{
-			var goodTasks = new[] { 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42 };
+			var goodTasks = new[] { 1,2,3,4,5,6,7,8, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
 			var badTasks = new[] { 16 };
 
-			var allTasks = Enumerable.Range(43, 100);
+			var allTasks = Enumerable.Range(46, 100);
 
 
-			foreach (var task in goodTasks)
+			foreach (var task in allTasks)
 			{
 				var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt", task);
 				var spec = ProblemSpec.Parse(File.ReadAllText(fname));
 
-				var solver = SolverMaker.Solve(spec);
+                var solver = SolverMaker.CreateSolver(spec);
+
+                PaintSolver(spec, solver);
+
+                solver = SolverMaker.Solve(solver);
 				if (solver == null)
 				{
 					MessageBox.Show("No solution for " + fname);
 					return;
 				}
 
-				//PaintSolver(spec,solver);
 
 				var wnd = new Form() { ClientSize = new Size(800, 600) };
 

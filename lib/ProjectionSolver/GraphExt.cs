@@ -39,7 +39,7 @@ namespace Runner
 
 		public static SolutionSpec Solve(ProblemSpec problemSpec)
 		{
-			var solver = SolverMaker.Solve(problemSpec);
+			var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec));
 			var graphExt = new GraphExt(solver.Projection);
 			return graphExt.GetSolution();
 		}

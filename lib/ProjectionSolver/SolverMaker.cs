@@ -67,12 +67,17 @@ namespace Runner
             Application.Run(wnd);
         }
 
-
-        public static PointProjectionSolver Solve(ProblemSpec spec)
+        public static PointProjectionSolver CreateSolver(ProblemSpec spec)
         {
-			spec = spec.MoveToOrigin();
-			
+            spec = spec.MoveToOrigin();
+
             var solver = new PointProjectionSolver(spec);
+            return solver;
+        }
+
+        public static PointProjectionSolver Solve(PointProjectionSolver solver)
+        {
+
 
             //PaintSolver(spec,solver);
 
@@ -92,7 +97,9 @@ namespace Runner
                 var unused = solver.UnusedSegments().ToList();
 
                 var used = solver.AddAdditionalEdges(unused);
+                Console.WriteLine($"{used}/{unused.Count}");
                 if (used < unused.Count) continue;
+
                 ok = true;
 
                 break;
