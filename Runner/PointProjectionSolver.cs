@@ -82,7 +82,7 @@ namespace Runner
             }
         }
 
-        public List<Path> Algorithm()
+        public IEnumerable<Path> Algorithm()
         {
             var result = new List<Path>();
 
@@ -104,17 +104,12 @@ namespace Runner
                 list.Clear();
                 foreach(var e in otherList)
                 {
-                    if (e.length == 4) result.Add(e);
+                    if (e.length == 4) yield return e;
                     else if (e.length > 4) continue;
                     else list.Add(e);
                 }
 
             }
-
-            return result
-                .Where(z => IsCircular(z))
-                .OrderByDescending(z => VerticesIn(z))
-                .ToList();
         }
 
         private static Rational GetRationalEnumerableSum(IEnumerable<Rational> source)
@@ -288,25 +283,32 @@ namespace Runner
                 .Count();
         }
 
-
+        #region initialization
         public List<Segment> Segments = new List<Segment>();
+        public List<Vector> vectors;
 
-        public PointProjectionSolver(ProblemSpec spec)
+
+        void GenerateSegments(ProblemSpec spec)
         {
-            var vectors = spec
-               .Segments
-               .SelectMany(z => new[] { z.Start, z.End })
-               .Distinct()
-               .ToList();
-
-
-
-
-            Graph = new Graph<EdgeInfo, NodeInfo>(vectors.Count);
-            for (int i = 0; i < vectors.Count; i++)
-                Graph[i].Data = new NodeInfo { Location = vectors[i] };
 
             Segments = spec.Segments.ToList();
+
+            vectors = spec
+                   .Segments
+                   .SelectMany(z => new[] { z.Start, z.End })
+                   .Distinct()
+                   .ToList();
+            for (int i = 0; i < Segments.Count; i++)
+                for (int j = i + 1; j < Segments.Count; j++)
+                {
+                    var intersect = Arithmetic.GetIntersection(Segments[i], Segments[j]);
+                    if (!intersect.HasValue) continue;
+                    var v = intersect.Value;
+                    v = new Vector(v.X.Reduce(), v.Y.Reduce());
+                    if (!vectors.Contains(v))
+                        vectors.Add(v);
+                }
+
 
             while (true)
             {
@@ -326,6 +328,22 @@ namespace Runner
                     break;
                 Segments = segments;
             }
+
+
+        }
+
+        public PointProjectionSolver(ProblemSpec spec)
+        {
+
+
+
+            GenerateSegments(spec);
+
+            Graph = new Graph<EdgeInfo, NodeInfo>(vectors.Count);
+            for (int i = 0; i < vectors.Count; i++)
+                Graph[i].Data = new NodeInfo { Location = vectors[i] };
+
+            
 
         
             
@@ -351,5 +369,6 @@ namespace Runner
 
 
         }
+        #endregion
     }
 }

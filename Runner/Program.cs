@@ -54,41 +54,43 @@ namespace Runner
             weights.Add(sum);
             return weights.ToArray();
         }
+        
 
-
+        static void PaintSolver(ProblemSpec spec, PointProjectionSolver solver)
+        {
+            spec = new ProblemSpec(spec.Polygons, solver.Segments.ToArray());
+            var wnd = new Form();
+            wnd.Paint += (s, a) =>
+              {
+                  new Painter().Paint(a.Graphics, 200, spec);
+              };
+            Application.Run(wnd);
+        }
 
 
         static void Main(string[] args)
         {
             var goodTasks = new[] { 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42 };
-            var badTasks = new[] { 42 };
+            var badTasks = new[] { 16 };
 
             var allTasks = Enumerable.Range(43, 100);
 
 
-            foreach (var task in allTasks)
+            foreach (var task in goodTasks)
             {
                 var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt", task);
                 var spec = ProblemSpec.Parse(File.ReadAllText(fname));
                 spec = spec.MoveToOrigin();
 
 
-                var irrationalEdges = spec
-                    .Segments
-                    .Where(z => !Arithmetic.IsSquare(z.QuadratOfLength))
-                    .ToList();
-
                 var solver = new PointProjectionSolver(spec);
 
-                var result = solver.Algorithm();
+                //PaintSolver(spec,solver);
 
-                result = result
-                    .Where(z => z.edges[0].From == z.edges[z.edges.Count - 1].To)
-                    .ToList();
+                var result = solver.Algorithm().Where(z => z.edges[0].From == z.edges[z.edges.Count - 1].To);
 
-                var resIndex = -1;
 
-                var reorderings = result.SelectMany(z => solver.GetReorderings(z)).ToList();
+                var reorderings = result.SelectMany(z => solver.GetReorderings(z));
 
 
                 bool ok = false;
