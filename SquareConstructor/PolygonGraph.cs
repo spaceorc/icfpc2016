@@ -18,8 +18,13 @@ namespace SquareConstructor
                 {
                     if (currentNode.Equals(neightbourNode))
                         continue;
-                    if (currentNode.Polygon.GetCommonSegment(neightbourNode.Polygon) != null)
-                        currentNode.Neightbours.Add(neightbourNode);
+	                
+	                foreach (var segment in currentNode.Polygon.GetCommonSegments(neightbourNode.Polygon))
+	                {
+						if(!currentNode.Neightbours.ContainsKey(segment))
+							currentNode.Neightbours[segment] = new List<Node>();
+						currentNode.Neightbours[segment].Add(neightbourNode);
+					}
                 }
             }
         }
@@ -27,17 +32,17 @@ namespace SquareConstructor
         public class Node
         {
             public Polygon Polygon { get; private set; }
-            public List<Node> Neightbours { get; private set; }
+            public Dictionary<Segment, List<Node>> Neightbours { get; private set; }
 
             public Node(Polygon polygon)
             {
                 Polygon = polygon;
-                Neightbours = new List<Node>();
+                Neightbours = new Dictionary<Segment, List<Node>>();
             }
 
-            public Node[] GetNeightbours(Segment segment)
+            public List<Node> GetNeightbours(Segment segment)
             {
-                return Neightbours.Where(n => PolygonExtensions.HasSegment(n.Polygon, segment)).ToArray();
+                return Neightbours[segment];
             }
         }
     }
