@@ -81,6 +81,11 @@ namespace lib
 			return X*p2.X + Y*p2.Y;
 		}
 
+        public Rational VectorProdLength(Vector p2)
+        {
+            return X*p2.Y - p2.X * Y;
+        }
+
 		[Pure]
 		public Vector Move(Rational shiftX, Rational shiftY)
 		{

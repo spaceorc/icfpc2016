@@ -265,14 +265,42 @@ namespace Runner
                .Distinct()
                .ToList();
 
-            
-            Graph = new Graph<EdgeInfo,NodeInfo>(vectors.Count);
+
+
+
+            Graph = new Graph<EdgeInfo, NodeInfo>(vectors.Count);
             for (int i = 0; i < vectors.Count; i++)
                 Graph[i].Data = new NodeInfo { Location = vectors[i] };
 
+            var initialSegments = spec.Segments.ToList();
+
+            while (true)
+            {
+                var segments = new List<Segment>();
+                foreach (var e in initialSegments)
+                {
+                    var inter = vectors.Where(z => !z.Equals(e.Start) && !z.Equals(e.End) && Arithmetic.PointInSegment(z, e)).ToList();
+                    if (inter.Count == 0)
+                        segments.Add(e);
+                    else
+                    {
+                        segments.Add(new Segment(e.Start, inter[0]));
+                        segments.Add(new Segment(inter[0], e.End));
+                    }
+                }
+                if (segments.Count == initialSegments.Count)
+                    break;
+                initialSegments = segments;
+            }
+
+        
+            
+
+
+
 
             int edges = 0;
-            foreach (var seg in spec.Segments)
+            foreach (var seg in initialSegments)
             {
                 if (!Arithmetic.IsSquare(seg.QuadratOfLength)) continue;
 

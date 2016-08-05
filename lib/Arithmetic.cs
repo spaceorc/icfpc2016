@@ -54,5 +54,14 @@ namespace lib
             var dy = (double)(a.Y - b.Y);
             return Math.Sqrt(dx * dx + dy * dy);
         }
+
+        public static bool PointInSegment(Vector a, Segment b)
+        {
+            if ((a - b.Start).VectorProdLength(b.End - b.Start) != 0) return false;
+            if ((b.End - b.Start).ScalarProd(a - b.Start) < 0) return false;
+            if ((b.Start - b.End).ScalarProd(a - b.End) < 0) return false;
+            return true;
+
+        }
     }
 }
