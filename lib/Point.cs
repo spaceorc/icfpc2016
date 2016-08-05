@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -100,7 +101,14 @@ namespace lib
 			var k = a.ScalarProd(b)*2/b.Length2;
 			return mirror.Start + b*k-a;
 		}
+
+		public static Point[] ToPoints(this string points)
+		{
+			return points.Split(' ').Select(Point.Parse).ToArray();
+		}
 	}
+
+
 
 	[TestFixture]
 	public class Point_Should
@@ -115,6 +123,23 @@ namespace lib
 			var p2 = Point.Parse(expectedPoint);
 			p.Reflect(s).Should().Be(p2);
 			p2.Reflect(s).Should().Be(p);
+		}
+
+		[TestCase("0,0", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Inside)]
+		[TestCase("0,0", "-1,1 1,1 1,-1 -1,-1", ExpectedResult = PointToPolygonPositionType.Inside)]
+		[TestCase("0,1/100000", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Inside)]
+		[TestCase("2,0", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Outside)]
+		[TestCase("-1,-1", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
+		[TestCase("-1,0", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
+		[TestCase("-1,0", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
+		[TestCase("-1,1", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
+		[TestCase("-1,-1", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
+		[TestCase("0,-1", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
+		public PointToPolygonPositionType BeInValidPositionToPolygon(string point, string polygonDef)
+		{
+			Point p = point;
+			var polygon = new Polygon(polygonDef.Split(' ').Select(Point.Parse).ToArray());
+			return p.GetPositionToPolygon(polygon);
 		}
 	}
 }

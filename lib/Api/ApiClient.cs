@@ -26,7 +26,7 @@ namespace lib
 		public IEnumerable<SnapshotRefJson> GetSnapshots()
 		{
 			var res = QueryJson("snapshot/list");
-			return ((JArray)res["snapshots"]).Select(t => t.ToObject<SnapshotRefJson>())
+			return ((JArray) res["snapshots"]).Select(t => t.ToObject<SnapshotRefJson>())
 				.OrderBy(s => s.Time)
 				.ToArray();
 		}
@@ -51,7 +51,33 @@ namespace lib
 		{
 			return JObject.Parse(Query(query));
 		}
+
+		public string PostSolution(int problemId, SolutionSpec solution)
+		{
+			using (var client = CreateClient())
+			{
+				var content = new MultipartFormDataContent();
+				content.Add(new StringContent(problemId.ToString()), "problem_id");
+				content.Add(new StringContent(solution.ToString()), "solution_spec", "solution.txt");
+				//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
+				var res = client.PostAsync($"{baseUrl}solution/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
+				if (!res.IsSuccessStatusCode)
+				{
+					Console.WriteLine(res.ToString());
+					Console.WriteLine(res.Headers.RetryAfter);
+					throw new HttpRequestException(res.ReasonPhrase);
+				}
+				return res.Content.ReadAsStringAsync().Result;
+			}
+		}
+
 		private string Query(string query)
+		{
+			using (var client = CreateClient())
+				return client.GetStringAsync($"{baseUrl}{query}").Result;
+		}
+
+		private HttpClient CreateClient()
 		{
 			var handler = new HttpClientHandler()
 			{
@@ -59,20 +85,13 @@ namespace lib
 				AllowAutoRedirect = true,
 				MaxAutomaticRedirections = 3
 			};
-			using (var client = new HttpClient(handler))
-			{
-				client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
-				return client.GetStringAsync($"{baseUrl}{query}").Result;
-			}
+			var client = new HttpClient(handler);
+			client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
+			client.DefaultRequestHeaders.ExpectContinue = false;
+			return client;
 		}
 	}
 
-	public static class Paths
-	{
-		public static string ProblemsDir() => 
-			Path.Combine(new DirectoryInfo(TestContext.CurrentContext.TestDirectory).Parent?.Parent?.Parent?.FullName ?? ".", "problems");
-
-	}
 	[TestFixture, Explicit]
 	public class ApiClient_Utils
 	{

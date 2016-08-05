@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,17 +8,32 @@ using NUnit.Framework;
 
 namespace lib
 {
-	public class Polygon
+    public class Polygon
 	{
 		public readonly Point[] Vertices;
+	    public readonly Segment[] Segments;
+
 		public bool IsReflected = false;
 
 		public Polygon(params Point[] vertices)
 		{
 			Vertices = vertices;
+		    Segments = BuildSegments(vertices).ToArray();
 		}
-		
-		public override string ToString()
+
+	    private static List<Segment> BuildSegments(Point[] vertices)
+	    {
+	        var segments = new List<Segment>();
+	        for (int i = 0; i < vertices.Length; i++)
+	        {
+	            var vertex1 = vertices[i];
+	            var vertex2 = vertices[(i + 1)%vertices.Length];
+	            segments.Add(new Segment(vertex1, vertex2));
+	        }
+	        return segments;
+	    }
+
+	    public override string ToString()
 		{
 			var sb = new StringBuilder();
 			sb.AppendLine(Vertices.Length.ToString());
@@ -59,7 +75,6 @@ namespace lib
 				var p1 = Vertices[i];
 				var p2 = Vertices[(i + 1) % Vertices.Length];
 				sum += (p1.X - p2.X)*(p1.Y + p2.Y)/2;
-				Console.WriteLine(sum);
 			}
 			return sum;
 		}
