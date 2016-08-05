@@ -10,6 +10,7 @@ namespace lib
 		[TestCase("0,0 1,1", "0,1", "1,0")]
 		[TestCase("0,0 1,0", "0,1", "0,-1")]
 		[TestCase("10,10 11,10", "10,11", "10,9")]
+		[TestCase("1/4,1/4 1,0", "1/16,1/16", "17/80,41/80")]
 		public void BeMirrored(string segment, string point, string expectedPoint)
 		{
 			Segment s = segment;

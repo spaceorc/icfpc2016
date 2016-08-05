@@ -4,6 +4,10 @@ namespace lib
 {
 	public static class VectorExtensions
 	{
+		public static Vector Reflect(this Vector p, Vector a, Vector b)
+		{
+			return p.Reflect(new Segment(a, b));
+		}
 		public static Vector Reflect(this Vector p, Segment mirror)
 		{
 			var b = mirror.End - mirror.Start;
@@ -17,6 +21,22 @@ namespace lib
 			return points.Split(' ').Select(Vector.Parse).ToArray();
 		}
 
+		public static Vector GetCenter(this Vector[] ps)
+		{
+			var minX = ps.Select(v => v.X).Min();
+			var minY = ps.Select(v => v.Y).Min();
+			var maxX = ps.Select(v => v.X).Max();
+			var maxY = ps.Select(v => v.Y).Max();
+			return new Vector((minX + maxX) / 2, (minY + maxY) / 2);
+		}
+		public static Vector[] Rotate(this Vector[] ps, Rational x)
+		{
+			return ps.Select(p => p.Rotate(ps.GetCenter(), x)).ToArray();
+		}
+		public static Vector[] Move(this Vector[] ps, Vector shift)
+		{
+			return ps.Select(p => p + shift).ToArray();
+		}
 		public static Vector Rotate(this Vector p, Vector other, Rational x)
 		{
 			return (p - other).Rotate(x) + other;

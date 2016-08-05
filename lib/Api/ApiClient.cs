@@ -49,7 +49,7 @@ namespace lib
 		{
 			return JObject.Parse(Query(query));
 		}
-		
+
 		public string PostSolution(int problemId, SolutionSpec solution)
 		{
 			using (var client = CreateClient())
@@ -62,7 +62,26 @@ namespace lib
 				if (!res.IsSuccessStatusCode)
 				{
 					Console.WriteLine(res.ToString());
-					Console.WriteLine(res.Headers.RetryAfter);
+					Console.WriteLine(res.Content.ReadAsStringAsync().Result);
+					throw new HttpRequestException(res.ReasonPhrase);
+				}
+				return res.Content.ReadAsStringAsync().Result;
+			}
+		}
+
+		public string PostProblem(long publishTime, SolutionSpec solution)
+		{
+			using (var client = CreateClient())
+			{
+				var content = new MultipartFormDataContent();
+				content.Add(new StringContent(publishTime.ToString()), "publish_time");
+				content.Add(new StringContent(solution.ToString()), "solution_spec", "solution.txt");
+				//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
+				var res = client.PostAsync($"{baseUrl}problem/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
+				if (!res.IsSuccessStatusCode)
+				{
+					Console.WriteLine(res.ToString());
+					Console.WriteLine(res.Content.ReadAsStringAsync().Result);
 					throw new HttpRequestException(res.ReasonPhrase);
 				}
 				return res.Content.ReadAsStringAsync().Result;
