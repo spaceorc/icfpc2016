@@ -29,7 +29,7 @@ namespace Runner
         }
     }
 
-    public class Path
+    public class PPath
     {
         public List<Edge<EdgeInfo, NodeInfo>> edges;
         public Edge<EdgeInfo,NodeInfo> LastEdge { get { return edges[edges.Count - 1]; } }
@@ -72,14 +72,14 @@ namespace Runner
         public Graph<EdgeInfo,NodeInfo> Graph;
 
 #region Cycle 
-        public IEnumerable<Path> Extend(Path path)
+        public IEnumerable<PPath> Extend(PPath path)
         {
-            var output = new List<Path>();
+            var output = new List<PPath>();
             var last = path.edges[path.edges.Count - 1].To;
             var edges = last.IncidentEdges.ToList();
             foreach(var e in edges)
             {
-                var result = new Path();
+                var result = new PPath();
                 result.edges = path.edges.ToList();
                 result.edges.Add(e);
                 result.length = path.length + e.Data.length;
@@ -87,12 +87,12 @@ namespace Runner
             }
         }
 
-        List<Path> TruncateBadPaths(List<Path> p)
+        List<PPath> TruncateBadPaths(List<PPath> p)
         {
             return p.OrderByDescending(z => VerticesIn(z)).Take(10000).ToList();
         }
 
-        public IEnumerable<Path> Recursive(Path path, Rational length)
+        public IEnumerable<PPath> Recursive(PPath path, Rational length)
         {
             if (path.length == 1)
             {
@@ -110,7 +110,7 @@ namespace Runner
             edges.Add(bad);
             foreach(var e in edges)
             {
-                var p = new Path();
+                var p = new PPath();
                 p.edges = path.edges.ToList();
                 p.edges.Add(e);
                 p.length = path.length + e.Data.length;
@@ -121,31 +121,31 @@ namespace Runner
 
         int depthRejected = 0;
 
-        public IEnumerable<Path> DepthAlgorithm(int nodeIndex, Rational length)
+        public IEnumerable<PPath> DepthAlgorithm(int nodeIndex, Rational length)
         {
             var edges = Graph[nodeIndex].IncidentEdges.ToList();
             foreach (var e in edges)
             {
-                var p = new Path { edges = new[] { e }.ToList(), length = e.Data.length };
+                var p = new PPath { edges = new[] { e }.ToList(), length = e.Data.length };
                 foreach (var c in Recursive(p,length))
                     yield return c;
             }
 
         }
 
-        public IEnumerable<Path> GetStartPath()
+        public IEnumerable<PPath> GetStartPath()
         {
           var startNode=  Graph.Edges.OrderByDescending(z => z.Data.length).First().From;
             var edges = startNode.IncidentEdges.ToList();
             foreach(var e in edges)
-                yield return new Path { edges = new List<Edge<EdgeInfo, NodeInfo>> { e }, length = e.Data.length };
+                yield return new PPath { edges = new List<Edge<EdgeInfo, NodeInfo>> { e }, length = e.Data.length };
 
         }
 
-        public IEnumerable<Path> Algorithm()
+        public IEnumerable<PPath> Algorithm()
         {
            
-            var list = new List<Path>();
+            var list = new List<PPath>();
             foreach(var e in GetStartPath())
                 list.Add(e);
 
@@ -154,7 +154,7 @@ namespace Runner
                 var avg = list.Average(z => (double)z.length);
                 list = TruncateBadPaths(list);
 
-                var otherList = new List<Path>();
+                var otherList = new List<PPath>();
                 foreach (var a in list)
                     foreach (var r in Extend(a))
                         otherList.Add(r);
@@ -179,7 +179,7 @@ namespace Runner
         }
         #endregion
 
-        public IEnumerable<List<int>> SeparateTo4(Path path)
+        public IEnumerable<List<int>> SeparateTo4(PPath path)
         {
             int n = path.edges.Count;
             var matrix = new Rational[n+1, n+1];
@@ -214,7 +214,7 @@ namespace Runner
             }
         }
 
-        public List<List<Edge<EdgeInfo,NodeInfo>>> Reorder(Path path, List<int> separation)
+        public List<List<Edge<EdgeInfo,NodeInfo>>> Reorder(PPath path, List<int> separation)
         {
             var result = new List<List<Edge<EdgeInfo, NodeInfo>>>();
             separation.Add(separation[0]+path.edges.Count);
@@ -230,7 +230,7 @@ namespace Runner
             return result;
         }
 
-        public IEnumerable<List<List<Edge<EdgeInfo,NodeInfo>>>> GetReorderings(Path path)
+        public IEnumerable<List<List<Edge<EdgeInfo,NodeInfo>>>> GetReorderings(PPath path)
         {
             foreach (var e in SeparateTo4(path))
                 yield return Reorder(path, e);
@@ -327,12 +327,12 @@ namespace Runner
             return used;
         }
 
-        public bool IsCircular(Path path)
+        public bool IsCircular(PPath path)
         {
             return path.edges[0].From == path.edges[path.edges.Count - 1].To;
         }
 
-        public int VerticesIn(Path path)
+        public int VerticesIn(PPath path)
         {
             return path
                 .edges

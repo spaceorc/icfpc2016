@@ -9,9 +9,9 @@ namespace Runner
     public class NewAlgorithm
     {
         PointProjectionSolver solver;
-        public Dictionary<int, List<Path>> outPathes;
+        public Dictionary<int, List<PPath>> outPathes;
 
-        public IEnumerable<List<Path>> Combine(List<Path> path)
+        public IEnumerable<List<PPath>> Combine(List<PPath> path)
         {
             var ed = path[path.Count - 1].edges;
             foreach (var e in outPathes[ed[ed.Count - 1].To.NodeNumber])
@@ -30,7 +30,7 @@ namespace Runner
 
         public void Build(PointProjectionSolver solver)
         {
-            outPathes = new Dictionary<int, List<Path>>();
+            outPathes = new Dictionary<int, List<PPath>>();
             this.solver = solver;
             for (int i = 0; i < solver.Graph.NodesCount; i++)
             {
@@ -38,10 +38,10 @@ namespace Runner
             }
         }
 
-        public static List<List<Path>> GetAll(PointProjectionSolver solver)
+        public static List<List<PPath>> GetAll(PointProjectionSolver solver)
         {
 
-            var res = new List<List<Path>>();
+            var res = new List<List<PPath>>();
             var alg = new NewAlgorithm();
             alg.Build(solver);
             foreach (var e in alg.outPathes.SelectMany(z => z.Value))

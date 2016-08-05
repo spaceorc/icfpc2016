@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using lib;
 using Runner;
+using Path = System.IO.Path;
 
 namespace SolutionVisalizer
 {
