@@ -81,17 +81,20 @@ namespace Runner
 
             //PaintSolver(spec,solver);
 
-            var result = solver.Algorithm().Where(z => z.edges[0].From == z.edges[z.edges.Count - 1].To);
+            //var pathes = solver.DepthAlgorithm();
+            var pathes = solver.Algorithm();
+
+            var result = pathes.Where(z => z.edges[0].From == z.edges[z.edges.Count - 1].To);
 
 
-            var reorderings = result.SelectMany(z => solver.GetReorderings(z));
+            var reorderings = result.SelectMany(z => solver.GetReorderings(z).Select(x => new { reordering = x, path = z }));
 
 
             bool ok = false;
 
             foreach(var reordering in reorderings)
             {
-                var r = solver.TryProject(reordering);
+                var r = solver.TryProject(reordering.reordering);
                 if (!r) continue;
 
                 var unused = solver.UnusedSegments().ToList();

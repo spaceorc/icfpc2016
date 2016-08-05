@@ -82,19 +82,69 @@ namespace Runner
             }
         }
 
+        List<Path> TruncateBadPaths(List<Path> p)
+        {
+            return p.OrderByDescending(z => VerticesIn(z)).Take(10000).ToList();
+        }
+
+        public IEnumerable<Path> Recursive(Path path)
+        {
+            var last = path.edges[path.edges.Count - 1];
+            var edges = last.To.IncidentEdges.OrderByDescending(z=>z.Data.length).ToList();
+            var bad = edges.Where(z => z.To == last.From).First();
+            edges.Remove(bad);
+            edges.Add(bad);
+            foreach(var e in edges)
+            {
+                var p = new Path();
+                p.edges = path.edges.ToList();
+                p.edges.Add(e);
+                p.length = path.length + e.Data.length;
+                if (p.length == 4) yield return p;
+                if (p.length > 4)
+                {
+               //     Console.WriteLine(p.edges.Select(z => z.From.NodeNumber).StrJoin(" "));
+                    depthRejected++;
+                    continue;
+                }
+                foreach (var c in Recursive(p))
+                    yield return c;
+            }
+        }
+
+        int depthRejected = 0;
+
+        public IEnumerable<Path> DepthAlgorithm()
+        {
+
+            foreach(var e in GetStartPath())
+            {
+                foreach (var c in Recursive(e))
+                    yield return c;
+            }
+
+        }
+
+        public IEnumerable<Path> GetStartPath()
+        {
+          var startNode=  Graph.Edges.OrderByDescending(z => z.Data.length).First().From;
+            var edges = startNode.IncidentEdges.ToList();
+            foreach(var e in edges)
+                yield return new Path { edges = new List<Edge<EdgeInfo, NodeInfo>> { e }, length = e.Data.length };
+
+        }
+
         public IEnumerable<Path> Algorithm()
         {
-            var result = new List<Path>();
-
+           
             var list = new List<Path>();
-            var startNode = Graph[0];
-            var edges = startNode.IncidentEdges.ToList();
-            foreach(var e in startNode.IncidentEdges)
-                list.Add(new Path { edges = new[] { e }.ToList(), length = e.Data.length});
+            foreach(var e in GetStartPath())
+                list.Add(e);
 
             while(list.Count!=0)
             {
                 var avg = list.Average(z => (double)z.length);
+                list = TruncateBadPaths(list);
 
                 var otherList = new List<Path>();
                 foreach (var a in list)
@@ -203,7 +253,7 @@ namespace Runner
             for (int i=0;i<list.Count;i++)
             {
                 Projection[i].Data = list[i].Item2;
-                var e = Projection.Connect(i, (i + 1)%Projection.NodesCount );
+                var e = Projection.DirectedConnect(i, (i + 1)%Projection.NodesCount );
                 e.Data = new ProjectedEdgeInfo { IsLate = false, Segment=list[i].Item1 };
             }
 
@@ -259,7 +309,7 @@ namespace Runner
                         var len = Arithmetic.IrrationalDistance(start.Data.Projection, end.Data.Projection);
                         if (Math.Abs(len-Arithmetic.IrrationalDistance(s.Start,s.End))<1e-5)
                         {
-                            var e = Projection.Connect(start.NodeNumber, end.NodeNumber);
+                            var e = Projection.DirectedConnect(start.NodeNumber, end.NodeNumber);
                             e.Data = new ProjectedEdgeInfo { IsLate = true };
                             used++;
                         }
@@ -358,10 +408,10 @@ namespace Runner
 
                 var length = Arithmetic.Sqrt(seg.QuadratOfLength);
 
-                var e = Graph.Connect(vectors.IndexOf(seg.Start), vectors.IndexOf(seg.End));
+                var e = Graph.DirectedConnect(vectors.IndexOf(seg.Start), vectors.IndexOf(seg.End));
                 e.Data = new EdgeInfo { length = length, segment = seg };
 
-                e = Graph.Connect(vectors.IndexOf(seg.End), vectors.IndexOf(seg.Start));
+                e = Graph.DirectedConnect(vectors.IndexOf(seg.End), vectors.IndexOf(seg.Start));
                 e.Data = new EdgeInfo { length = length, segment = new Segment(seg.End, seg.Start) };
                 edges++;
             }

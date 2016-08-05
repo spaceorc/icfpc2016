@@ -102,7 +102,7 @@ namespace lib.Graphs
             }
         }
 
-        public Edge<TEdge, TNode> Connect(int index1, int index2)
+        public Edge<TEdge, TNode> DirectedConnect(int index1, int index2)
         {
             return Node<TEdge, TNode>.Connect(nodes[index1], nodes[index2], this);
         }
