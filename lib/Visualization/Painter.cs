@@ -36,20 +36,30 @@ namespace lib
 
                 if (Arithmetic.IsSquare(segment.QuadratOfLength))
                 {
-                    color = Color.FromArgb(0, 255 - cyan, 255 - cyan);
-                    cyan = cyan += 30;
-                    if (cyan > 150) cyan = 0;
+                    color = Color.Cyan;
                 }
 
                 PaintSegment(g, color, segment);
-			}
-		}
+                PaintNode(g, color, segment.Start);
+                PaintNode(g, color, segment.End);
+
+            }
+        }
 
         
 		public void PaintSegment(Graphics g, Color color, Segment segment)
 		{
 			g.DrawLine(new Pen(color, 0.01f), segment.Start.X, segment.Start.Y, segment.End.X, segment.End.Y);
 		}
+
+        void PaintNode(Graphics g, Color color, Vector v)
+        {
+            var font = new Font("Arial", 0.04f);
+            float size = 0.04f;
+            g.FillEllipse(new SolidBrush(color), (float)(v.X-size), (float)(v.Y-size),2*size,2*size);
+            
+            g.DrawString(v.ToString(), font, Brushes.Black, v.X.AsFloat(), v.Y.AsFloat());
+        }
 
 		private void PaintPolygon(Graphics g, Color color, Polygon polygon)
 		{

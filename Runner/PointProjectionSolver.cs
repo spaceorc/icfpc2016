@@ -26,6 +26,13 @@ namespace Runner
             public Vector Location;
             public Vector Projection;
             public bool IsProjected;
+
+            public override string ToString()
+            {
+                if (IsProjected)
+                    return Location.ToString() + " -> " + Projection.ToString();
+                return "*";
+            }
         }
 
 
@@ -38,7 +45,7 @@ namespace Runner
             {
                 return ((double)length).ToString() + " : " +
                     edges
-                    .Select(z => z.Data.segment.Start).StrJoin(" ") + " " + edges[edges.Count - 1].To.ToString() ;
+                    .Select(z => z.Data.segment.Start).StrJoin(" ") + " " + edges[edges.Count - 1].To.Data.Location.ToString() ;
             }
         }
 
@@ -121,9 +128,10 @@ namespace Runner
                 var separation = new List<int>();
                 int t = potentialStart;
                 bool ok = true;
-                for (int k=0;k<4;k++)
+                separation.Add(t);
+                for (int k=0;k<3;k++)
                 {
-                    separation.Add(t);
+
                     var end = Enumerable.Range(0, n + 1).Where(z => matrix[t, z] == 1).ToList();
                     if (end.Count == 0)
                     {
@@ -131,6 +139,7 @@ namespace Runner
                         break;
                     }
                     t = end[0];
+                    separation.Add(t);
                 }
                 if (ok) return separation;
             }
@@ -161,14 +170,20 @@ namespace Runner
             var parts = Reorder(path, separation);
             var corners = new[] { new Vector(0, 0), new Vector(0, 1), new Vector(1, 1), new Vector(1, 0) };
             var direction = new[] { new Vector(0, 1), new Vector(1, 0), new Vector(0, -1), new Vector(-1, 0) };
+
             foreach (var n in Graph.Nodes)
                 n.Data.IsProjected = false;
+
             for (int i=0;i<4;i++)
             {
                 Rational len = 0;
                 for (int k=0;k<parts[i].Count;k++)
                 {
-                    if (parts[i][k].From.Data.IsProjected) return false;
+                    if (parts[i][k].From.Data.IsProjected)
+                    {
+                        foreach (var n in Graph.Nodes)
+                            n.Data.IsProjected = false;
+                    }
                     var location = corners[i] + direction[i] * len;
                     parts[i][k].From.Data.IsProjected = true;
                     parts[i][k].From.Data.Projection = location;
@@ -180,20 +195,33 @@ namespace Runner
 
         public void AddAdditionalEdges(List<Segment> segments)
         {
-            for(int i=0;i<Graph.NodesCount;i++)
-                for (int j=i+1;j<Graph.NodesCount;j++)
-                {
-                    var p1 = Graph[i].Data.Projection;
-                    var p2 = Graph[j].Data.Projection;
-                    var dx = p1.X - p2.X;
-                    var dy = p1.Y - p2.Y;
-                    var length = Math.Sqrt((double)(dx * dx + dy * dy));
-                    if (segments.Any(z=>Math.Abs(z.IrrationalLength-length)<1e-06))
-                    {
-                        var e=Graph.Connect(i, j);
-                        e.Data = new EdgeInfo { addedEdge = true };
-                    }
-                }
+            //for(int i=0;i<Graph.NodesCount;i++)
+            //    for (int j=i+1;j<Graph.NodesCount;j++)
+            //    {
+            //        if (!Graph[i].Data.IsProjected || !Graph[j].Data.IsProjected)
+            //            continue;
+
+            //        var p1 = Graph[i].Data.Projection;
+            //        var p2 = Graph[j].Data.Projection;
+            //        var dx = p1.X - p2.X;
+            //        var dy = p1.Y - p2.Y;
+            //        var length = Math.Sqrt((double)(dx * dx + dy * dy));
+            //        if (segments.Any(z=>Math.Abs(z.IrrationalLength-length)<1e-06))
+            //        {
+            //            var e=Graph.Connect(i, j);
+            //            e.Data = new EdgeInfo { addedEdge = true };
+            //        }
+            //    }
+
+            foreach(var s in segments)
+            {
+                var start = Graph.Nodes.Where(z => z.Data.Location.Equals(s.Start)).FirstOrDefault();
+                var end = Graph.Nodes.Where(z => z.Data.Location.Equals(s.End)).FirstOrDefault();
+                if (start == null || end == null) continue;
+                var e=Graph.Connect(start.NodeNumber, end.NodeNumber);
+                e.Data = new EdgeInfo { addedEdge = true };
+
+            }
         }
 
         public bool IsCircular(Path path)
@@ -224,6 +252,8 @@ namespace Runner
             for (int i = 0; i < vectors.Count; i++)
                 Graph[i].Data = new NodeInfo { Location = vectors[i] };
 
+
+            int edges = 0;
             foreach (var seg in spec.Segments)
             {
                 if (!Arithmetic.IsSquare(seg.QuadratOfLength)) continue;
@@ -235,7 +265,10 @@ namespace Runner
 
                 e = Graph.Connect(vectors.IndexOf(seg.End), vectors.IndexOf(seg.Start));
                 e.Data = new EdgeInfo { length = length, segment = new Segment(seg.End, seg.Start) };
-     }
+                edges++;
+            }
+
+
 
         }
     }
