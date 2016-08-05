@@ -125,20 +125,20 @@ namespace lib
 			p2.Reflect(s).Should().Be(p);
 		}
 
-		[TestCase("0,0", "-1,-1|1,-1|1,1|-1,1", ExpectedResult = PointToPolygonPositionType.Inside)]
-		[TestCase("0,0", "-1,1|1,1|1,-1|-1,-1", ExpectedResult = PointToPolygonPositionType.Inside)]
-		[TestCase("0,1/100000", "-1,-1|1,-1|1,1|-1,1", ExpectedResult = PointToPolygonPositionType.Inside)]
-		[TestCase("2,0", "-1,-1|1,-1|1,1|-1,1", ExpectedResult = PointToPolygonPositionType.Outside)]
-		[TestCase("-1,-1", "-1,-1|1,-1|1,1|-1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
-		[TestCase("-1,0", "-1,-1|1,-1|1,1|-1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
-		[TestCase("-1,0", "-1,-1|1,-1|1,1|-1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
-		[TestCase("-1,1", "-1,-1|1,-1|1,1|-1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
-		[TestCase("-1,-1", "-1,-1|1,-1|1,1|-1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
-		[TestCase("0,-1", "-1,-1|1,-1|1,1|-1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
+		[TestCase("0,0", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Inside)]
+		[TestCase("0,0", "-1,1 1,1 1,-1 -1,-1", ExpectedResult = PointToPolygonPositionType.Inside)]
+		[TestCase("0,1/100000", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Inside)]
+		[TestCase("2,0", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Outside)]
+		[TestCase("-1,-1", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
+		[TestCase("-1,0", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
+		[TestCase("-1,0", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
+		[TestCase("-1,1", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
+		[TestCase("-1,-1", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
+		[TestCase("0,-1", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
 		public PointToPolygonPositionType BeInValidPositionToPolygon(string point, string polygonDef)
 		{
 			Point p = point;
-			var polygon = new Polygon(polygonDef.Split('|').Select(Point.Parse).ToArray());
+			var polygon = new Polygon(polygonDef.Split(' ').Select(Point.Parse).ToArray());
 			return p.GetPositionToPolygon(polygon);
 		}
 	}

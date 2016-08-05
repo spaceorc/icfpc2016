@@ -91,6 +91,7 @@
     <Compile Include="ProblemSpec.cs" />
     <Compile Include="ProblemSpec_Should.cs" />
     <Compile Include="Segment.cs" />
+    <Compile Include="SolutionEvaluator.cs" />
     <Compile Include="SolutionSpec.cs" />
     <Compile Include="Rational.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
