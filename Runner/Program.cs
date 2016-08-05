@@ -61,8 +61,12 @@ namespace Runner
         static void Main(string[] args)
         {
             var goodTasks = new[] { 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42 };
+            var badTasks = new[] { 42 };
 
-            foreach(var task in goodTasks)
+            var allTasks = Enumerable.Range(43, 100);
+
+
+            foreach (var task in allTasks)
             {
                 var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt", task);
                 var spec = ProblemSpec.Parse(File.ReadAllText(fname));
@@ -84,16 +88,21 @@ namespace Runner
 
                 var resIndex = -1;
 
+                var reorderings = result.SelectMany(z => solver.GetReorderings(z)).ToList();
 
 
-                for (int i = 0; i < result.Count; i++)
+                bool ok = false;
+
+                foreach(var reordering in reorderings)
                 {
-                    var r = solver.TryProject(result[i]);
+                    var r = solver.TryProject(reordering);
                     if (!r) continue;
 
                     var unused = solver.UnusedSegments().ToList();
 
-                    solver.AddAdditionalEdges(unused);
+                    var used = solver.AddAdditionalEdges(unused);
+                    if (used < unused.Count) continue;
+                    ok = true;
                     var wnd = new Form() { ClientSize = new Size(800, 600) };
 
                     wnd.Paint += (s, a) =>
@@ -111,6 +120,16 @@ namespace Runner
                                 e.To.Data.Projection.X.AsFloat() * size,
                                 e.To.Data.Projection.Y.AsFloat() * size
                                 );
+
+                            g.FillEllipse(Brushes.Red,
+                                e.From.Data.Projection.X.AsFloat() * size - 3,
+                                e.From.Data.Projection.Y.AsFloat() * size - 3,
+                                6, 6);
+                            g.FillEllipse(Brushes.Red,
+                                e.To.Data.Projection.X.AsFloat() * size - 3,
+                                e.To.Data.Projection.Y.AsFloat() * size - 3,
+                                6, 6);
+
                         }
 
                     };
@@ -120,6 +139,8 @@ namespace Runner
                     Application.Run(wnd);
                     break;
                 }
+
+                if (!ok) MessageBox.Show("No solution for " + fname);
             }
 
 

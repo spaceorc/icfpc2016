@@ -126,7 +126,7 @@ namespace Runner
         }
         #endregion
 
-        public List<int> SeparateTo4(Path path)
+        public IEnumerable<List<int>> SeparateTo4(Path path)
         {
             int n = path.edges.Count;
             var matrix = new Rational[n+1, n+1];
@@ -157,9 +157,8 @@ namespace Runner
                     t = end[0];
                     separation.Add(t);
                 }
-                if (ok) return separation;
+                if (ok) yield return separation;
             }
-            return null;
         }
 
         public List<List<Edge<EdgeInfo,NodeInfo>>> Reorder(Path path, List<int> separation)
@@ -178,12 +177,15 @@ namespace Runner
             return result;
         }
 
-
-        public bool TryProject(Path path)
+        public IEnumerable<List<List<Edge<EdgeInfo,NodeInfo>>>> GetReorderings(Path path)
         {
-            var separation = SeparateTo4(path);
-            if (separation == null) return false;
-            var parts = Reorder(path, separation);
+            foreach (var e in SeparateTo4(path))
+                yield return Reorder(path, e);
+        }
+
+
+        public bool TryProject(List<List<Edge<EdgeInfo, NodeInfo>>> parts)
+        {
             var corners = new[] { new Vector(0, 0), new Vector(0, 1), new Vector(1, 1), new Vector(1, 0) };
             var direction = new[] { new Vector(0, 1), new Vector(1, 0), new Vector(0, -1), new Vector(-1, 0) };
 
@@ -213,16 +215,24 @@ namespace Runner
             return true;
         }
 
+        bool SegmentOrMirror(Segment a, Segment b)
+        {
+            if (a.Start.Equals(b.Start) && a.End.Equals(b.End)) return true;
+            if (a.Start.Equals(b.End) && a.End.Equals(b.Start)) return true;
+            return false;
+
+        }
+
         public IEnumerable<Segment> UnusedSegments()
         {
             foreach(var e in Segments)
             {
-                if (Projection.Edges.Any(z => z.Data.Segment.Equals(e))) continue;
+                if (Projection.Edges.Any(z => SegmentOrMirror(z.Data.Segment.segment,e))) continue;
                 yield return e;
             }
         }
 
-        public void AddAdditionalEdges(List<Segment> segments)
+        public int AddAdditionalEdges(List<Segment> segments)
         {
             //for(int i=0;i<Graph.NodesCount;i++)
             //    for (int j=i+1;j<Graph.NodesCount;j++)
@@ -242,6 +252,8 @@ namespace Runner
             //        }
             //    }
 
+            int used = 0;
+
             foreach(var s in segments)
             {
                 var starts = Projection.Nodes.Where(z => z.Data.Original.Data.Location.Equals(s.Start)).ToList();
@@ -254,9 +266,12 @@ namespace Runner
                         {
                             var e = Projection.Connect(start.NodeNumber, end.NodeNumber);
                             e.Data = new ProjectedEdgeInfo { IsLate = true };
+                            used++;
                         }
                     }
             }
+
+            return used;
         }
 
         public bool IsCircular(Path path)
