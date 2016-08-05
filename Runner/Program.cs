@@ -61,7 +61,7 @@ namespace Runner
         static void Main(string[] args)
         {
 
-            for (int task = 39; ; task++)
+            for (int task = 40; ; task++)
             {
                 var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt", task);
                 var spec = ProblemSpec.Parse(File.ReadAllText(fname));
