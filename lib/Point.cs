@@ -6,23 +6,23 @@ using NUnit.Framework;
 
 namespace lib
 {
-	public struct Point
+	public struct Vector
 	{
 		public readonly Rational X, Y;
 
-		public Point(Rational x, Rational y)
+		public Vector(Rational x, Rational y)
 		{
 			X = x;
 			Y = y;
 		}
-		public static Point Parse(string s)
+		public static Vector Parse(string s)
 		{
 			var parts = s.Split(',');
 			if (parts.Length != 2) throw new FormatException(s);
-			return new Point(Rational.Parse(parts[0]), Rational.Parse(parts[1]));
+			return new Vector(Rational.Parse(parts[0]), Rational.Parse(parts[1]));
 		}
 		#region value semantics
-		public bool Equals(Point other)
+		public bool Equals(Vector other)
 		{
 			return X.Equals(other.X) && Y.Equals(other.Y);
 		}
@@ -30,7 +30,7 @@ namespace lib
 		public override bool Equals(object obj)
 		{
 			if (ReferenceEquals(null, obj)) return false;
-			return obj is Point && Equals((Point)obj);
+			return obj is Vector && Equals((Vector)obj);
 		}
 
 		public override int GetHashCode()
@@ -47,44 +47,49 @@ namespace lib
 			return $"{X},{Y}";
 		}
 		#endregion
-		public static implicit operator Point(string s)
+		public static implicit operator Vector(string s)
 		{
 			return Parse(s);
 		}
-		public static Point operator -(Point a, Point b)
+		public static Vector operator -(Vector a, Vector b)
 		{
-			return new Point(a.X - b.X, a.Y - b.Y);
+			return new Vector(a.X - b.X, a.Y - b.Y);
 		}
-		public static Point operator -(Point a)
+		public static Vector operator -(Vector a)
 		{
-			return new Point(-a.X, -a.Y);
+			return new Vector(-a.X, -a.Y);
 		}
 
-		public static Point operator +(Point a, Point b)
+		public static Vector operator +(Vector a, Vector b)
 		{
-			return new Point(a.X + b.X, a.Y + b.Y);
+			return new Vector(a.X + b.X, a.Y + b.Y);
 		}
-		public static Point operator *(Point a, Rational k)
+		public static Vector operator *(Vector a, Rational k)
 		{
-			return new Point(a.X * k, a.Y * k);
+			return new Vector(a.X * k, a.Y * k);
 		}
-		public static Point operator /(Point a, Rational k)
+		public static Vector operator /(Vector a, Rational k)
 		{
-			return new Point(a.X / k, a.Y / k);
+			return new Vector(a.X / k, a.Y / k);
 		}
-		public static Point operator *(Rational k, Point a)
+		public static Vector operator *(Rational k, Vector a)
 		{
-			return new Point(a.X * k, a.Y * k);
+			return new Vector(a.X * k, a.Y * k);
 		}
-		public Rational ScalarProd(Point p2)
+		public Rational ScalarProd(Vector p2)
 		{
 			return X*p2.X + Y*p2.Y;
 		}
 
+        public Rational VectorProdLength(Vector p2)
+        {
+            return X*p2.Y - p2.X * Y;
+        }
+
 		[Pure]
-		public Point Move(Rational shiftX, Rational shiftY)
+		public Vector Move(Rational shiftX, Rational shiftY)
 		{
-			return new Point(X + shiftX, Y + shiftY);
+			return new Vector(X + shiftX, Y + shiftY);
 		}
 		
 		public double Length => Math.Sqrt(X * X + Y * Y);
@@ -94,7 +99,7 @@ namespace lib
 
 	public static class PointExtensions
 	{
-		public static Point Reflect(this Point p, Segment mirror)
+		public static Vector Reflect(this Vector p, Segment mirror)
 		{
 			var b = mirror.End - mirror.Start;
 			var a = p - mirror.Start;
@@ -102,9 +107,9 @@ namespace lib
 			return mirror.Start + b*k-a;
 		}
 
-		public static Point[] ToPoints(this string points)
+		public static Vector[] ToPoints(this string points)
 		{
-			return points.Split(' ').Select(Point.Parse).ToArray();
+			return points.Split(' ').Select(Vector.Parse).ToArray();
 		}
 	}
 
@@ -119,8 +124,8 @@ namespace lib
 		public void BeMirrored(string segment, string point, string expectedPoint)
 		{
 			Segment s = segment;
-			Point p = point;
-			var p2 = Point.Parse(expectedPoint);
+			Vector p = point;
+			var p2 = Vector.Parse(expectedPoint);
 			p.Reflect(s).Should().Be(p2);
 			p2.Reflect(s).Should().Be(p);
 		}
@@ -137,8 +142,8 @@ namespace lib
 		[TestCase("0,-1", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
 		public PointToPolygonPositionType BeInValidPositionToPolygon(string point, string polygonDef)
 		{
-			Point p = point;
-			var polygon = new Polygon(polygonDef.Split(' ').Select(Point.Parse).ToArray());
+            Vector p = point;
+			var polygon = new Polygon(polygonDef.Split(' ').Select(Vector.Parse).ToArray());
 			return p.GetPositionToPolygon(polygon);
 		}
 	}

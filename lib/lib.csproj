@@ -82,6 +82,7 @@
     <Compile Include="DiofantEquationSolver\DiofantEquation.cs" />
     <Compile Include="Api\SnapshotRefJson.cs" />
     <Compile Include="DiofantEquationSolver\DiofantEquationSolver_Sould.cs" />
+    <Compile Include="Graphs\Graph.cs" />
     <Compile Include="ImperfectSolver.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Point.cs" />
@@ -100,6 +101,10 @@
     <Compile Include="SolutionSpec_Should.cs" />
     <Compile Include="Visualization\Painter.cs" />
     <Compile Include="Visualization\Painter_Utils.cs" />
+    <Compile Include="Visualization\VisualizationExtensions.cs" />
+    <Compile Include="Visualization\VisualizerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -6,17 +7,24 @@ namespace lib
 {
 	public class SolutionSpec
 	{
-		public readonly Point[] SourcePoints;
+		public readonly Vector[] SourcePoints;
 		public readonly Facet[] Facets;
-		public readonly Point[] DestPoints;
+		public readonly Vector[] DestPoints;
 
-		public SolutionSpec(Point[] sourcePoints, Facet[] facets, Point[] destPoints)
+		public SolutionSpec(Vector[] sourcePoints, Facet[] facets, Vector[] destPoints)
 		{
 			if (sourcePoints.Length != destPoints.Length)
 				throw new ArgumentException();
 			SourcePoints = sourcePoints;
 			Facets = facets;
 			DestPoints = destPoints;
+		}
+
+		public Polygon[] Polygons => Facets.Select(FacetToPolygon).ToArray();
+
+		private Polygon FacetToPolygon(Facet f)
+		{
+			return new Polygon(f.Vertices.Select(i => SourcePoints[i]).ToArray());
 		}
 
 		public override string ToString()

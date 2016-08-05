@@ -1,5 +1,6 @@
 ﻿using lib;
 using lib.DiofantEquationSolver;
+using lib.Graphs;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -54,35 +55,75 @@ namespace Runner
             return weights.ToArray();
         }
 
+
+
+
         static void Main(string[] args)
         {
 
-            var spec = ProblemSpec.Parse(File.ReadAllText("...\\..\\..\\problems\\018.spec.txt"));
-            spec = spec.MoveToOrigin();
+            for (int task = 40; ; task++)
+            {
+                var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt", task);
+                var spec = ProblemSpec.Parse(File.ReadAllText(fname));
+                spec = spec.MoveToOrigin();
 
-            var q = spec.Segments.Where(z => Arithmetic.IsSquare(z.QuadratOfLength)).ToList();
-                
+
+                var irrationalEdges = spec
+                    .Segments
+                    .Where(z => !Arithmetic.IsSquare(z.QuadratOfLength))
+                    .ToList();
+
+                var solver = new PointProjectionSolver(spec);
+
+                var result = solver.Algorithm();
+
+                result = result
+                    .Where(z => z.edges[0].From == z.edges[z.edges.Count - 1].To)
+                    .ToList();
+
+                var resIndex = -1;
+
+                for (int i = 0; i < result.Count; i++)
+                {
+                    var r = solver.TryProject(result[i]);
+                    if (!r) continue;
+
+                    solver.AddAdditionalEdges(irrationalEdges);
+                    var wnd = new Form() { ClientSize = new Size(800, 600) };
+
+                    wnd.Paint += (s, a) =>
+                    {
+                        var g = a.Graphics;
+                        int size = 200;
+                        foreach (var e in solver.Projection.Edges)
+                        {
+                            var color = Color.Black;
+                            if (e.Data.IsLate) color = Color.Orange;
+
+                            g.DrawLine(new Pen(color, 1),
+                                e.From.Data.Projection.X.AsFloat() * size,
+                                e.From.Data.Projection.Y.AsFloat() * size,
+                                e.To.Data.Projection.X.AsFloat() * size,
+                                e.To.Data.Projection.Y.AsFloat() * size
+                                );
+                        }
+
+                    };
+
+                    wnd.Text = fname;
+
+                    Application.Run(wnd);
+                    break;
+                }
+            }
+
+
+           
+
+
+
             
-
-            var wnd = new Form() { ClientSize = new Size(800, 600) };
-
-            wnd.Paint += (s, a) =>
-              {
-                  var g = a.Graphics;
-                  var p = new Painter();
-                  p.Paint(g, 600, spec);
-                  Color[] cs = new[] { Color.Blue, Color.Cyan, Color.Orange, Color.Green, Color.Magenta };
-
-                  for (int i=0;i<q.Count;i++)
-                  {
-                      p.PaintSegment(g, cs[i % cs.Length], q[i]);
-                  }
-              };
-
-
-
-
-            Application.Run(wnd);        
+                
             
 
         }

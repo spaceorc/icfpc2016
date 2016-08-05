@@ -15,7 +15,7 @@ namespace lib
         /// </summary>
         /// <param name="n"></param>
         /// <returns></returns>
-        public static BigInteger Square(BigInteger n)
+        public static BigInteger Sqrt(BigInteger n)
         {
             if (n == BigInteger.Zero) return BigInteger.Zero;
             var left = BigInteger.One;
@@ -30,9 +30,15 @@ namespace lib
             return left;
         }
 
+        public static Rational Sqrt(Rational r)
+        {
+            r = r.Reduce();
+            return new Rational(Sqrt(r.Numerator), Sqrt(r.Denomerator));
+        }
+
         public static bool IsSquare(BigInteger n)
         {
-            var sq = Square(n);
+            var sq = Sqrt(n);
             return n == sq * sq;
         }
 
@@ -40,6 +46,22 @@ namespace lib
         {
             r=r.Reduce();
             return IsSquare(r.Numerator) && IsSquare(r.Denomerator);
+        }
+
+        public static double IrrationalDistance(Vector a, Vector b)
+        {
+            var dx = (double)(a.X - b.X);
+            var dy = (double)(a.Y - b.Y);
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
+
+        public static bool PointInSegment(Vector a, Segment b)
+        {
+            if ((a - b.Start).VectorProdLength(b.End - b.Start) != 0) return false;
+            if ((b.End - b.Start).ScalarProd(a - b.Start) < 0) return false;
+            if ((b.Start - b.End).ScalarProd(a - b.End) < 0) return false;
+            return true;
+
         }
     }
 }

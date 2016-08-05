@@ -9,7 +9,7 @@ namespace SquareConstructor
 {
 	static class GeometryExtensions
 	{
-		public static Point? GetIntersection(this Segment segment, Segment intersector)
+		public static Vector? GetIntersection(this Segment segment, Segment intersector)
 		{
 			var A1 = segment.End - segment.Start;
 			var B1 = segment.Start;

@@ -3,25 +3,33 @@ using System.Diagnostics.Contracts;
 
 namespace lib
 {
-	public class Segment
-	{
-		public readonly Point Start, End;
+    public class Segment
+    {
+        public readonly Vector Start, End;
 
-		public Segment(Point start, Point end)
-		{
-			Start = start;
-			End = end;
-		}
+        public Segment(Vector start, Vector end)
+        {
+            Start = start;
+            End = end;
+        }
 
         public Rational QuadratOfLength
         {
             get
             {
-                var result= (End.X - Start.X) * (End.X - Start.X) +
+                var result = (End.X - Start.X) * (End.X - Start.X) +
                 (End.Y - Start.Y) * (End.Y - Start.Y);
 
                 result.Reduce();
                 return result;
+            }
+        }
+
+        public double IrrationalLength
+        {
+            get
+            {
+                return Math.Sqrt((double)QuadratOfLength);
             }
         }
 
@@ -35,7 +43,7 @@ namespace lib
 		{
 			var parts = s.Split(' ');
 			if (parts.Length != 2) throw new FormatException(s);
-			return new Segment(Point.Parse(parts[0]), Point.Parse(parts[1]));
+			return new Segment(Vector.Parse(parts[0]), Vector.Parse(parts[1]));
 		}
 
 		public Segment Reflect(Segment mirror)

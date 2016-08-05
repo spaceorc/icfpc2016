@@ -13,6 +13,11 @@ namespace lib
 		public readonly BigInteger Denomerator;
 
 
+        public float AsFloat()
+        {
+            return (float)((double)this);
+        }
+
 		public static Rational Parse(string s)
 		{
 			var parts = s.Split('/');
@@ -40,7 +45,7 @@ namespace lib
 			while (!a.IsZero)
 			{
 				c = a;
-				a = b%a;
+				a = b % a;
 				b = c;
 			}
 			return b;
@@ -74,7 +79,7 @@ namespace lib
 			if (obj == null) return false;
 			if (!(obj is Rational)) return false;
 			var r1 = Reduce();
-			var r2 = ((Rational)obj).Reduce();
+			var r2 = ((Rational) obj).Reduce();
 			return r1.Numerator == r2.Numerator && r1.Denomerator == r2.Denomerator;
 		}
 
@@ -118,6 +123,7 @@ namespace lib
 		{
 			return r1 + new Rational(n2, 1);
 		}
+
 		public static Rational operator -(Rational r)
 		{
 			return new Rational(-r.Numerator, r.Denomerator);
@@ -134,11 +140,12 @@ namespace lib
 
 		public static implicit operator double(Rational r1)
 		{
-			return (double) r1.Numerator/(double) r1.Denomerator;
+			return (double) r1.Numerator / (double) r1.Denomerator;
 		}
+
 		public static implicit operator float(Rational r1)
 		{
-			return (float)((double)r1.Numerator / (double)r1.Denomerator);
+			return (float) ((double) r1.Numerator / (double) r1.Denomerator);
 		}
 
 		#endregion
@@ -149,7 +156,7 @@ namespace lib
 		{
 			if (obj == null) throw new Exception();
 			if (!(obj is Rational)) throw new Exception();
-			var r = (Rational)obj;
+			var r = (Rational) obj;
 			return (Numerator * r.Denomerator).CompareTo(Denomerator * r.Numerator);
 		}
 
