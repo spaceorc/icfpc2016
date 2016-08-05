@@ -47,5 +47,12 @@ namespace lib
             r=r.Reduce();
             return IsSquare(r.Numerator) && IsSquare(r.Denomerator);
         }
+
+        public static double IrrationalDistance(Vector a, Vector b)
+        {
+            var dx = (double)(a.X - b.X);
+            var dy = (double)(a.Y - b.Y);
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
     }
 }

@@ -14,7 +14,6 @@ namespace Runner
         {
             public Segment segment;
             public Rational length;
-            public bool addedEdge;
             public override string ToString()
             {
                 return segment.ToString();
@@ -24,17 +23,26 @@ namespace Runner
         public class NodeInfo
         {
             public Vector Location;
-            public Vector Projection;
-            public bool IsProjected;
+            public List<Vector> Projections = new List<Vector>();
 
             public override string ToString()
             {
-                if (IsProjected)
-                    return Location.ToString() + " -> " + Projection.ToString();
-                return "*";
+                return new string('*', Projections.Count);
             }
         }
 
+        public class ProjectedNodeInfo
+        {
+            public Node<EdgeInfo, NodeInfo> Original;
+            public Vector Projection;
+        }
+
+        public class ProjectedEdgeInfo
+        {
+            public bool IsLate;
+        }
+
+        public Graph<ProjectedEdgeInfo,ProjectedNodeInfo> Projection;
 
 
         public class Path
@@ -171,25 +179,29 @@ namespace Runner
             var corners = new[] { new Vector(0, 0), new Vector(0, 1), new Vector(1, 1), new Vector(1, 0) };
             var direction = new[] { new Vector(0, 1), new Vector(1, 0), new Vector(0, -1), new Vector(-1, 0) };
 
-            foreach (var n in Graph.Nodes)
-                n.Data.IsProjected = false;
+            var list = new List<ProjectedNodeInfo>();
 
             for (int i=0;i<4;i++)
             {
                 Rational len = 0;
                 for (int k=0;k<parts[i].Count;k++)
                 {
-                    if (parts[i][k].From.Data.IsProjected)
-                    {
-                        foreach (var n in Graph.Nodes)
-                            n.Data.IsProjected = false;
-                    }
                     var location = corners[i] + direction[i] * len;
-                    parts[i][k].From.Data.IsProjected = true;
-                    parts[i][k].From.Data.Projection = location;
+                    var node = parts[i][k].From;
+                    list.Add(new ProjectedNodeInfo { Original = node, Projection = location });
                     len += parts[i][k].Data.length;
                 }
             }
+
+
+            Projection = new Graph<ProjectedEdgeInfo, ProjectedNodeInfo>(list.Count);
+            for (int i=0;i<list.Count;i++)
+            {
+                Projection[i].Data = list[i];
+                var e = Projection.Connect(i, (i + 1)%Projection.NodesCount );
+                e.Data = new ProjectedEdgeInfo { IsLate = false };
+            }
+
             return true;
         }
 
@@ -215,12 +227,18 @@ namespace Runner
 
             foreach(var s in segments)
             {
-                var start = Graph.Nodes.Where(z => z.Data.Location.Equals(s.Start)).FirstOrDefault();
-                var end = Graph.Nodes.Where(z => z.Data.Location.Equals(s.End)).FirstOrDefault();
-                if (start == null || end == null) continue;
-                var e=Graph.Connect(start.NodeNumber, end.NodeNumber);
-                e.Data = new EdgeInfo { addedEdge = true };
-
+                var starts = Projection.Nodes.Where(z => z.Data.Original.Data.Location.Equals(s.Start)).ToList();
+                var ends = Projection.Nodes.Where(z => z.Data.Original.Data.Location.Equals(s.End)).ToList();
+                foreach(var start in starts)
+                    foreach(var end in ends)
+                    {
+                        var len = Arithmetic.IrrationalDistance(start.Data.Projection, end.Data.Projection);
+                        if (Math.Abs(len-Arithmetic.IrrationalDistance(s.Start,s.End))<1e-5)
+                        {
+                            var e = Projection.Connect(start.NodeNumber, end.NodeNumber);
+                            e.Data = new ProjectedEdgeInfo { IsLate = true };
+                        }
+                    }
             }
         }
 

@@ -61,7 +61,7 @@ namespace Runner
         static void Main(string[] args)
         {
 
-            for (int task = 16; ; task++)
+            for (int task = 39; ; task++)
             {
                 var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt", task);
                 var spec = ProblemSpec.Parse(File.ReadAllText(fname));
@@ -95,10 +95,11 @@ namespace Runner
                     {
                         var g = a.Graphics;
                         int size = 200;
-                        foreach (var e in solver.Graph.Edges)
+                        foreach (var e in solver.Projection.Edges)
                         {
                             var color = Color.Black;
-                            if (e.Data.addedEdge) color = Color.Orange;
+                            if (e.Data.IsLate) color = Color.Orange;
+
                             g.DrawLine(new Pen(color, 1),
                                 e.From.Data.Projection.X.AsFloat() * size,
                                 e.From.Data.Projection.Y.AsFloat() * size,
