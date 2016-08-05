@@ -5,9 +5,9 @@ namespace lib
 {
 	public class Segment
 	{
-		public readonly Point Start, End;
+		public readonly Vector Start, End;
 
-		public Segment(Point start, Point end)
+		public Segment(Vector start, Vector end)
 		{
 			Start = start;
 			End = end;
@@ -35,7 +35,7 @@ namespace lib
 		{
 			var parts = s.Split(' ');
 			if (parts.Length != 2) throw new FormatException(s);
-			return new Segment(Point.Parse(parts[0]), Point.Parse(parts[1]));
+			return new Segment(Vector.Parse(parts[0]), Vector.Parse(parts[1]));
 		}
 
 		public Segment Reflect(Segment mirror)

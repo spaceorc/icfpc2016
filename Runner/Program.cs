@@ -1,5 +1,6 @@
 ﻿using lib;
 using lib.DiofantEquationSolver;
+using lib.Graphs;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -54,15 +55,27 @@ namespace Runner
             return weights.ToArray();
         }
 
+
+
+
         static void Main(string[] args)
         {
 
-            var spec = ProblemSpec.Parse(File.ReadAllText("...\\..\\..\\problems\\018.spec.txt"));
+            var spec = ProblemSpec.Parse(File.ReadAllText("...\\..\\..\\problems\\011.spec.txt"));
             spec = spec.MoveToOrigin();
 
             var q = spec.Segments.Where(z => Arithmetic.IsSquare(z.QuadratOfLength)).ToList();
-                
-            
+
+
+            var solver = new PointProjectionSolver(spec);
+
+            var result = solver.Algorithm();
+
+            result = result
+                .Where(z => z.edges[0].From == z.edges[z.edges.Count - 1].To)
+                .ToList();
+
+
 
             var wnd = new Form() { ClientSize = new Size(800, 600) };
 
@@ -82,7 +95,8 @@ namespace Runner
 
 
 
-            Application.Run(wnd);        
+            
+                
             
 
         }

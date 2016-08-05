@@ -15,7 +15,7 @@ namespace lib
         /// </summary>
         /// <param name="n"></param>
         /// <returns></returns>
-        public static BigInteger Square(BigInteger n)
+        public static BigInteger Sqrt(BigInteger n)
         {
             if (n == BigInteger.Zero) return BigInteger.Zero;
             var left = BigInteger.One;
@@ -30,9 +30,15 @@ namespace lib
             return left;
         }
 
+        public static Rational Sqrt(Rational r)
+        {
+            r = r.Reduce();
+            return new Rational(Sqrt(r.Numerator), Sqrt(r.Denomerator));
+        }
+
         public static bool IsSquare(BigInteger n)
         {
-            var sq = Square(n);
+            var sq = Sqrt(n);
             return n == sq * sq;
         }
 

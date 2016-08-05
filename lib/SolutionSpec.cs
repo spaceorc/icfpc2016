@@ -7,11 +7,11 @@ namespace lib
 {
 	public class SolutionSpec
 	{
-		public readonly Point[] SourcePoints;
+		public readonly Vector[] SourcePoints;
 		public readonly Facet[] Facets;
-		public readonly Point[] DestPoints;
+		public readonly Vector[] DestPoints;
 
-		public SolutionSpec(Point[] sourcePoints, Facet[] facets, Point[] destPoints)
+		public SolutionSpec(Vector[] sourcePoints, Facet[] facets, Vector[] destPoints)
 		{
 			if (sourcePoints.Length != destPoints.Length)
 				throw new ArgumentException();

@@ -80,6 +80,7 @@
     <Compile Include="DiofantEquationSolver\DiofantEquation.cs" />
     <Compile Include="Api\SnapshotRefJson.cs" />
     <Compile Include="DiofantEquationSolver\DiofantEquationSolver_Sould.cs" />
+    <Compile Include="Graphs\Graph.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="Facet.cs" />

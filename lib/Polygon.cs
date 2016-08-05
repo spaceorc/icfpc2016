@@ -9,9 +9,9 @@ namespace lib
 {
 	public class Polygon
 	{
-		public readonly Point[] Vertices;
+		public readonly Vector[] Vertices;
 
-		public Polygon(params Point[] vertices)
+		public Polygon(params Vector[] vertices)
 		{
 			Vertices = vertices;
 		}
@@ -29,14 +29,14 @@ namespace lib
 			var vCount = int.Parse(reader.ReadLine() ?? "0");
 			var ps = Enumerable.Range(0, vCount)
 				.Select(i => reader.ReadLine())
-				.Select(Point.Parse)
+				.Select(Vector.Parse)
 				.ToArray();
 			return new Polygon(ps);
 		}
 
 		public Polygon Move(Rational shiftX, Rational shiftY)
 		{
-			return new Polygon(Vertices.Select(p => new Point(p.X + shiftX, p.Y + shiftY)).ToArray());
+			return new Polygon(Vertices.Select(p => new Vector(p.X + shiftX, p.Y + shiftY)).ToArray());
 		}
 
 		public Polygon Reflect(Segment mirror)
@@ -73,7 +73,7 @@ namespace lib
 		[TestCase("0,0 0,1 1,1 1,0", "-1")]
 		public void CalcSquare(string poly, string expectedSquare)
 		{
-			var polygon = new Polygon(poly.Split(' ').Select(Point.Parse).ToArray());
+			var polygon = new Polygon(poly.Split(' ').Select(Vector.Parse).ToArray());
 			var s = polygon.GetSignedSquare();
 			s.Should().Be(Rational.Parse(expectedSquare));
 		}
