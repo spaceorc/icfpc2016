@@ -85,7 +85,7 @@ namespace lib
 		{
 			return new Point(X + shiftX, Y + shiftY);
 		}
-
+		
 		public double Length => Math.Sqrt(X * X + Y * Y);
 		public Rational Length2 => X * X + Y * Y;
 
