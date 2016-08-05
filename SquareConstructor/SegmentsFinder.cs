@@ -14,8 +14,8 @@ namespace SquareConstructor
 			var segments = GetRealSegments(problem);
 			segments.AddRange(segments.ToArray().Select(Reverse));
 
-			Dictionary<Point, List<Segment>> outerSegments = segments.GroupBy(segment => segment.Start).ToDictionary(group => group.Key, group => group.ToList());
-			HashSet<Tuple<Point, Point>> usedSegments = new HashSet<Tuple<Point, Point>>();
+			Dictionary<Vector, List<Segment>> outerSegments = segments.GroupBy(segment => segment.Start).ToDictionary(group => group.Key, group => group.ToList());
+			HashSet<Tuple<Vector, Vector>> usedSegments = new HashSet<Tuple<Vector, Vector>>();
 			List<Polygon> polygons = new List<Polygon>();
 			
 			foreach (var segment in segments)
@@ -28,7 +28,7 @@ namespace SquareConstructor
 			return polygons;
 		}
 
-		private static IEnumerable<Point> GeneratePolygon(Segment startSegment, Dictionary<Point, List<Segment>> outerSegments, HashSet<Tuple<Point, Point>> usedSegments)
+		private static IEnumerable<Vector> GeneratePolygon(Segment startSegment, Dictionary<Vector, List<Segment>> outerSegments, HashSet<Tuple<Vector, Vector>> usedSegments)
 		{
 			var segment = startSegment;
 			usedSegments.Add(Tuple.Create(segment.Start, segment.End));
