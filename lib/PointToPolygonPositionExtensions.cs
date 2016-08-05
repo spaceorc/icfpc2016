@@ -12,7 +12,7 @@ namespace lib
 		public static PointToPolygonPositionType GetPositionToPolygon(this Point p, Polygon polygon)
 		{
 			var parity = true;
-			for (int i = 0; i < polygon.Vertices.Length; i++)
+			for (var i = 0; i < polygon.Vertices.Length; i++)
 			{
 				var v1 = polygon.Vertices[i];
 				var v2 = polygon.Vertices[(i + 1)%polygon.Vertices.Length];
@@ -38,8 +38,8 @@ namespace lib
 
 		private static EdgeType ClassifyEdge(Point a, Segment e)
 		{
-			Point v = e.Start;
-			Point w = e.End;
+			var v = e.Start;
+			var w = e.End;
 			switch (a.Classify(e))
 			{
 				case PointClassification.LEFT:
