@@ -88,7 +88,7 @@ namespace lib
 		{
 			var api = new ApiClient();
 			var snapshot = api.GetLastSnapshot();
-			foreach (var p in snapshot.Problems.Skip(10))
+			foreach (var p in snapshot.Problems)
 			{
 				var spec = api.GetBlob(p.SpecHash);
 				var filepath = Path.Combine(Paths.ProblemsDir(), $@"{p.Id:000}.spec.txt");

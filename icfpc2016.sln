@@ -1,11 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lib", "lib\lib.csproj", "{99A4C223-DD49-468F-A791-5587E795A663}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runner", "Runner\Runner.csproj", "{3F474806-7FF4-4DF9-A061-35367E99DCB8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SquareConstructor", "SquareConstructor\SquareConstructor.csproj", "{82E3B127-3AAB-477E-BAA8-B13E57B099C3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +22,10 @@ Global
 		{3F474806-7FF4-4DF9-A061-35367E99DCB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F474806-7FF4-4DF9-A061-35367E99DCB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F474806-7FF4-4DF9-A061-35367E99DCB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82E3B127-3AAB-477E-BAA8-B13E57B099C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82E3B127-3AAB-477E-BAA8-B13E57B099C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82E3B127-3AAB-477E-BAA8-B13E57B099C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82E3B127-3AAB-477E-BAA8-B13E57B099C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
