@@ -61,11 +61,14 @@ namespace Runner
         static void Main(string[] args)
         {
 
-            var spec = ProblemSpec.Parse(File.ReadAllText("...\\..\\..\\problems\\011.spec.txt"));
+            var spec = ProblemSpec.Parse(File.ReadAllText("...\\..\\..\\problems\\014.spec.txt"));
             spec = spec.MoveToOrigin();
 
-            var q = spec.Segments.Where(z => Arithmetic.IsSquare(z.QuadratOfLength)).ToList();
 
+            var irrationalEdges = spec
+                .Segments
+                .Where(z => !Arithmetic.IsSquare(z.QuadratOfLength))
+                .ToList();
 
             var solver = new PointProjectionSolver(spec);
 
@@ -75,6 +78,10 @@ namespace Runner
                 .Where(z => z.edges[0].From == z.edges[z.edges.Count - 1].To)
                 .ToList();
 
+            var r = solver.TryProject(result[0]);
+            solver.AddAdditionalEdges(irrationalEdges);
+            
+
 
 
             var wnd = new Form() { ClientSize = new Size(800, 600) };
@@ -82,16 +89,22 @@ namespace Runner
             wnd.Paint += (s, a) =>
               {
                   var g = a.Graphics;
-                  var p = new Painter();
-                  p.Paint(g, 600, spec);
-                  Color[] cs = new[] { Color.Blue, Color.Cyan, Color.Orange, Color.Green, Color.Magenta };
-
-                  for (int i=0;i<q.Count;i++)
+                  int size = 200;
+                  foreach(var e in solver.Graph.Edges)
                   {
-                      p.PaintSegment(g, cs[i % cs.Length], q[i]);
+                      var color = Color.Black;
+                      if (e.Data.addedEdge) color = Color.Orange;
+                      g.DrawLine(new Pen(color, 1),
+                          e.From.Data.Projection.X.AsFloat() * size,
+                          e.From.Data.Projection.Y.AsFloat() * size,
+                          e.To.Data.Projection.X.AsFloat() * size,
+                          e.To  .Data.Projection.Y.AsFloat() * size
+                          );
                   }
+
               };
 
+            Application.Run(wnd);
 
 
 

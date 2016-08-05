@@ -92,6 +92,8 @@ namespace lib.Graphs
         public Node<TEdge, TNode> this[int index] { get { return nodes[index]; } }
 
 
+        public int NodesCount {  get { return nodes.Length; } }
+
         public IEnumerable<Node<TEdge, TNode>> Nodes
         {
             get

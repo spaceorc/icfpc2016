@@ -13,6 +13,11 @@ namespace lib
 		public readonly BigInteger Denomerator;
 
 
+        public float AsFloat()
+        {
+            return (float)((double)this);
+        }
+
 		public static Rational Parse(string s)
 		{
 			var parts = s.Split('/');
