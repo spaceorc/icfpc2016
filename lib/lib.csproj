@@ -86,6 +86,9 @@
     <Compile Include="ImperfectSolver.cs" />
     <Compile Include="ImperfectSolver_Should.cs" />
     <Compile Include="ObjectExtensions.cs" />
+    <Compile Include="ProjectionSolver\GraphExt.cs" />
+    <Compile Include="ProjectionSolver\PointProjectionSolver.cs" />
+    <Compile Include="ProjectionSolver\SolverMaker.cs" />
     <Compile Include="Vector.cs" />
     <Compile Include="Facet.cs" />
     <Compile Include="VectorExtensions.cs" />

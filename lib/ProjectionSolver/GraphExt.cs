@@ -39,27 +39,7 @@ namespace Runner
 
 		public static SolutionSpec Solve(ProblemSpec problemSpec)
 		{
-			var solver = new PointProjectionSolver(problemSpec);
-
-			var result = solver.Algorithm();
-
-			result = result
-				.Where(z => z.edges[0].From == z.edges[z.edges.Count - 1].To)
-				.ToList();
-
-			var resIndex = -1;
-
-			for (int i = 0; i < result.Count; i++)
-			{
-				var r = solver.TryProject(result[i]);
-				if (!r) continue;
-
-				var unused = solver.UnusedSegments().ToList();
-
-				solver.AddAdditionalEdges(unused);
-				break;
-			}
-
+			var solver = SolverMaker.Solve(problemSpec);
 			var graphExt = new GraphExt(solver.Projection);
 			return graphExt.GetSolution();
 		}
