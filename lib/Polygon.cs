@@ -10,12 +10,13 @@ namespace lib
 	public class Polygon
 	{
 		public readonly Point[] Vertices;
+		public bool IsReflected = false;
 
 		public Polygon(params Point[] vertices)
 		{
 			Vertices = vertices;
 		}
-
+		
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
