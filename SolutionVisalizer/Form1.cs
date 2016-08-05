@@ -66,20 +66,13 @@ namespace SolutionVisalizer
 
 			var problem = ProblemSpec.Parse(spec);
 			var polygons = PolygonFinder.GetRealPolygons(problem);
-
+			
 			var painter = new Painter();
-
-			int i = 0;
-			foreach (var polygon in polygons)
-			{
-				problem.Segments = polygon.Vertices.Select((v, id) => new Segment(v, polygon.Vertices[(id+1)%polygon.Vertices.Length])).ToArray();
-
-				painter.Paint(e.Graphics, e.ClipRectangle.Height, problem);
-				Update();
-				Thread.Sleep(1000);
-				i = (i + 1)%ColourValues.Length;
-			}
+			
+			problem.Segments = polygons[8].Segments;
+			painter.Paint(e.Graphics, e.ClipRectangle.Height, problem);
 			Update();
+			
 		}
 	}
 }
