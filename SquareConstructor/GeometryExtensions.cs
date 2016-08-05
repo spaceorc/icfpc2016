@@ -36,5 +36,13 @@ namespace SquareConstructor
 		{
 			return (a - x)*(b - x) <= 0;
 		}
+
+		public static double GetAngleMeasure(Point vec1, Point vec2)
+		{
+			var vectorAngleMeasure = 1 - vec1.ScalarProd(vec2)/Math.Sqrt(vec1.Length2*vec2.Length2);
+			if (vec1.X*vec2.Y - vec1.Y*vec2.X < 0)
+				vectorAngleMeasure = 4 - vectorAngleMeasure;
+			return vectorAngleMeasure;
+		}
 	}
 }

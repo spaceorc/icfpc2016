@@ -51,7 +51,7 @@ namespace lib
 			g.DrawLine(new Pen(color, 0.01f), segment.Start.X, segment.Start.Y, segment.End.X, segment.End.Y);
 		}
 
-		private void PaintPolygon(Graphics g, Color color, Polygon polygon)
+		public void PaintPolygon(Graphics g, Color color, Polygon polygon)
 		{
 			var ps = polygon.Vertices.Select(v => new PointF(v.X, v.Y)).ToArray();
 			g.FillPolygon(new SolidBrush(color), ps);
