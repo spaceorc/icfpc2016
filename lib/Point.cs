@@ -102,9 +102,9 @@ namespace lib
 			return mirror.Start + b*k-a;
 		}
 
-		public static Point[] ToPoints(this string points)
+		public static Vector[] ToPoints(this string points)
 		{
-			return points.Split(' ').Select(Point.Parse).ToArray();
+			return points.Split(' ').Select(Vector.Parse).ToArray();
 		}
 	}
 
@@ -137,8 +137,8 @@ namespace lib
 		[TestCase("0,-1", "-1,-1 1,-1 1,1 -1,1", ExpectedResult = PointToPolygonPositionType.Boundary)]
 		public PointToPolygonPositionType BeInValidPositionToPolygon(string point, string polygonDef)
 		{
-			Point p = point;
-			var polygon = new Polygon(polygonDef.Split(' ').Select(Point.Parse).ToArray());
+            Vector p = point;
+			var polygon = new Polygon(polygonDef.Split(' ').Select(Vector.Parse).ToArray());
 			return p.GetPositionToPolygon(polygon);
 		}
 	}

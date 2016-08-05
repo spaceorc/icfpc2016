@@ -10,10 +10,14 @@ namespace lib
 {
     public class Polygon
 	{
+<<<<<<< HEAD
 		public readonly Vector[] Vertices;
+=======
+		public readonly Point[] Vertices;
 	    public readonly Segment[] Segments;
 
 		public bool IsReflected = false;
+>>>>>>> master
 
 		public Polygon(params Vector[] vertices)
 		{
@@ -21,7 +25,7 @@ namespace lib
 		    Segments = BuildSegments(vertices).ToArray();
 		}
 
-	    private static List<Segment> BuildSegments(Vector[] vertices)
+	    private static List<Segment> BuildSegments(Point[] vertices)
 	    {
 	        var segments = new List<Segment>();
 	        for (int i = 0; i < vertices.Length; i++)
@@ -75,7 +79,6 @@ namespace lib
 				var p1 = Vertices[i];
 				var p2 = Vertices[(i + 1) % Vertices.Length];
 				sum += (p1.X - p2.X)*(p1.Y + p2.Y)/2;
-				Console.WriteLine(sum);
 			}
 			return sum;
 		}

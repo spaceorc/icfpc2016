@@ -28,7 +28,7 @@ namespace lib
 			for (var x = minX; x < maxX; x += deltaX)
 				for (var y = minY; y < maxY; y += deltaY)
 				{
-					var p = new Point(x, y);
+					var p = new Vector(x, y);
 					var inNegative = negativePolygons.Any(poly => p.GetPositionToPolygon(poly) == PointToPolygonPositionType.Inside);
 					var inPositive = positivePolygons.Any(poly => p.GetPositionToPolygon(poly) != PointToPolygonPositionType.Outside);
 					var inProblem = inPositive && !inNegative;
@@ -79,7 +79,7 @@ namespace lib
 		{
 			public readonly double X, Y;
 
-			public PointX(Point other)
+			public PointX(Vector other)
 				: this(other.X, other.Y)
 			{
 			}
@@ -221,10 +221,10 @@ namespace lib
 		[TestCase("10,0 11,0 11,1 10,1", "0,0 1,0 1,1 0,1", 0.0, 0)]
 		public void Evaluate(string problem, string solution, double expectedResult, double precision)
 		{
-			var problemPolygons = problem.Split('|').Select(x => new Polygon(x.Split(' ').Select(Point.Parse).ToArray())).ToArray();
+			var problemPolygons = problem.Split('|').Select(x => new Polygon(x.Split(' ').Select(Vector.Parse).ToArray())).ToArray();
 			var problemSpec = new ProblemSpec(problemPolygons, new Segment[0]);
 
-			var solutionPolygons = solution.Split('|').Select(x => new Polygon(x.Split(' ').Select(Point.Parse).ToArray())).ToArray();
+			var solutionPolygons = solution.Split('|').Select(x => new Polygon(x.Split(' ').Select(Vector.Parse).ToArray())).ToArray();
 			var solutionPoints = solutionPolygons.SelectMany(x => x.Vertices).Distinct().ToArray();
 			var pointToIndex = solutionPoints.Select((p, i) => new { p, i }).ToDictionary(x => x.p, x => x.i);
 			var facets = solutionPolygons.Select(x => new Facet(x.Vertices.Select(v => pointToIndex[v]).ToArray())).ToArray();
@@ -241,10 +241,10 @@ namespace lib
 		[TestCase("10,0 11,0 11,1 10,1", "0,0 1,0 1,1 0,1", 0.0, 0)]
 		public void EvaluateX(string problem, string solution, double expectedResult, double precision)
 		{
-			var problemPolygons = problem.Split('|').Select(x => new Polygon(x.Split(' ').Select(Point.Parse).ToArray())).ToArray();
+			var problemPolygons = problem.Split('|').Select(x => new Polygon(x.Split(' ').Select(Vector.Parse).ToArray())).ToArray();
 			var problemSpec = new ProblemSpec(problemPolygons, new Segment[0]);
 
-			var solutionPolygons = solution.Split('|').Select(x => new Polygon(x.Split(' ').Select(Point.Parse).ToArray())).ToArray();
+			var solutionPolygons = solution.Split('|').Select(x => new Polygon(x.Split(' ').Select(Vector.Parse).ToArray())).ToArray();
 			var solutionPoints = solutionPolygons.SelectMany(x => x.Vertices).Distinct().ToArray();
 			var pointToIndex = solutionPoints.Select((p, i) => new { p, i }).ToDictionary(x => x.p, x => x.i);
 			var facets = solutionPolygons.Select(x => new Facet(x.Vertices.Select(v => pointToIndex[v]).ToArray())).ToArray();

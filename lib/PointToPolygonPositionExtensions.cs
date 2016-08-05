@@ -9,7 +9,7 @@ namespace lib
 
 	public static class PointToPolygonPositionExtensions
 	{
-		public static PointToPolygonPositionType GetPositionToPolygon(this Point p, Polygon polygon)
+		public static PointToPolygonPositionType GetPositionToPolygon(this Vector p, Polygon polygon)
 		{
 			var parity = true;
 			for (var i = 0; i < polygon.Vertices.Length; i++)
@@ -36,7 +36,7 @@ namespace lib
 			TOUCHING
 		}
 
-		private static EdgeType ClassifyEdge(Point a, Segment e)
+		private static EdgeType ClassifyEdge(Vector a, Segment e)
 		{
 			var v = e.Start;
 			var w = e.End;
@@ -66,7 +66,7 @@ namespace lib
 			DESTINATION
 		};
 
-		private static PointClassification Classify(this Point p, Segment s)
+		private static PointClassification Classify(this Vector p, Segment s)
 		{
 			var a = s.End - s.Start;
 			var b = p - s.Start;
