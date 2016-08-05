@@ -76,18 +76,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Api\ApiClient.cs" />
+    <Compile Include="Api\Paths.cs" />
+    <Compile Include="Api\ProblemsRepo.cs" />
     <Compile Include="Arithmetic.cs" />
     <Compile Include="DiofantEquationSolver\DiofantEquation.cs" />
     <Compile Include="Api\SnapshotRefJson.cs" />
     <Compile Include="DiofantEquationSolver\DiofantEquationSolver_Sould.cs" />
     <Compile Include="Graphs\Graph.cs" />
+    <Compile Include="ImperfectSolver.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="Facet.cs" />
+    <Compile Include="PointToPolygonPositionExtensions.cs" />
     <Compile Include="Polygon.cs" />
+    <Compile Include="PolygonExtensions.cs" />
     <Compile Include="ProblemSpec.cs" />
     <Compile Include="ProblemSpec_Should.cs" />
     <Compile Include="Segment.cs" />
+    <Compile Include="SolutionEvaluator.cs" />
     <Compile Include="SolutionSpec.cs" />
     <Compile Include="Rational.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -95,6 +101,10 @@
     <Compile Include="SolutionSpec_Should.cs" />
     <Compile Include="Visualization\Painter.cs" />
     <Compile Include="Visualization\Painter_Utils.cs" />
+    <Compile Include="Visualization\VisualizationExtensions.cs" />
+    <Compile Include="Visualization\VisualizerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -60,5 +60,19 @@ namespace lib
 		{
 			return new Segment(Start.Move(shiftX, shiftY), End.Move(shiftX, shiftY));
 		}
+
+		public override int GetHashCode()
+		{
+			return Start.GetHashCode() ^ End.GetHashCode();
+		}
+
+		public override bool Equals(object obj)
+		{
+			var segment = obj as Segment;
+			if (segment == null)
+				return false;
+
+			return Tuple.Create(Start, End).Equals(Tuple.Create(segment.Start, segment.End)) || Tuple.Create(End, Start).Equals(Tuple.Create(segment.Start, segment.End));
+		}
 	}
 }
