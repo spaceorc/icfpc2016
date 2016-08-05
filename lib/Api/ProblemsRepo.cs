@@ -48,6 +48,11 @@ namespace lib
 		{
 			File.WriteAllText(Path.Combine(problemsDir, $"{id:000}.solution.txt"), solutionSpec.ToString());
 		}
+
+		public void PutSolution(int id, string solutionSpec)
+		{
+			File.WriteAllText(Path.Combine(problemsDir, $"{id:000}.solution.txt"), solutionSpec);
+		}
 	}
 
 	[TestFixture]

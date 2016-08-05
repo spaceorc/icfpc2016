@@ -31,8 +31,9 @@ namespace Runner
 					problemsRepo.PutSolution(p, solutionSpec);
 					problemsRepo.PutResponse(p, postSolution);
 				}
-				catch (Exception)
+				catch (Exception e)
 				{
+					problemsRepo.PutSolution(p, e.ToString());
 				}
 				Thread.Sleep(1000);
 			}
@@ -43,7 +44,7 @@ namespace Runner
 		public void DoSomething_WhenSomething2()
 		{
 			var problemsRepo = new ProblemsRepo();
-			var problemSpec = problemsRepo.Get(13);
+			var problemSpec = problemsRepo.Get(47);
 			Console.WriteLine("problem");
 			Console.WriteLine(problemSpec);
 			problemSpec.CreateVisualizerForm().ShowDialog();
