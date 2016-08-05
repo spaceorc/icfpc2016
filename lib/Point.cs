@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics.Contracts;
+using FluentAssertions;
+using NUnit.Framework;
 
 namespace lib
 {
@@ -38,16 +40,78 @@ namespace lib
 			}
 		}
 
+
 		public override string ToString()
 		{
 			return $"{X},{Y}";
 		}
 		#endregion
+		public static implicit operator Point(string s)
+		{
+			return Parse(s);
+		}
+		public static Point operator -(Point a, Point b)
+		{
+			return new Point(a.X - b.X, a.Y - b.Y);
+		}
+		public static Point operator -(Point a)
+		{
+			return new Point(-a.X, -a.Y);
+		}
+
+		public static Point operator +(Point a, Point b)
+		{
+			return new Point(a.X + b.X, a.Y + b.Y);
+		}
+		public static Point operator *(Point a, Rational k)
+		{
+			return new Point(a.X * k, a.Y * k);
+		}
+		public static Point operator /(Point a, Rational k)
+		{
+			return new Point(a.X / k, a.Y / k);
+		}
+		public static Point operator *(Rational k, Point a)
+		{
+			return new Point(a.X * k, a.Y * k);
+		}
+		public Rational ScalarProd(Point p2)
+		{
+			return X*p2.X + Y*p2.Y;
+		}
 
 		[Pure]
 		public Point Move(Rational shiftX, Rational shiftY)
 		{
 			return new Point(X + shiftX, Y + shiftY);
+		}
+
+		public double Length => Math.Sqrt(X * X + Y * Y);
+
+	}
+
+	public static class PointExtensions
+	{
+		public static Point Reflect(this Point p, Segment mirror)
+		{
+			var b = mirror.End - mirror.Start;
+			var a = p - mirror.Start;
+			return new Point(0, 0);
+			//var side = mirror.End - mirror.Start;
+			//var n = new Point(-side.Y, side.X).Normalize();
+			//return p + n * 2;
+		}
+	}
+
+	[TestFixture]
+	public class Point_Should
+	{
+		[Test]
+		public void BeMirrored()
+		{
+			Segment s = "0,0 1,0";
+			Point p = "1,1";
+			p.Reflect(s).Should().Be(Point.Parse("1,-1"));
 		}
 	}
 }

@@ -13,11 +13,21 @@ namespace lib
 			End = end;
 		}
 
+		public static implicit operator Segment(string s)
+		{
+			return Parse(s);
+		}
+
 		public static Segment Parse(string s)
 		{
 			var parts = s.Split(' ');
 			if (parts.Length != 2) throw new FormatException(s);
 			return new Segment(Point.Parse(parts[0]), Point.Parse(parts[1]));
+		}
+
+		public Segment Reflect(Segment mirror)
+		{
+			return new Segment(Start.Reflect(mirror), End.Reflect(mirror));
 		}
 
 		public override string ToString()
