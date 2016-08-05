@@ -36,10 +36,14 @@ namespace lib
 
 		public static BigInteger GCD(BigInteger a, BigInteger b)
 		{
-			var max = a > b ? a : b;
-			for (BigInteger i = max; i >= 1; i--)
-				if (a % i == 0 && b % i == 0) return i;
-			return 1;
+			BigInteger c;
+			while (!a.IsZero)
+			{
+				c = a;
+				a = b%a;
+				b = c;
+			}
+			return b;
 		}
 
 		public Rational Reduce()
@@ -47,7 +51,7 @@ namespace lib
 			if (Numerator == 0) return new Rational(0, 1);
 			var gcd = GCD(Numerator, Denomerator);
 			var n = Numerator / gcd;
-			var d = Numerator / gcd;
+			var d = Denomerator / gcd;
 			if (d < 0)
 			{
 				n = -n;
@@ -96,15 +100,23 @@ namespace lib
 		{
 			return r1 + new Rational(n2, 1);
 		}
+		public static Rational operator -(Rational r)
+		{
+			return new Rational(-r.Numerator, r.Denomerator);
+		}
 
 		public static Rational operator +(int n2, Rational r1)
 		{
 			return r1 + n2;
 		}
 
-		public static explicit operator double(Rational r1)
+		public static implicit operator double(Rational r1)
 		{
-			return (double)(r1.Numerator / r1.Denomerator);
+			return (double) r1.Numerator/(double) r1.Denomerator;
+		}
+		public static implicit operator float(Rational r1)
+		{
+			return (float)((double)r1.Numerator / (double)r1.Denomerator);
 		}
 
 		#endregion
@@ -116,7 +128,7 @@ namespace lib
 			if (obj == null) throw new Exception();
 			if (!(obj is Rational)) throw new Exception();
 			var r = (Rational)obj;
-			return (Numerator * r.Denomerator).CompareTo(Denomerator * r.Denomerator);
+			return (Numerator * r.Denomerator).CompareTo(Denomerator * r.Numerator);
 		}
 
 		public static bool operator ==(Rational r1, Rational r2)

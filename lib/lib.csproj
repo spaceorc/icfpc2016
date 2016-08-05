@@ -58,8 +58,13 @@
       <HintPath>..\packages\NUnit.3.4.1\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="StatePrinter, Version=2.1.0.0, Culture=neutral, PublicKeyToken=693eec472ad792e3, processorArchitecture=MSIL">
+      <HintPath>..\packages\StatePrinter.3.0.0\lib\net35\StatePrinter.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -71,6 +76,7 @@
   <ItemGroup>
     <Compile Include="Api\ApiClient.cs" />
     <Compile Include="DiofantEquationSolver\DiofantEquation.cs" />
+    <Compile Include="Api\SnapshotRefJson.cs" />
     <Compile Include="DiofantEquationSolver\DiofantEquationSolver_Sould.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Point.cs" />
@@ -84,8 +90,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rational_Should.cs" />
     <Compile Include="SolutionSpec_Should.cs" />
+    <Compile Include="Visualization\Painter.cs" />
+    <Compile Include="Visualization\Painter_Utils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
