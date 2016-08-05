@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace lib
 {
 	[TestFixture]
-	public class Point_Should
+	public class Vector_Should
 	{
 		[TestCase("0,0 1,1", "0,1", "1,0")]
 		[TestCase("0,0 1,0", "0,1", "0,-1")]

@@ -2,7 +2,7 @@ using System.Linq;
 
 namespace lib
 {
-	public static class PointExtensions
+	public static class VectorExtensions
 	{
 		public static Vector Reflect(this Vector p, Segment mirror)
 		{
