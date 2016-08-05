@@ -60,8 +60,9 @@ namespace Runner
 
         static void Main(string[] args)
         {
+            var goodTasks = new[] { 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42 };
 
-            for (int task = 40; ; task++)
+            foreach(var task in goodTasks)
             {
                 var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt", task);
                 var spec = ProblemSpec.Parse(File.ReadAllText(fname));
@@ -83,12 +84,16 @@ namespace Runner
 
                 var resIndex = -1;
 
+
+
                 for (int i = 0; i < result.Count; i++)
                 {
                     var r = solver.TryProject(result[i]);
                     if (!r) continue;
 
-                    solver.AddAdditionalEdges(irrationalEdges);
+                    var unused = solver.UnusedSegments().ToList();
+
+                    solver.AddAdditionalEdges(unused);
                     var wnd = new Form() { ClientSize = new Size(800, 600) };
 
                     wnd.Paint += (s, a) =>

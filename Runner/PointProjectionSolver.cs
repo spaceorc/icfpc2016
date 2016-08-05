@@ -8,19 +8,21 @@ using System.Threading.Tasks;
 
 namespace Runner
 {
-	public class EdgeInfo
-	{
-		public Segment segment;
-		public Rational length;
-		public override string ToString()
-		{
-			return segment.ToString();
-		}
-	}
-	public class PointProjectionSolver
+    public class EdgeInfo
+    {
+        public Segment segment;
+        public Rational length;
+        public override string ToString()
+        {
+            return segment.ToString();
+        }
+    }
+    public class PointProjectionSolver
     {
 
+        #region data classes 
 
+       
         public class NodeInfo
         {
             public Vector Location;
@@ -41,10 +43,10 @@ namespace Runner
         public class ProjectedEdgeInfo
         {
             public bool IsLate;
+            internal EdgeInfo Segment;
         }
 
-        public Graph<ProjectedEdgeInfo,ProjectedNodeInfo> Projection;
-
+   
 
         public class Path
         {
@@ -57,10 +59,14 @@ namespace Runner
                     .Select(z => z.Data.segment.Start).StrJoin(" ") + " " + edges[edges.Count - 1].To.Data.Location.ToString() ;
             }
         }
+        #endregion
 
+
+        public Graph<ProjectedEdgeInfo, ProjectedNodeInfo> Projection;
 
         public Graph<EdgeInfo,NodeInfo> Graph;
 
+#region Cycle 
         public IEnumerable<Path> Extend(Path path)
         {
             var output = new List<Path>();
@@ -118,6 +124,7 @@ namespace Runner
                 res += e;
             return res;
         }
+        #endregion
 
         public List<int> SeparateTo4(Path path)
         {
@@ -180,7 +187,7 @@ namespace Runner
             var corners = new[] { new Vector(0, 0), new Vector(0, 1), new Vector(1, 1), new Vector(1, 0) };
             var direction = new[] { new Vector(0, 1), new Vector(1, 0), new Vector(0, -1), new Vector(-1, 0) };
 
-            var list = new List<ProjectedNodeInfo>();
+            var list = new List<Tuple<EdgeInfo,ProjectedNodeInfo>>();
 
             for (int i=0;i<4;i++)
             {
@@ -189,7 +196,7 @@ namespace Runner
                 {
                     var location = corners[i] + direction[i] * len;
                     var node = parts[i][k].From;
-                    list.Add(new ProjectedNodeInfo { Original = node, Projection = location });
+                    list.Add(Tuple.Create(parts[i][k].Data,new ProjectedNodeInfo { Original = node, Projection = location }));
                     len += parts[i][k].Data.length;
                 }
             }
@@ -198,12 +205,21 @@ namespace Runner
             Projection = new Graph<ProjectedEdgeInfo, ProjectedNodeInfo>(list.Count);
             for (int i=0;i<list.Count;i++)
             {
-                Projection[i].Data = list[i];
+                Projection[i].Data = list[i].Item2;
                 var e = Projection.Connect(i, (i + 1)%Projection.NodesCount );
-                e.Data = new ProjectedEdgeInfo { IsLate = false };
+                e.Data = new ProjectedEdgeInfo { IsLate = false, Segment=list[i].Item1 };
             }
 
             return true;
+        }
+
+        public IEnumerable<Segment> UnusedSegments()
+        {
+            foreach(var e in Segments)
+            {
+                if (Projection.Edges.Any(z => z.Data.Segment.Equals(e))) continue;
+                yield return e;
+            }
         }
 
         public void AddAdditionalEdges(List<Segment> segments)
@@ -258,6 +274,8 @@ namespace Runner
         }
 
 
+        public List<Segment> Segments = new List<Segment>();
+
         public PointProjectionSolver(ProblemSpec spec)
         {
             var vectors = spec
@@ -273,12 +291,12 @@ namespace Runner
             for (int i = 0; i < vectors.Count; i++)
                 Graph[i].Data = new NodeInfo { Location = vectors[i] };
 
-            var initialSegments = spec.Segments.ToList();
+            Segments = spec.Segments.ToList();
 
             while (true)
             {
                 var segments = new List<Segment>();
-                foreach (var e in initialSegments)
+                foreach (var e in Segments)
                 {
                     var inter = vectors.Where(z => !z.Equals(e.Start) && !z.Equals(e.End) && Arithmetic.PointInSegment(z, e)).ToList();
                     if (inter.Count == 0)
@@ -289,9 +307,9 @@ namespace Runner
                         segments.Add(new Segment(inter[0], e.End));
                     }
                 }
-                if (segments.Count == initialSegments.Count)
+                if (segments.Count == Segments.Count)
                     break;
-                initialSegments = segments;
+                Segments = segments;
             }
 
         
@@ -301,7 +319,7 @@ namespace Runner
 
 
             int edges = 0;
-            foreach (var seg in initialSegments)
+            foreach (var seg in Segments)
             {
                 if (!Arithmetic.IsSquare(seg.QuadratOfLength)) continue;
 
