@@ -88,6 +88,7 @@
     <Compile Include="Facet.cs" />
     <Compile Include="PointToPolygonPositionExtensions.cs" />
     <Compile Include="Polygon.cs" />
+    <Compile Include="PolygonExtensions.cs" />
     <Compile Include="ProblemSpec.cs" />
     <Compile Include="ProblemSpec_Should.cs" />
     <Compile Include="Segment.cs" />
