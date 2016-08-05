@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using lib;
+using Runner;
 
 namespace SolutionVisalizer
 {
@@ -23,7 +24,8 @@ namespace SolutionVisalizer
 
 		private static SolutionSpec Solve(ProblemSpec arg)
 		{
-			return new ImperfectSolver().SolveMovingInitialSquare(arg);
+			return GraphExt.Solve(arg);
+			//return new ImperfectSolver().SolveMovingInitialSquare(arg);
 		}
 
 		private static string GetProblemsDir()

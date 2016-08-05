@@ -75,6 +75,10 @@
       <Project>{99a4c223-dd49-468f-a791-5587e795a663}</Project>
       <Name>lib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Runner\Runner.csproj">
+      <Project>{3f474806-7ff4-4df9-a061-35367e99dcb8}</Project>
+      <Name>Runner</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SquareConstructor\SquareConstructor.csproj">
       <Project>{82e3b127-3aab-477e-baa8-b13e57b099c3}</Project>
       <Name>SquareConstructor</Name>
