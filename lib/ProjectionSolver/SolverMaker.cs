@@ -75,41 +75,61 @@ namespace Runner
             return solver;
         }
 
-        public static PointProjectionSolver Solve(PointProjectionSolver solver)
+
+        static IEnumerable<List<List<Edge<EdgeInfo,NodeInfo>>>> TraditionalReorderings(PointProjectionSolver solver)
         {
-
-
-            //PaintSolver(spec,solver);
-
-            //var pathes = solver.DepthAlgorithm();
             var pathes = solver.Algorithm();
 
             var result = pathes.Where(z => z.edges[0].From == z.edges[z.edges.Count - 1].To);
 
 
-            var reorderings = result.SelectMany(z => solver.GetReorderings(z).Select(x => new { reordering = x, path = z }));
+            var reorderings = result.SelectMany(z => solver.GetReorderings(z));
 
+            return reorderings;
+        }
+
+        static IEnumerable<List<List<Edge<EdgeInfo, NodeInfo>>>> NewReorderings(PointProjectionSolver solver)
+        {
+            return NewAlgorithm.GetAll(solver).Select(z=>z.Select(x=>x.edges).ToList());
+            
+        }
+
+        public static PointProjectionSolver Solve(PointProjectionSolver solver)
+        {
+
+
+            //PaintSolver(spec,solver);
+               var reorderings = TraditionalReorderings(solver);
+            //var reorderings = NewReorderings(solver);
+            
 
             bool ok = false;
 
+            var best = solver.Projection;
+            best = null;
+            double bestQuality = -10;
+
             foreach(var reordering in reorderings)
             {
-                var r = solver.TryProject(reordering.reordering);
+                var r = solver.TryProject(reordering);
                 if (!r) continue;
 
                 var unused = solver.UnusedSegments().ToList();
 
                 var used = solver.AddAdditionalEdges(unused);
                 Console.WriteLine($"{used}/{unused.Count}");
-                if (used < unused.Count) continue;
 
-                ok = true;
-
-                break;
+                double quality = (double)used / unused.Count;
+                if (quality > bestQuality)
+                {
+                    bestQuality = quality;
+                    best = solver.Projection;
+                    if (used == unused.Count) return solver ;
+                }
             }
 
-	        if (!ok)
-				return null;
+            solver.Projection = best;
+	        
 
 	        return solver;
         }

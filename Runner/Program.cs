@@ -1,4 +1,5 @@
-﻿using lib;
+﻿using DataScience;
+using lib;
 using lib.DiofantEquationSolver;
 using lib.Graphs;
 using System;
@@ -23,30 +24,37 @@ namespace Runner
 		}
 
 
+
+
+
+
+
 		static void Main(string[] args)
 		{
+         //   NewMain();return;
 			var goodTasks = new[] { 1,2,3,4,5,6,7,8, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
             var nonTrivial = new[] { 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
 
             var badTasks = new[] { 16 };
 
-			var allTasks = Enumerable.Range(43, 100);
+			var allTasks = Enumerable.Range(46, 100);
 
 
 			foreach (var task in goodTasks)
 			{
-				var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt", task);
-				var spec = ProblemSpec.Parse(File.ReadAllText(fname));
+                var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt",task);
+                var spec = ProblemSpec.Parse(File.ReadAllText(fname));
+
 
                 var solver = SolverMaker.CreateSolver(spec);
-
+                
             //    PaintSolver(spec, solver);
 
                 solver = SolverMaker.Solve(solver);
 				if (solver == null)
 				{
 					MessageBox.Show("No solution for " + fname);
-					return;
+                    continue;
 				}
 
 

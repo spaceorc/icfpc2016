@@ -17,23 +17,38 @@ namespace Runner
             return segment.ToString();
         }
     }
+
+    public class NodeInfo
+    {
+        public Vector Location;
+        public List<Vector> Projections = new List<Vector>();
+
+        public override string ToString()
+        {
+            return new string('*', Projections.Count);
+        }
+    }
+
+    public class Path
+    {
+        public List<Edge<EdgeInfo, NodeInfo>> edges;
+        public Edge<EdgeInfo,NodeInfo> LastEdge { get { return edges[edges.Count - 1]; } }
+        public Rational length;
+        public override string ToString()
+        {
+            return ((double)length).ToString() + " : " +
+                edges
+                .Select(z => z.Data.segment.Start).StrJoin(" ") + " " + edges[edges.Count - 1].To.Data.Location.ToString();
+        }
+    }
+
     public class PointProjectionSolver
     {
 
         #region data classes 
 
        
-        public class NodeInfo
-        {
-            public Vector Location;
-            public List<Vector> Projections = new List<Vector>();
-
-            public override string ToString()
-            {
-                return new string('*', Projections.Count);
-            }
-        }
-
+       
         public class ProjectedNodeInfo
         {
             public Node<EdgeInfo, NodeInfo> Original;
@@ -48,17 +63,7 @@ namespace Runner
 
    
 
-        public class Path
-        {
-            public List<Edge<EdgeInfo, NodeInfo>> edges;
-            public Rational length;
-            public override string ToString()
-            {
-                return ((double)length).ToString() + " : " +
-                    edges
-                    .Select(z => z.Data.segment.Start).StrJoin(" ") + " " + edges[edges.Count - 1].To.Data.Location.ToString() ;
-            }
-        }
+       
         #endregion
 
 
@@ -87,8 +92,17 @@ namespace Runner
             return p.OrderByDescending(z => VerticesIn(z)).Take(10000).ToList();
         }
 
-        public IEnumerable<Path> Recursive(Path path)
+        public IEnumerable<Path> Recursive(Path path, Rational length)
         {
+            if (path.length == 1)
+            {
+                yield return path;
+                yield break;
+            }
+            if (path.length > 1)
+                yield break;
+            
+
             var last = path.edges[path.edges.Count - 1];
             var edges = last.To.IncidentEdges.OrderByDescending(z=>z.Data.length).ToList();
             var bad = edges.Where(z => z.To == last.From).First();
@@ -100,26 +114,20 @@ namespace Runner
                 p.edges = path.edges.ToList();
                 p.edges.Add(e);
                 p.length = path.length + e.Data.length;
-                if (p.length == 4) yield return p;
-                if (p.length > 4)
-                {
-               //     Console.WriteLine(p.edges.Select(z => z.From.NodeNumber).StrJoin(" "));
-                    depthRejected++;
-                    continue;
-                }
-                foreach (var c in Recursive(p))
+                foreach (var c in Recursive(p,length))
                     yield return c;
             }
         }
 
         int depthRejected = 0;
 
-        public IEnumerable<Path> DepthAlgorithm()
+        public IEnumerable<Path> DepthAlgorithm(int nodeIndex, Rational length)
         {
-
-            foreach(var e in GetStartPath())
+            var edges = Graph[nodeIndex].IncidentEdges.ToList();
+            foreach (var e in edges)
             {
-                foreach (var c in Recursive(e))
+                var p = new Path { edges = new[] { e }.ToList(), length = e.Data.length };
+                foreach (var c in Recursive(p,length))
                     yield return c;
             }
 
