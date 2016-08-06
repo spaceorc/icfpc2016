@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using lib;
 
 namespace SquareConstructor
@@ -40,7 +41,11 @@ namespace SquareConstructor
 			var spec = ProblemSpec.Parse(problem);
 
 			var polygons = PolygonFinder.GetRealPolygons(spec);
-			Console.WriteLine();
-		}
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            var form = new PolygonsAndSegmentsForm();
+            form.SetData(null, null);
+            Application.Run(form);
+        }
 	}
 }
