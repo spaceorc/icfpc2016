@@ -13,6 +13,11 @@ namespace lib
             End = end;
         }
 
+	    public Vector ToVector()
+	    {
+		    return End -Start;
+	    }
+
         public Rational QuadratOfLength
         {
             get
