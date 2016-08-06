@@ -7,6 +7,7 @@ namespace lib
 {
 	public class ProblemSpec
 	{
+		public int id;
 		public readonly Polygon[] Polygons;
 		public  Segment[] Segments;
 
@@ -37,7 +38,7 @@ namespace lib
 			return sb.ToString();
 		}
 
-		public static ProblemSpec Parse(string input)
+		public static ProblemSpec Parse(string input, int id = 0)
 		{
 			var r = new StringReader(input);
 			var pCount = int.Parse(r.ReadLine() ?? "0");
@@ -47,7 +48,7 @@ namespace lib
 			var ss = Enumerable.Range(0, sCount)
 				.Select(i => r.ReadLine())
 				.Select(Segment.Parse).ToArray();
-			return new ProblemSpec(ps, ss);
+			return new ProblemSpec(ps, ss) {id=id};
 		}
 	}
 }

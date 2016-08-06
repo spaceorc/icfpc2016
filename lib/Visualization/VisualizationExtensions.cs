@@ -15,11 +15,15 @@ namespace lib
 			return form;
 		}
 
-		public static Form CreateVisualizerForm(this SolutionSpec solution)
+		public static Form CreateVisualizerForm(this SolutionSpec solution, bool dest = false)
 		{
 			var form = new Form();
 			Painter painter = new Painter();
-			form.Paint +=
+			if (dest)
+				form.Paint +=
+					(sender, args) => painter.PaintDest(args.Graphics, Math.Min(form.ClientSize.Height, form.ClientSize.Width), solution);
+			else
+				form.Paint +=
 				(sender, args) => painter.Paint(args.Graphics, Math.Min(form.ClientSize.Height, form.ClientSize.Width), solution);
 			form.Text = "Problem";
 			return form;

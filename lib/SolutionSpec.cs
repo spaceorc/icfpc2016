@@ -10,7 +10,12 @@ namespace lib
 		public readonly Vector[] SourcePoints;
 		public readonly Facet[] Facets;
 		public readonly Vector[] DestPoints;
+		private static readonly Vector[] initialSquare = "0,0 1,0 1,1 0,1".ToPoints();
 
+		public static SolutionSpec CreateTrivial(Func<Vector, Vector> transform)
+		{
+			return new SolutionSpec(initialSquare, new[] { new Facet(0, 1, 2, 3) }, initialSquare.Select(transform).ToArray());
+		}
 		public SolutionSpec(Vector[] sourcePoints, Facet[] facets, Vector[] destPoints)
 		{
 			if (sourcePoints.Length != destPoints.Length)
@@ -21,10 +26,15 @@ namespace lib
 		}
 
 		public Polygon[] Polygons => Facets.Select(FacetToPolygon).ToArray();
+		public Polygon[] PolygonsDest => Facets.Select(FacetToPolygonDst).ToArray();
 
 		private Polygon FacetToPolygon(Facet f)
 		{
 			return new Polygon(f.Vertices.Select(i => SourcePoints[i]).ToArray());
+		}
+		private Polygon FacetToPolygonDst(Facet f)
+		{
+			return new Polygon(f.Vertices.Select(i => DestPoints[i]).ToArray());
 		}
 
 		public override string ToString()

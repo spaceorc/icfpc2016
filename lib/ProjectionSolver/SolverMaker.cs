@@ -69,7 +69,7 @@ namespace Runner
 
         public static PointProjectionSolver CreateSolver(ProblemSpec spec)
         {
-            spec = spec.MoveToOrigin();
+//            spec = spec.MoveToOrigin();
 
             var solver = new PointProjectionSolver(spec);
             return solver;
@@ -117,7 +117,7 @@ namespace Runner
                 var unused = solver.UnusedSegments().ToList();
 
                 var used = solver.AddAdditionalEdges(unused);
-                Console.WriteLine($"{used}/{unused.Count}");
+//                Console.WriteLine($"{used}/{unused.Count}");
 
                 double quality = (double)used / unused.Count;
                 if (quality > bestQuality)
