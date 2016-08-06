@@ -33,6 +33,7 @@ namespace lib
 		}
 
 		[JsonProperty("problem_id")] public int Id;
+		[JsonProperty("owner")] public string Owner;
 	}
 
 	public class RankingJson

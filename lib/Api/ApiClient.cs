@@ -53,9 +53,14 @@ namespace lib
 			return JObject.Parse(Query(query));
 		}
 
+		public string PostSolution(int problemId, SolutionSpec solution)
+		{
+			return PostSolution(problemId, solution.ToString());
+		}
+
 		private static readonly Stopwatch sw = Stopwatch.StartNew();
 
-		public string PostSolution(int problemId, SolutionSpec solution)
+		public string PostSolution(int problemId, string solution)
 		{
 			if (sw.Elapsed < TimeSpan.FromSeconds(1))
 				Thread.Sleep(TimeSpan.FromSeconds(1));
@@ -65,7 +70,7 @@ namespace lib
 				{
 					var content = new MultipartFormDataContent();
 					content.Add(new StringContent(problemId.ToString()), "problem_id");
-					content.Add(new StringContent(solution.ToString()), "solution_spec", "solution.txt");
+					content.Add(new StringContent(solution), "solution_spec", "solution.txt");
 					//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
 					var res = client.PostAsync($"{baseUrl}solution/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
 					if (!res.IsSuccessStatusCode)
@@ -164,6 +169,15 @@ namespace lib
 				Console.WriteLine($"writing {filepath}");
 				File.WriteAllText(filepath, spec);
 			}
+		}
+
+		[Test]
+		public void GetOurProblems()
+		{
+			var api = new ApiClient();
+			var snapshot = api.GetLastSnapshot();
+			foreach(var p in snapshot.Problems.Where(p => p.Owner == "89"))
+				Console.WriteLine($"problem {p.Id}, max score {p.Ranking?.Max(rank => rank?.resemblance) ?? 0.0}");
 		}
 
 		[Test]
