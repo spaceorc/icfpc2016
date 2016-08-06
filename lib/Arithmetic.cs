@@ -115,5 +115,22 @@ namespace lib
             var second = h - oba * multiplier;
             return new[] { first, second };
         }
+
+	    public static Rational Distance2(Vector a, Vector b) => (b - a).Length2;
+
+	    public static Rational Distance2(Vector point, Segment segment)
+	    {
+		    var v = segment.End - segment.Start;
+		    var w = point - segment.Start;
+		    var c1 = w.ScalarProd(v);
+		    var c2 = v.ScalarProd(v);
+		    if (c1 <= 0)
+				return Distance2(point, segment.Start);
+			if (c2 <= c1)
+			    return Distance2(point, segment.End);
+		    var b = c1/c2;
+		    var pb = segment.Start + b*v;
+		    return Distance2(point, pb);
+	    }
     }
 }
