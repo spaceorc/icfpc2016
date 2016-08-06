@@ -72,6 +72,13 @@ namespace lib
 			File.WriteAllText(Path.Combine(problemsDir, $"{id:000}.solution.txt"), solutionSpec.ToString());
 		}
 
+		public string FindSolution(int id)
+		{
+			if (!File.Exists(Path.Combine(problemsDir, $"{id:000}.solution.txt")))
+				return null;
+			return File.ReadAllText(Path.Combine(problemsDir, $"{id:000}.solution.txt"));
+		}
+
 		public void PutSolution(int id, string solutionSpec)
 		{
 			File.WriteAllText(Path.Combine(problemsDir, $"{id:000}.solution.txt"), solutionSpec);

@@ -11,9 +11,9 @@ namespace lib
 		public readonly Vector[] DestPoints;
 		private static readonly Vector[] initialSquare = "0,0 1,0 1,1 0,1".ToPoints();
 
-		public static SolutionSpec CreateTrivial(Func<Vector, Vector> transform)
+		public static SolutionSpec CreateTrivial(Func<Vector, Vector> transform = null)
 		{
-			return new SolutionSpec(initialSquare, new[] { new Facet(0, 1, 2, 3) }, initialSquare.Select(transform).ToArray());
+			return new SolutionSpec(initialSquare, new[] { new Facet(0, 1, 2, 3) }, initialSquare.Select(transform ?? (x => x)).ToArray());
 		}
 		public SolutionSpec(Vector[] sourcePoints, Facet[] facets, Vector[] destPoints)
 		{
