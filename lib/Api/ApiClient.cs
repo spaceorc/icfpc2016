@@ -172,6 +172,15 @@ namespace lib
 		}
 
 		[Test]
+		public void GetOurProblems()
+		{
+			var api = new ApiClient();
+			var snapshot = api.GetLastSnapshot();
+			foreach(var p in snapshot.Problems.Where(p => p.Owner == "89"))
+				Console.WriteLine($"problem {p.Id}, max score {p.Ranking?.Max(rank => rank?.resemblance) ?? 0.0}");
+		}
+
+		[Test]
 		public void ProblemsRating()
 		{
 			var api = new ApiClient();
