@@ -1,1 +1,0 @@
-{"solution_size":83,"ok":true,"resemblance":0.333333,"problem_id":2030,"solution_spec_hash":"8ef74fddfae92c672e3922609b8ee26f069d91c6"}

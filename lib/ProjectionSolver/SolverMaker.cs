@@ -58,9 +58,10 @@ namespace Runner
             return g;
         }
 
-        public static void Visualize(PointProjectionSolver solver)
+        public static void Visualize(PointProjectionSolver solver, Projection p=null)
         {
-            var gr = GenerateOutGraph(solver.ProjectionScheme, true);
+            if (p == null) p = solver.ProjectionScheme;
+            var gr = GenerateOutGraph(p, true);
             var viz = new GraphVisualizer<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>();
             viz.GetX = z => z.Data.Projection.X;
             viz.GetY = z => z.Data.Projection.Y;
@@ -76,12 +77,18 @@ namespace Runner
 
             var cs = cycles.ToList();
 
-            foreach(var c in cs)
+            int cnt = -1;
+
+            foreach (var c in cs)
             {
+                cnt++;
                 var pr = Projector.CreateProjection(solver.SegmentFamilies,solver.AllSegments, solver.Graph);
                 pr.Stages.Push(Projector.CreateInitialProjection(c, pr));
-              //  Visualize(solver, pr);
-                while(true)
+
+                //Visualize(solver, pr);
+
+
+                while (true)
                 {
                     if (pr.IsCompleteProjection())
                     {
@@ -93,7 +100,7 @@ namespace Runner
                     var st = Projector.AddVeryGoodEdges(pr);
                     if (st == null) break;
                     pr.Stages.Push(st);
-             //       Visualize(solver, pr);
+                  //  Visualize(solver, pr);
 
                 }
             }

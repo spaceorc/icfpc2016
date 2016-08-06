@@ -4,6 +4,7 @@ using Runner;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,7 +30,7 @@ namespace Runner
         public List<EdgeProjection> Edges = new List<EdgeProjection>();
     }
 
-     public class Projection
+    public class Projection
     {
         public Graph<EdgeInfo, NodeInfo> Graph;
         public List<Segment> AllSegments;
@@ -52,7 +53,7 @@ namespace Runner
             }
         }
 
-        public Dictionary<Node<EdgeInfo,NodeInfo>,List<NodeProjection>> GetNodeFunction()
+        public Dictionary<Node<EdgeInfo, NodeInfo>, List<NodeProjection>> GetNodeFunction()
         {
             var dict = Graph.Nodes.ToDictionary(z => z, z => new List<NodeProjection>());
             foreach (var e in AllNodeProjections)
@@ -60,16 +61,16 @@ namespace Runner
             return dict;
         }
 
-        public Dictionary<Segment,List<EdgeProjection>> GetEdgeFunction()
+        public Dictionary<Segment, List<EdgeProjection>> GetEdgeFunction()
         {
             var dict = AllSegments.ToDictionary(z => z, z => new List<EdgeProjection>());
             foreach (var e in AllEdgeProjections)
-                foreach(var ee in e.Segments)
+                foreach (var ee in e.Segments)
                     dict[ee].Add(e);
             return dict;
         }
 
-        
+
 
         public bool IsCompleteProjection()
         {
@@ -113,7 +114,7 @@ namespace Runner
 
                     var pr = new NodeProjection { Original = node, Projection = location };
                     stage.Nodes.Add(pr);
-                   len += square[i].edges[k].Data.length;
+                    len += square[i].edges[k].Data.length;
                 }
             }
 
@@ -137,65 +138,111 @@ namespace Runner
             return stage;
         }
 
-
-        class EdgeProjector
+        public class SegmentFamilySubset
         {
-            public Dictionary<Node<EdgeInfo, NodeInfo>,List<NodeProjection>> nodesMap;
-            public Dictionary<Segment, List<EdgeProjection>> edgesMap;
+            public SegmentFamily family;
+            public int start;
+            public int count;
+            public Segment[] Insides { get; private set; }
+            public Rational QuadratLength { get; private set; }
 
-            public EdgeProjection TryInsertFamily(SegmentFamily family, int startIndex, int count)
+            public SegmentFamilySubset(SegmentFamily family, int start, int count)
             {
-                var segments = family.Segments.Skip(startIndex).Take(count).ToList();
-                if (segments.All(z => edgesMap[z].Count != 0)) return null;
-                var startP = family.Points[startIndex];
-                var start = nodesMap.Keys.Where(z => z.Data.Location.Equals(startP)).FirstOrDefault();
-                if (start == null) return null;
-                var endP = family.Points[startIndex + count];
-                var end = nodesMap.Keys.Where(z => z.Data.Location.Equals(endP)).FirstOrDefault();
-                if (end == null) return null;
-                foreach(var s in nodesMap[start])
-                    foreach(var f in nodesMap[end])
-                    {
-                        var length = new Segment(s.Projection, f.Projection).QuadratOfLength;
-                        if (length != new Segment(startP,endP).QuadratOfLength) continue;
-                        var result = new EdgeProjection { begin = s, end = f, Segments = segments };
-                        return result;
-                    }
-                return null;
+                this.family = family;
+                this.start = start;
+                this.count = count;
+                Insides = family.Segments.Skip(start).Take(count).ToArray();
+                QuadratLength = new Segment(Begin, End).QuadratOfLength;
+            }
+
+
+
+            public Vector Begin
+            {
+                get { return family.Points[start]; }
+            }
+
+            public Vector End
+            {
+                get { return family.Points[start+count]; }
             }
         }
 
-       
+        public class CurrentState
+        {
+            public Dictionary<Node<EdgeInfo, NodeInfo>, List<NodeProjection>> nodesMap;
+            public Dictionary<Segment, List<EdgeProjection>> edgesMap;
+
+
+            public Node<EdgeInfo, NodeInfo> GetNode(Vector p)
+            {
+                return nodesMap.Keys.Where(z => z.Data.Location.Equals(p)).FirstOrDefault();
+            }
+
+            public bool SegmentIsCovered(SegmentFamilySubset subs)
+            {
+                return subs.Insides.All(z => edgesMap[z].Count != 0);
+            }
+        }
+
+
+
+        public static CurrentState GetCurrentState(Projection p)
+        {
+            var ep = new CurrentState();
+            ep.edgesMap = p.GetEdgeFunction();
+            ep.nodesMap = p.GetNodeFunction();
+            return ep;
+        }
+
+        public static EdgeProjection TryInsertFamily(SegmentFamilySubset subset, CurrentState state)
+        {
+
+            if (state.SegmentIsCovered(subset)) return null;
+            var start = state.GetNode(subset.Begin);
+            if (start == null) return null;
+            var end = state.GetNode(subset.End);
+            if (end == null) return null;
+
+            foreach (var s in state.nodesMap[start])
+                foreach (var f in state.nodesMap[end])
+                {
+                    var length = new Segment(s.Projection, f.Projection).QuadratOfLength;
+                    if (length != new Segment(subset.Begin, subset.End).QuadratOfLength) continue;
+                    var result = new EdgeProjection { begin = s, end = f, Segments = subset.Insides.ToList() };
+                    return result;
+                }
+            return null;
+        }
+
+
+
+
+        public static IEnumerable<SegmentFamilySubset> GetAllPossibleSegments(List<SegmentFamily> family)
+        {
+            foreach (var f in family)
+                for (int size = 1; size < f.Segments.Length + 1; size++)
+                    for (int start = 0; start <= f.Segments.Length - size; start++)
+                        yield return new SegmentFamilySubset(f, start, size);
+        }
 
         public static ProjectionStage AddVeryGoodEdges(Projection p)
         {
 
             var stage = new ProjectionStage();
-            var ep = new EdgeProjector();
-            ep.edgesMap = p.GetEdgeFunction();
-            ep.nodesMap = p.GetNodeFunction();
-            
 
-            foreach(var f in p.SegmentsFamily)
+            var ep = GetCurrentState(p);
+
+            foreach (var subs in GetAllPossibleSegments(p.SegmentsFamily))
             {
-                for (int size=f.Segments.Length;size>=1;size--)
-                    for (int start=0;start<=f.Segments.Length-size;start++)
-                    {
-                        var res = ep.TryInsertFamily(f, start, size);
-                        if (res!=null)
-                        {
-                            stage.Edges.Add(res);
-                            return stage;
-                        }
-                    }
+                var res = TryInsertFamily(subs, ep);
+                if (res != null)
+                {
+                    stage.Edges.Add(res);
+                    return stage;
+                }
             }
             return null;
         }
-
-        
     }
-
-
- 
-    
 }

@@ -76,7 +76,7 @@ namespace Runner
 
         static void SolveAndSend(int id)
         {
-            Console.WriteLine(ProblemsSender.SolveAndSend(42));
+            Console.WriteLine(ProblemsSender.SolveAndSend(id));
             Console.ReadKey();
             return;
         }
@@ -86,13 +86,13 @@ namespace Runner
 		static void Main(string[] args)
 		{
             //     NewMain();return;
-           SolveAndSend(47); return;
-            
-            
+            //SolveAndSend(47); return;
+
+           SolveAndSend(43);return;
 
             var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
 
-            SolveTask(47); return;
+            SolveTask(43);
 
             foreach (var e in goodTasks) SolveTask(e);
             //NewMain();return;

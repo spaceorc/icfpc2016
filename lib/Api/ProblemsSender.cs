@@ -29,7 +29,8 @@ namespace lib.Api
                 var response = client.PostSolution(problemSpec.id, solutionSpec);
                 repo.PutResponse(problemSpec.id, response);
                 repo.PutSolution(problemSpec.id, solutionSpec);
-                return JObject.Parse(response)["resemblance"].Value<double>();
+                var obj = JObject.Parse(response);
+                return obj["resemblance"].Value<double>();
             }
             catch (Exception e)
             {
