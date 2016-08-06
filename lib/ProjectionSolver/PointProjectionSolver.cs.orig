@@ -332,6 +332,7 @@ namespace Runner
             return used;
         }
 
+<<<<<<< HEAD
 
         void AddHordes()
         {
@@ -359,7 +360,10 @@ namespace Runner
 
         
 
+        public bool IsCircular(Path path)
+=======
         public bool IsCircular(PPath path)
+>>>>>>> 5d86d7b076873cab2d31e18eae5b7c71b1923411
         {
             return path.edges[0].From == path.edges[path.edges.Count - 1].To;
         }
