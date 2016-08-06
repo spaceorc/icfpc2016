@@ -33,7 +33,7 @@ namespace lib
 			for (int i = 0; i < poly.Segments.Length; i++)
 			{
 				var thisEdge = poly.Segments[i];
-				var nextEdge = poly.Segments[(i+1)%poly.Segments.Length];
+				var nextEdge = poly.Segments[(i + 1)%poly.Segments.Length];
 				var prod = thisEdge.ToVector().VectorProdLength(nextEdge.ToVector());
 				if (prod < 0)
 					return false;
@@ -54,7 +54,7 @@ namespace lib
 			var poly = problem.Polygons.Single();
 
 			foreach (var x in Enumerable.Range(0, 131).Select(x => new Rational(x, 131)))
-			foreach (var y in Enumerable.Range(0, 245).Select(y => new Rational(y, 245)))
+				foreach (var y in Enumerable.Range(0, 245).Select(y => new Rational(y, 245)))
 				{
 					var shift = new Vector(x, y);
 					var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
@@ -114,3 +114,4 @@ namespace lib
 			return JObject.Parse(response)["resemblance"].Value<double>();
 		}
 	}
+}
