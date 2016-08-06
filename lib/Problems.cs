@@ -181,7 +181,7 @@ namespace lib
 		public void PrintTriangle()
 		{
 			var api = new ApiClient();
-			var time = 1470441600;
+			var time = 1470495600+ (1470445200 - 1470441600);
 			for (int i = 1; i <= 4; i++)
 				for (int j = 1; j <= 4; j++)
 				{

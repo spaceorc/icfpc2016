@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace lib
@@ -43,6 +45,12 @@ namespace lib
 				.Select(p => ProblemSpec.Parse(File.ReadAllText(p), ExtractProblemId(p)));
 		}
 
+		public IEnumerable<Tuple<string, int>> GetAllProblemSpecContentAndId()
+		{
+			return Directory.GetFiles(problemsDir, "*.spec.txt")
+				.Select(p => Tuple.Create(File.ReadAllText(p), ExtractProblemId(p)));
+		}
+
 		private static int ExtractProblemId(string fileName)
 		{
 			return int.Parse(Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(fileName) ?? ""));
@@ -64,6 +72,13 @@ namespace lib
 			File.WriteAllText(Path.Combine(problemsDir, $"{id:000}.solution.txt"), solutionSpec.ToString());
 		}
 
+		public string FindSolution(int id)
+		{
+			if (!File.Exists(Path.Combine(problemsDir, $"{id:000}.solution.txt")))
+				return null;
+			return File.ReadAllText(Path.Combine(problemsDir, $"{id:000}.solution.txt"));
+		}
+
 		public void PutSolution(int id, string solutionSpec)
 		{
 			File.WriteAllText(Path.Combine(problemsDir, $"{id:000}.solution.txt"), solutionSpec);
@@ -72,6 +87,25 @@ namespace lib
 		public void Put(int id, string problemSpec)
 		{
 			File.WriteAllText(GetFilename(id), problemSpec);
+		}
+
+		public SnapshotJson GetSnapshot(ApiClient api)
+		{
+			var path = Path.Combine(problemsDir, $"snapshot.txt");
+			if (File.Exists(path))
+				return JsonConvert.DeserializeObject<SnapshotJson>(File.ReadAllText(path));
+			else
+			{
+				var res = api.GetLastSnapshot();
+				File.WriteAllText(path, JsonConvert.SerializeObject(res));
+				return res;
+			}
+		}
+
+		public string FindSolution(int id)
+		{
+			var path = Path.Combine(problemsDir, $"{id:000}.solution.txt");
+			return !File.Exists(path) ? null : File.ReadAllText(path);
 		}
 	}
 
@@ -83,6 +117,7 @@ namespace lib
 		{
 			new ProblemsRepo().Get(2).Should().NotBeNull();
 		}
+
 		[Test]
 		public void GetAll()
 		{

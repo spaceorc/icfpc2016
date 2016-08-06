@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
@@ -55,15 +55,19 @@ namespace lib
 			var problem = problemsRepo.Get(problemId);
 			var poly = problem.Polygons.Single();
 
-			foreach (var x in Enumerable.Range(0, 131).Select(x => new Rational(x, 131)))
-				foreach (var y in Enumerable.Range(0, 245).Select(y => new Rational(y, 245)))
+			foreach (var x in Enumerable.Range(9, 1).Select(x => new Rational(x, 131)))
+				foreach (var y in Enumerable.Range(8, 1).Select(y => new Rational(y, 245)))
 				{
 					var shift = new Vector(x, y);
 					var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
 					var solution = ConvexPolygonSolver.Solve(poly, initialSolution);
 					var solutionSize = solution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
 					if (solutionSize <= 5080)
-						Console.WriteLine($"{shift}: {solutionSize}");
+					{
+						var packedSolution = solution.Pack();
+						var packedSolutionSize = packedSolution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
+						Console.WriteLine($"{shift}: {solutionSize}; packed: {packedSolutionSize}");
+					}
 					//solution.CreateVisualizerForm(true).ShowDialog();
 				}
 
@@ -101,7 +105,7 @@ namespace lib
 						Console.WriteLine("ImperfectSolver sucks! Skipping");
 						continue;
 					}
-					var solution = ConvexPolygonSolver.Solve(problem.Polygons[0], initialSolution);
+					var solution = ConvexPolygonSolver.Solve(problem.Polygons[0], initialSolution).Pack();
 					try
 					{
 						var response = apiClient.PostSolution(problem.id, solution);
