@@ -97,7 +97,7 @@
     <Compile Include="ImperfectSolver_Should.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Problems.cs" />
-    <Compile Include="ProjectionSolver\GraphExt.cs" />
+    <Compile Include="ProjectionSolver\CycleFinder.cs" />
     <Compile Include="ProjectionSolver\Pathfinder.cs" />
     <Compile Include="ProjectionSolver\PointProjectionSolver.cs" />
     <Compile Include="ProjectionSolver\Projector.cs" />

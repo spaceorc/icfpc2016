@@ -47,7 +47,7 @@ namespace AutoSolver
 						{
 							var t = new Thread(() =>
 							{
-								var spec = ProjectionSolver.Solve(problemSpec);
+								var spec = ProjectionSolverRunner.Solve(problemSpec);
 								var ps = Post(problemSpec, spec);
 								Console.Write($" perfect score: {ps}");
 							}) { IsBackground = true };
