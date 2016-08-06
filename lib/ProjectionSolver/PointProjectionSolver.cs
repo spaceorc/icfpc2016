@@ -62,10 +62,7 @@ namespace Runner
 
         public class ProjectedEdgeInfo
         {
-            [Obsolete]
-            public bool IsLate;
-            [Obsolete]
-            internal EdgeInfo Segment;
+
         }
 
    
@@ -78,5 +75,6 @@ namespace Runner
         public List<Segment> AllSegments;
         public List<Vector> vectors;
         public Graph<EdgeInfo, NodeInfo> Graph;
+        public Projection ProjectionScheme;
     }
 }

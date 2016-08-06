@@ -82,7 +82,7 @@ namespace Runner
 
             var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
 
-            SolveTask(43); return;
+            SolveTask(13); return;
 
             foreach (var e in goodTasks) SolveTask(e);
             //NewMain();return;

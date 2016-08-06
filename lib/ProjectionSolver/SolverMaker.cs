@@ -30,44 +30,42 @@ namespace Runner
         }
 
 
-        static PointProjectionSolver GenerateOutGraph(PointProjectionSolver solver, Projection proj)
+        static Graph<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>
+            GenerateOutGraph(Projection proj, bool bidirectional)
         {
-
-
             var nodes = proj.AllNodeProjections.ToList();
-            solver.Projection = new Graph<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(nodes.Count);
+            var g = new Graph<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(nodes.Count);
             for (int i=0;i<nodes.Count;i++)
             {
-                solver.Projection[i].Data = new PointProjectionSolver.ProjectedNodeInfo
+                g[i].Data = new PointProjectionSolver.ProjectedNodeInfo
                 {
                     Original = nodes[i].Original,
                     Projection = nodes[i].Projection
                 };
             }
-
-            foreach(var e in proj.AllEdgeProjections)
+            var edges = proj.AllEdgeProjections.ToList();
+            foreach(var e in edges)
             {
                 var from = nodes.IndexOf(e.begin);
                 var to = nodes.IndexOf(e.end);
-                solver.Projection.NonDirectedConnect(from, to, new PointProjectionSolver.ProjectedEdgeInfo());
+                if (bidirectional)
+                    g.NonDirectedConnect(from, to, new PointProjectionSolver.ProjectedEdgeInfo());
+                else
+                    g.DirectedConnect(from, to);
             }
 
-            return solver;
-        }
-
-        public static void Visualize(PointProjectionSolver solver, Projection pr)
-        {
-            Visualize(GenerateOutGraph(solver, pr));
+            return g;
         }
 
         public static void Visualize(PointProjectionSolver solver)
         {
-
+            var gr = GenerateOutGraph(solver.ProjectionScheme, true);
             var viz = new GraphVisualizer<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>();
             viz.GetX = z => z.Data.Projection.X;
             viz.GetY = z => z.Data.Projection.Y;
-            viz.Window(500, solver.Projection);
+            viz.Window(500, gr);
         }
+
 
         public static PointProjectionSolver Solve(PointProjectionSolver solver)
         {
@@ -85,7 +83,12 @@ namespace Runner
                 while(true)
                 {
                     if (pr.IsCompleteProjection())
-                        return GenerateOutGraph(solver, pr);
+                    {
+                        solver.ProjectionScheme = pr;
+                        solver.Projection=GenerateOutGraph(solver.ProjectionScheme, false);
+                        return solver;
+                    }
+                     
                     var st = Projector.AddVeryGoodEdges(pr);
                     if (st == null) break;
                     pr.Stages.Push(st);
