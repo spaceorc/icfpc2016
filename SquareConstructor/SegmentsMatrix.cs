@@ -53,7 +53,7 @@ namespace SquareConstructor
 			{
 				if (!success)
 					return;
-				if (node.HasIntersections(segment))
+				if (!node.Contains(segment, polygon) && node.HasIntersections(segment))
 					success = false;
 				else
 					node.Add(segment, polygon);
@@ -86,6 +86,11 @@ namespace SquareConstructor
 				var intY = y.Value.ToInt();
 				DoItToNode(i, intY, doIt);
 				DoItToNode(i-1, intY, doIt);
+				if (y.Value.IsInt())
+				{
+					DoItToNode(i, intY - 1, doIt);
+					DoItToNode(i - 1, intY - 1, doIt);
+				}
 			}
 
 			for (int j = minY; j <= maxY; j++)
@@ -96,6 +101,12 @@ namespace SquareConstructor
 				var intX = x.Value.ToInt();
 				DoItToNode(intX, j, doIt);
 				DoItToNode(intX, j-1, doIt);
+
+				if (x.Value.IsInt())
+				{
+					DoItToNode(intX - 1, j, doIt);
+					DoItToNode(intX - 1, j - 1, doIt);
+				}
 			}
 		}
 
@@ -122,6 +133,11 @@ namespace SquareConstructor
 			Segments.Remove(Tuple.Create(segment, polygon));
 		}
 
+		public bool Contains(Segment segment, Polygon polygon)
+		{
+			return Segments.Contains(Tuple.Create(segment, polygon));
+		}
+
 		public bool HasIntersections(Segment segment)
 		{
 			return Segments.Any(pair =>
@@ -129,7 +145,7 @@ namespace SquareConstructor
 				var intersection = segment.GetIntersection(pair.Item1);
 				if (intersection == null)
 					return false;
-				if (intersection.Equals(segment.Start) || intersection.Equals(segment.End))
+				if ((intersection.Equals(segment.Start) || intersection.Equals(segment.End)) && (intersection.Equals(pair.Item1.Start) || intersection.Equals(pair.Item1.End)))
 					return false;
 				return true;
 			});

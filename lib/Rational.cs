@@ -70,6 +70,12 @@ namespace lib
 			return (int)BigInteger.Divide(Numerator, Denomerator);
 		}
 
+		public bool IsInt()
+		{
+			Reduce();
+			return Denomerator == 1;
+		}
+
 		#region Перегрузки методов
 
 		public override string ToString()
