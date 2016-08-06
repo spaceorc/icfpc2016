@@ -34,6 +34,13 @@ namespace lib.Visualization.ManualSolving
 			Invalidate();
 		}
 
+		protected override void OnClick(EventArgs e)
+		{
+			base.OnClick(e);
+			Model.ToggleHighlightedToSelected();
+			Invalidate();
+		}
+
 		public Rational Margin = new Rational(1, 1);
 
 		public Rational GetScaleFactor()

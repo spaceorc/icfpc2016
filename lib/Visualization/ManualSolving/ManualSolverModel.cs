@@ -27,5 +27,15 @@ namespace lib.Visualization.ManualSolving
 			var index = Array.IndexOf(Segments, segment);
 			HighlightedSegmentIndex = index < 0 ? (int?) null : index;
 		}
+
+		public void ToggleHighlightedToSelected()
+		{
+			if (!HighlightedSegmentIndex.HasValue) return;
+			var index = HighlightedSegmentIndex.Value;
+			if (SelectedSegmentIndices.Contains(index))
+				SelectedSegmentIndices.Remove(index);
+			else
+				SelectedSegmentIndices.Add(index);
+		}
 	}
 }
