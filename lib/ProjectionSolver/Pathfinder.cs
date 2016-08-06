@@ -94,7 +94,7 @@ namespace Runner
         public static Graph<EdgeInfo, NodeInfo> BuildGraph(ProblemSpec spec)
         {
             var r = MakeSegmentsWithIntersections(spec.Segments);
-            return BuildGraph(r.Item1, r.Item2);
+            return BuildGraph(r.Item1.SelectMany(z=>z.Segments).ToList(), r.Item2);
         }
 
         public static Graph<EdgeInfo,NodeInfo> BuildGraph(List<Segment> Segments, List<Vector> vectors)
@@ -120,12 +120,7 @@ namespace Runner
             return Graph;
         }
 
-        public static IEnumerable<Segment> GenerateAllSmallSegments(IEnumerable<SegmentFamily> families)
-        {
-            foreach (var f in families)
-                for (int i = 0; i < f.Points.Length - 1; i++)
-                    yield return new Segment(f.Points[i], f.Points[i + 1]);
-        }
+      
 
         public static Tuple<List<SegmentFamily>,List<Vector>> MakeSegmentsWithIntersections(IEnumerable<Segment> __segments)
         {

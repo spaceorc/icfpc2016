@@ -20,7 +20,7 @@ namespace Runner
     {
         public NodeProjection begin;
         public NodeProjection end;
-        public Segment Segment;
+        public List<Segment> Segments;
     }
 
     public class ProjectionStage
@@ -34,6 +34,7 @@ namespace Runner
         public Graph<EdgeInfo, NodeInfo> Graph;
         public List<Segment> AllSegments;
         public Stack<ProjectionStage> Stages = new Stack<ProjectionStage>();
+        internal List<SegmentFamily> SegmentsFamily;
 
         public IEnumerable<NodeProjection> AllNodeProjections
         {
@@ -63,7 +64,8 @@ namespace Runner
         {
             var dict = AllSegments.ToDictionary(z => z, z => new List<EdgeProjection>());
             foreach (var e in AllEdgeProjections)
-                dict[e.Segment].Add(e);
+                foreach(var ee in e.Segments)
+                    dict[ee].Add(e);
             return dict;
         }
 
@@ -73,7 +75,7 @@ namespace Runner
         {
             var goodNodes = AllNodeProjections.Select(z => z.Original).Distinct().Count();
             if (goodNodes != Graph.NodesCount) return false;
-            var goodEdges = AllEdgeProjections.Select(z => z.Segment).Distinct().Count();
+            var goodEdges = AllEdgeProjections.SelectMany(z => z.Segments).Distinct().Count();
             if (goodEdges != AllSegments.Count) return false;
             return true;
         }
@@ -83,11 +85,12 @@ namespace Runner
 
     public static class Projector
     {
-        public static Projection CreateProjection(List<Segment> allSegments, Graph<EdgeInfo, NodeInfo> graph)
+        public static Projection CreateProjection(List<SegmentFamily> families, List<Segment> allSegments, Graph<EdgeInfo, NodeInfo> graph)
         {
             var p = new Projection();
             p.AllSegments = allSegments.ToList();
             p.Graph = graph;
+            p.SegmentsFamily = families.ToList();
             return p;
         }
 
@@ -128,36 +131,63 @@ namespace Runner
                     var begin = stage.Nodes[ptr];
                     var end = stage.Nodes[(ptr + 1) % stage.Nodes.Count];
                     ptr++;
-                        
-                    stage.Edges.Add(new EdgeProjection { begin = begin, end = end, Segment = e.Data.segment });
+
+                    stage.Edges.Add(new EdgeProjection { begin = begin, end = end, Segments = new List<Segment> { e.Data.segment } });
                 }
             return stage;
         }
-        
 
-        public static ProjectionStage AddVeryGoodEdges(Projection p)
+
+        class EdgeProjector
         {
-            var stage = new ProjectionStage();
-            var nodesMap = p.GetNodeFunction();
-            var edgesMap = p.GetEdgeFunction();
-            
-            foreach(var e in edgesMap.Keys)
-            {
-                if (edgesMap[e].Count != 0) continue;
-                var start = nodesMap.Keys.Where(z => z.Data.Location.Equals(e.Start)).FirstOrDefault();
-                if (start == null) continue;
-                var end = nodesMap.Keys.Where(z => z.Data.Location.Equals(e.End)).FirstOrDefault();
-                if (end == null) continue;
+            public Dictionary<Node<EdgeInfo, NodeInfo>,List<NodeProjection>> nodesMap;
+            public Dictionary<Segment, List<EdgeProjection>> edgesMap;
 
+            public EdgeProjection TryInsertFamily(SegmentFamily family, int startIndex, int count)
+            {
+                var segments = family.Segments.Skip(startIndex).Take(count).ToList();
+                if (segments.All(z => edgesMap[z].Count != 0)) return null;
+                var startP = family.Points[startIndex];
+                var start = nodesMap.Keys.Where(z => z.Data.Location.Equals(startP)).FirstOrDefault();
+                if (start == null) return null;
+                var endP = family.Points[startIndex + count];
+                var end = nodesMap.Keys.Where(z => z.Data.Location.Equals(endP)).FirstOrDefault();
+                if (end == null) return null;
                 foreach(var s in nodesMap[start])
                     foreach(var f in nodesMap[end])
                     {
                         var length = new Segment(s.Projection, f.Projection).QuadratOfLength;
-                        if (length != e.QuadratOfLength) continue;
-                        stage.Edges.Add(new EdgeProjection { begin = s, end = f, Segment = e });
-                        return stage;
+                        if (length != new Segment(startP,endP).QuadratOfLength) continue;
+                        var result = new EdgeProjection { begin = s, end = f, Segments = segments };
+                        return result;
                     }
+                return null;
+            }
+        }
 
+       
+
+        public static ProjectionStage AddVeryGoodEdges(Projection p)
+        {
+
+            var stage = new ProjectionStage();
+            var ep = new EdgeProjector();
+            ep.edgesMap = p.GetEdgeFunction();
+            ep.nodesMap = p.GetNodeFunction();
+            
+
+            foreach(var f in p.SegmentsFamily)
+            {
+                for (int size=f.Segments.Length;size>=1;size--)
+                    for (int start=0;start<=f.Segments.Length-size;start++)
+                    {
+                        var res = ep.TryInsertFamily(f, start, size);
+                        if (res!=null)
+                        {
+                            stage.Edges.Add(res);
+                            return stage;
+                        }
+                    }
             }
             return null;
         }

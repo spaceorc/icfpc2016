@@ -22,7 +22,9 @@ namespace lib
 
 		public ProblemSpec Get(int id)
 		{
-			return ProblemSpec.Parse(File.ReadAllText(GetFilename(id)));
+            var s= ProblemSpec.Parse(File.ReadAllText(GetFilename(id)));
+            s.id = id;
+            return s;
 		}
 
 		public ProblemSpec Find(int id)

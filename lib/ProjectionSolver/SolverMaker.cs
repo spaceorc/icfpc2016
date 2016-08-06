@@ -24,7 +24,8 @@ namespace Runner
             var solver = new PointProjectionSolver { spec = spec };
             var r = Pathfinder.MakeSegmentsWithIntersections(spec.Segments);
             solver.vectors = r.Item2;
-            solver.AllSegments = Pathfinder.GenerateAllSmallSegments(r.Item1);
+            solver.SegmentFamilies = r.Item1;
+            solver.AllSegments = r.Item1.SelectMany(z => z.Segments).ToList();
             solver.Graph = Pathfinder.BuildGraph(solver.AllSegments, solver.vectors);
             return solver;
         }
@@ -77,7 +78,7 @@ namespace Runner
 
             foreach(var c in cs)
             {
-                var pr = Projector.CreateProjection(solver.AllSegments, solver.Graph);
+                var pr = Projector.CreateProjection(solver.SegmentFamilies,solver.AllSegments, solver.Graph);
                 pr.Stages.Push(Projector.CreateInitialProjection(c, pr));
               //  Visualize(solver, pr);
                 while(true)

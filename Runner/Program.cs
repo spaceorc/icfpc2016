@@ -1,5 +1,6 @@
 ﻿using DataScience;
 using lib;
+using lib.Api;
 using lib.DiofantEquationSolver;
 using lib.Graphs;
 using System;
@@ -73,16 +74,25 @@ namespace Runner
             viz.Window(500, gr);
         }
 
+        static void SolveAndSend(int id)
+        {
+            Console.WriteLine(ProblemsSender.SolveAndSend(42));
+            Console.ReadKey();
+            return;
+        }
 
 
 
 		static void Main(string[] args)
 		{
-       //     NewMain();return;
+            //     NewMain();return;
+           SolveAndSend(47); return;
+            
+            
 
             var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
 
-            SolveTask(13); return;
+            SolveTask(47); return;
 
             foreach (var e in goodTasks) SolveTask(e);
             //NewMain();return;
