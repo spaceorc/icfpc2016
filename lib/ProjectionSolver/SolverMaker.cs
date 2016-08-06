@@ -129,7 +129,7 @@ namespace Runner
         static int cycleCounter = 0;
 
 
-        public static PointProjectionSolver Solve(PointProjectionSolver solver, double originality=0.95)
+        public static PointProjectionSolver Solve(PointProjectionSolver solver, double originality=0)
         {
             var pathes = Pathfinder.FindAllPathes(solver.Graph, 1, originality);
             var ps = pathes.ToList();
