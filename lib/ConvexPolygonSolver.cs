@@ -28,7 +28,7 @@ namespace lib
 			}
 		}
 
-		public static bool IsConvex(this Polygon poly)
+		public static bool IsConvexViaVectorProd(this Polygon poly)
 		{
 			for (int i = 0; i < poly.Segments.Length; i++)
 			{
@@ -84,7 +84,7 @@ namespace lib
 			var problemsRepo = new ProblemsRepo();
 			foreach (var problem in problemsRepo.GetAll().Where(ProblemIsNotSolved))
 			{
-				if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvex())
+				if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvexViaVectorProd())
 				{
 					Console.Out.Write($"Solving convex problem: {problem.id}...");
 					var solution = ConvexPolygonSolver.Solve(problem.Polygons[0], null);
