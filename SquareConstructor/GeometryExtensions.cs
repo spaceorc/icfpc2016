@@ -54,7 +54,7 @@ namespace SquareConstructor
 		{
 			if (vec1.Length2 != vec2.Length2)
 				throw new Exception("vectors must be equal");
-			return (vec1.X * vec2.X + vec1.Y * vec2.Y) / vec1.Length2;
+			return (vec1.X * vec2.X + vec1.Y * vec2.Y)/vec1.Length2;
 		}
 	}
 }
