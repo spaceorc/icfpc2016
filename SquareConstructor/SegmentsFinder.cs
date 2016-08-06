@@ -18,11 +18,15 @@ namespace SquareConstructor
 			HashSet<Tuple<Vector, Vector>> usedSegments = new HashSet<Tuple<Vector, Vector>>();
 			List<Polygon> polygons = new List<Polygon>();
 			
+			var holePolygons = problem.Polygons.Select(polygon => new HashSet<Vector>(polygon.Vertices)).ToList();
+			
 			foreach (var segment in segments)
 			{
 				if(usedSegments.Contains(Tuple.Create(segment.Start, segment.End)))
 					continue;
 				var points = GeneratePolygon(segment, outerSegments, usedSegments).ToArray();
+				if (holePolygons.Any(p => points.Count(p.Contains) == p.Count))
+					continue;
 				polygons.Add(new Polygon(points));
 			}
 			return polygons;

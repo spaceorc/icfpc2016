@@ -41,5 +41,10 @@ namespace SquareConstructor
 			matrix.MoveVector = destination.Start - newDVector;
 			return matrix;
 		}
+
+		public Polygon TransposePolygon(Polygon polygon)
+		{
+			return new Polygon(polygon.Vertices.Select(Apply).ToArray());
+		}
 	}
 }
