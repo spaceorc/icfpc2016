@@ -76,7 +76,6 @@ namespace lib
 				var p1 = Vertices[i];
 				var p2 = Vertices[(i + 1) % Vertices.Length];
 				sum += (p1.X - p2.X)*(p1.Y + p2.Y)/2;
-				Console.WriteLine(sum);
 			}
 			return sum;
 		}

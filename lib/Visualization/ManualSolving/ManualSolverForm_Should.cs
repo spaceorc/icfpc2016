@@ -8,7 +8,7 @@ namespace lib.Visualization.ManualSolving
 		[Test]
 		public void Open()
 		{
-			new ManualSolverForm(new ProblemsRepo().Get(9)).ShowDialog();
+			new ManualSolverForm(new ProblemsRepo().Get(64)).ShowDialog();
 		}
 	}
 }

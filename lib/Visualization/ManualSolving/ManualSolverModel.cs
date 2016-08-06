@@ -22,14 +22,14 @@ namespace lib.Visualization.ManualSolving
 		public readonly ImmutableArray<Segment> Segments;
 		public int? HighlightedSegmentIndex;
 		public readonly ImmutableList<int> SelectedSegmentIndices;
-		public readonly PendingOperationType PendingOperation;
+		public PendingOperationType PendingOperation;
 
 		public ManualSolverModel(ProblemSpec problem)
 		{
 			Problem = problem;
 			Segments = problem.Segments.ToImmutableArray();
 			SelectedSegmentIndices = ImmutableList<int>.Empty;
-			Shift = problem.MinXY();
+			Shift = -problem.MinXY();
 		}
 		public void UpdateHighlightedSegment(Vector p)
 		{
@@ -59,6 +59,7 @@ namespace lib.Visualization.ManualSolving
 			if (PendingOperation == PendingOperationType.ReflectMove)
 				res = res.Where(s => !selectedSegments.Contains(s));
 			res = res.Concat(reflected);
+			PendingOperation = PendingOperationType.None;
 			return With(res, null, ImmutableList<int>.Empty);
 		}
 
@@ -77,12 +78,14 @@ namespace lib.Visualization.ManualSolving
 
 		public ManualSolverModel StartOperation(PendingOperationType operation)
 		{
-			return With(Segments, HighlightedSegmentIndex, SelectedSegmentIndices, operation);
+			PendingOperation = operation;
+			return this;
 		}
 
 		public ManualSolverModel CancelPendingOperation()
 		{
-			return With(Segments, HighlightedSegmentIndex, SelectedSegmentIndices, PendingOperationType.None);
+			PendingOperation = PendingOperationType.None;
+			return this;
 		}
 	}
 }

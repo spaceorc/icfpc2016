@@ -24,7 +24,8 @@ namespace Runner
             var solver = new PointProjectionSolver { spec = spec };
             var r = Pathfinder.MakeSegmentsWithIntersections(spec.Segments);
             solver.vectors = r.Item2;
-            solver.AllSegments = r.Item1;
+            solver.SegmentFamilies = r.Item1;
+            solver.AllSegments = r.Item1.SelectMany(z => z.Segments).ToList();
             solver.Graph = Pathfinder.BuildGraph(solver.AllSegments, solver.vectors);
             return solver;
         }
@@ -57,42 +58,82 @@ namespace Runner
             return g;
         }
 
-        public static void Visualize(PointProjectionSolver solver)
+        public static void Visualize(PointProjectionSolver solver, Projection p=null, string name="")
         {
-            var gr = GenerateOutGraph(solver.ProjectionScheme, true);
+            if (p == null) p = solver.ProjectionScheme;
+            var gr = GenerateOutGraph(p, true);
             var viz = new GraphVisualizer<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>();
             viz.GetX = z => z.Data.Projection.X;
             viz.GetY = z => z.Data.Projection.Y;
-            viz.Window(500, gr);
+            viz.NodeCaption = z => z.Data.Original.Data.Location.ToString();
+            viz.Window(500, gr, name);
         }
 
 
-        public static PointProjectionSolver Solve(PointProjectionSolver solver)
+        public static PointProjectionSolver Solve(PointProjectionSolver solver, double originality=0.95)
         {
-            var pathes = Pathfinder.FindAllPathes(solver.Graph, 1, 0.9);
+            var pathes = Pathfinder.FindAllPathes(solver.Graph, 1, originality);
             var ps = pathes.ToList();
             var cycles = Pathfinder.FindAllCycles(ps);
 
-            var cs = cycles.ToList();
+            //var cs = cycles.ToList();
 
-            foreach(var c in cs)
+            int cnt = -1;
+
+            bool interesting = false;
+
+            foreach (var c in cycles)
             {
-                var pr = Projector.CreateProjection(solver.AllSegments, solver.Graph);
+                cnt++;
+              //  Console.WriteLine(cnt);
+                var tr = c.SelectMany(z => z.edges.AllNodes().Select(x => x.Data.Location)).ToList();
+
+               // if (cnt == 2794) interesting = true;
+
+                //if (tr.Contains(new Vector(0, 0)) && tr.Contains(new Vector(0, 1)) && tr.Contains(new Vector(new Rational(3, 5), new Rational(6, 5)))) interesting = true;
+
+                
+                
+                var pr = Projector.CreateProjection(solver.SegmentFamilies,solver.AllSegments, solver.Graph);
                 pr.Stages.Push(Projector.CreateInitialProjection(c, pr));
-              //  Visualize(solver, pr);
-                while(true)
+
+               // if (interesting)
+                 //  Visualize(solver, pr, cnt.ToString());
+
+
+                while (true)
                 {
                     if (pr.IsCompleteProjection())
                     {
                         solver.ProjectionScheme = pr;
                         solver.Projection=GenerateOutGraph(solver.ProjectionScheme, false);
+                //        Visualize(solver, pr, cnt.ToString());
                         return solver;
+                        var solution = ProjectionSolverRunner.Solve(solver.Projection);
+                        if (solution.ValidateFacetSquares())
+                        {
+                            Visualize(solver, pr, cnt.ToString());
+                            return solver;
+                        }
+                        else
+                            break;
                     }
                      
                     var st = Projector.AddVeryGoodEdges(pr);
-                    if (st == null) break;
-                    pr.Stages.Push(st);
-             //       Visualize(solver, pr);
+                    if (st == null)
+                    {
+                        break;
+                        var st1 = Projector.FindSquashPoint(pr);
+                        if (st1 == null)
+                            break;
+                        else
+                            pr.Stages.Push(st1);
+                    }
+                    else
+                    {
+                        pr.Stages.Push(st);
+                    }
+                  //  Visualize(solver, pr);
 
                 }
             }

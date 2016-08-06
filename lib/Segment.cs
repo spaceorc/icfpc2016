@@ -47,7 +47,6 @@ namespace lib
 		{
 			return Parse(s);
 		}
-        
 
 		public static Segment Parse(string s)
 		{
@@ -65,6 +64,7 @@ namespace lib
 		{
 			return $"{Start} {End}";
 		}
+
 		[Pure]
 		public Segment Move(Rational shiftX, Rational shiftY)
 		{
@@ -73,16 +73,18 @@ namespace lib
 
 		public override int GetHashCode()
 		{
-			return Start.GetHashCode() ^ End.GetHashCode();
+			unchecked
+			{
+				return Start.GetHashCode() ^ End.GetHashCode();
+			}
 		}
 
 		public override bool Equals(object obj)
 		{
 			var segment = obj as Segment;
-			if (segment == null)
+			if(segment == null)
 				return false;
-
-			return Tuple.Create(Start, End).Equals(Tuple.Create(segment.Start, segment.End)) || Tuple.Create(End, Start).Equals(Tuple.Create(segment.Start, segment.End));
+			return Start.Equals(segment.Start) && End.Equals(segment.End) || End.Equals(segment.Start) && Start.Equals(segment.End);
 		}
 	}
 }

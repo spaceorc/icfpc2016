@@ -75,6 +75,7 @@ namespace lib
 		public List<Segment> AllSegments;
 		public List<Vector> vectors;
 		public Graph<EdgeInfo, NodeInfo> Graph;
+        public List<SegmentFamily> SegmentFamilies;
 		public Projection ProjectionScheme;
 	}
 }

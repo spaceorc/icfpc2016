@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -46,6 +45,22 @@ namespace lib
 			sb.AppendLine(Facets.StrJoin(Environment.NewLine));
 			sb.Append(DestPoints.StrJoin(Environment.NewLine));
 			return sb.ToString();
+		}
+
+		public bool ValidateFacetSquares()
+		{
+			Rational totalSquare = 0;
+			foreach (var facet in Facets)
+			{
+				var sourcePolygon = new Polygon(facet.Vertices.Select(index => SourcePoints[index]).ToArray());
+				var destPolygon = new Polygon(facet.Vertices.Select(index => DestPoints[index]).ToArray());
+				var sourceSquare = sourcePolygon.GetUnsignedSquare();
+				if (sourceSquare != destPolygon.GetUnsignedSquare())
+					return false;
+
+				totalSquare += sourceSquare;
+			}
+			return totalSquare == 1;
 		}
 	}
 }
