@@ -181,16 +181,17 @@ namespace lib
 		public void PrintTriangle()
 		{
 			var api = new ApiClient();
-			var time = 1470495600+ (1470445200 - 1470441600);
+			var hour = 3600;
+			var time = 1470553200 + hour;
 			for (int i = 1; i <= 4; i++)
 				for (int j = 1; j <= 4; j++)
 				{
-					var solution = Triangle(new Rational(1, 4) - new Rational(i, 17), new Rational(1, 4) - new Rational(j, 19));
-					//solution.CreateVisualizerForm(true).ShowDialog();
+					var solution = Triangle(new Rational(1, 4) - new Rational(i, 19), new Rational(1, 4) - new Rational(j, 21));
+					solution.CreateVisualizerForm(true).ShowDialog();
 					var ans = api.PostProblem(time, solution);
 					Console.WriteLine(ans);
 					File.WriteAllText(Path.Combine(Paths.ProblemsDir(), $"{time}.problem.txt"), solution + "\r\n\r\n" + ans);
-					time += (1470445200 - 1470441600);
+					time += hour;
 					Thread.Sleep(1000);
 				}
 		}
