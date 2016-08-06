@@ -70,21 +70,22 @@ namespace Runner
         }
 
 
-        public static PointProjectionSolver Solve(PointProjectionSolver solver, double originality=0)
+        public static PointProjectionSolver Solve(PointProjectionSolver solver, double originality=0.95)
         {
             var pathes = Pathfinder.FindAllPathes(solver.Graph, 1, originality);
             var ps = pathes.ToList();
             var cycles = Pathfinder.FindAllCycles(ps);
 
-            var cs = cycles.ToList();
+            //var cs = cycles.ToList();
 
             int cnt = -1;
 
             bool interesting = false;
 
-            foreach (var c in cs)
+            foreach (var c in cycles)
             {
                 cnt++;
+              //  Console.WriteLine(cnt);
                 var tr = c.SelectMany(z => z.edges.AllNodes().Select(x => x.Data.Location)).ToList();
 
                // if (cnt == 2794) interesting = true;
@@ -106,17 +107,22 @@ namespace Runner
                     {
                         solver.ProjectionScheme = pr;
                         solver.Projection=GenerateOutGraph(solver.ProjectionScheme, false);
+                //        Visualize(solver, pr, cnt.ToString());
+                        return solver;
                         var solution = ProjectionSolverRunner.Solve(solver.Projection);
                         if (solution.ValidateFacetSquares())
                         {
-                          //  Visualize(solver, pr, cnt.ToString());
+                            Visualize(solver, pr, cnt.ToString());
                             return solver;
                         }
+                        else
+                            break;
                     }
                      
                     var st = Projector.AddVeryGoodEdges(pr);
                     if (st == null)
                     {
+                        break;
                         var st1 = Projector.FindSquashPoint(pr);
                         if (st1 == null)
                             break;
