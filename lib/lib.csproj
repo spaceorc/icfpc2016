@@ -92,12 +92,12 @@
     <Compile Include="Api\SnapshotRefJson.cs" />
     <Compile Include="DiofantEquationSolver\DiofantEquationSolver_Sould.cs" />
     <Compile Include="Graphs\Graph.cs" />
+    <Compile Include="Graphs\GraphExtensions.cs" />
     <Compile Include="ImperfectSolver.cs" />
     <Compile Include="ImperfectSolver_Should.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Problems.cs" />
     <Compile Include="ProjectionSolver\GraphExt.cs" />
-    <Compile Include="ProjectionSolver\NewAlgorithm.cs" />
     <Compile Include="ProjectionSolver\Pathfinder.cs" />
     <Compile Include="ProjectionSolver\PointProjectionSolver.cs" />
     <Compile Include="ProjectionSolver\Projector.cs" />
@@ -121,6 +121,7 @@
     <Compile Include="Visualization\Painter.cs" />
     <Compile Include="Visualization\Painter_Utils.cs" />
     <Compile Include="Visualization\VisualizationExtensions.cs" />
+    <Compile Include="Visualization\Visualizer.cs" />
     <Compile Include="Visualization\VisualizerForm.cs">
       <SubType>Form</SubType>
     </Compile>

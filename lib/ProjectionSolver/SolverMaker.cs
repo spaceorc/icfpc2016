@@ -49,30 +49,48 @@ namespace Runner
             {
                 var from = nodes.IndexOf(e.begin);
                 var to = nodes.IndexOf(e.end);
-                var r =solver.Projection.DirectedConnect(from, to);
-                r.Data = new PointProjectionSolver.ProjectedEdgeInfo();
+                solver.Projection.NonDirectedConnect(from, to, new PointProjectionSolver.ProjectedEdgeInfo());
             }
 
             return solver;
         }
 
+        public static void Visualize(PointProjectionSolver solver, Projection pr)
+        {
+            Visualize(GenerateOutGraph(solver, pr));
+        }
+
+        public static void Visualize(PointProjectionSolver solver)
+        {
+
+            var viz = new GraphVisualizer<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>();
+            viz.GetX = z => z.Data.Projection.X;
+            viz.GetY = z => z.Data.Projection.Y;
+            viz.Window(500, solver.Projection);
+        }
+
         public static PointProjectionSolver Solve(PointProjectionSolver solver)
         {
-            var pathes = Pathfinder.FindAllPathes(solver.Graph, 1);
-            var cycles = Pathfinder.FindAllCycles(pathes.ToList());
+            var pathes = Pathfinder.FindAllPathes(solver.Graph, 1, 0.9);
+            var ps = pathes.ToList();
+            var cycles = Pathfinder.FindAllCycles(ps);
 
+            var cs = cycles.ToList();
 
-            foreach(var c in cycles)
+            foreach(var c in cs)
             {
                 var pr = Projector.CreateProjection(solver.AllSegments, solver.Graph);
                 pr.Stages.Push(Projector.CreateInitialProjection(c, pr));
-
+              //  Visualize(solver, pr);
                 while(true)
                 {
                     if (pr.IsCompleteProjection())
                         return GenerateOutGraph(solver, pr);
                     var st = Projector.AddVeryGoodEdges(pr);
                     if (st == null) break;
+                    pr.Stages.Push(st);
+             //       Visualize(solver, pr);
+
                 }
             }
             return null;

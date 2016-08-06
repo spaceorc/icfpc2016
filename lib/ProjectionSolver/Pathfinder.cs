@@ -49,11 +49,16 @@ namespace Runner
             }
         }
 
-        public static IEnumerable<PPath> FindAllPathes(Graph<EdgeInfo,NodeInfo> Graph, Rational length)
+        public static IEnumerable<PPath> FindAllPathes(Graph<EdgeInfo,NodeInfo> Graph, Rational length, double originalityBorder=0)
         {
             for (int i = 0; i < Graph.NodesCount; i++)
                 foreach (var e in DepthSeatch(Graph, i, length))
-                    yield return e;
+                {
+                    var difVertices = e.edges.AllNodes().Distinct().Count();
+                    e.originality = (difVertices) / e.edges.Count;
+                    if (e.originality > originalityBorder)
+                        yield return e;
+                }
         }
 
         static IEnumerable<List<PPath>> FindAllCyclesRecursive(List<PPath> cycle, Dictionary<int,List<PPath>> map)
@@ -76,13 +81,12 @@ namespace Runner
         public static IEnumerable<List<PPath>> FindAllCycles(List<PPath> pathes)
         {
             var map = pathes.GroupBy(z => z.FirstEdge.From.NodeNumber).ToDictionary(z => z.Key, z => z.ToList());
-            foreach(var e in map.Keys)
-            {
-                foreach (var c in FindAllCyclesRecursive(new List<PPath>(), map)) 
-                {
-                    yield return c;
-                }
-            }
+            foreach (var e in map.Keys)
+                foreach (var s in map[e])
+                    foreach (var c in FindAllCyclesRecursive(new List<PPath> { s }, map))
+                    {
+                        yield return c;
+                    }
         }
 
         #region

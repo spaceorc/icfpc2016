@@ -35,9 +35,13 @@ namespace Runner
         public Edge<EdgeInfo, NodeInfo> LastEdge { get { return edges[edges.Count - 1]; } }
         public Edge<EdgeInfo, NodeInfo> FirstEdge { get { return edges[0]; } }
         public Rational length;
+        public double originality;
+
         public override string ToString()
         {
-            return ((double)length).ToString() + " : " +
+            return 
+                originality.ToString("0.000")+" "+
+                ((double)length).ToString() + " : " +
                 edges
                 .Select(z => z.Data.segment.Start).StrJoin(" ") + " " + edges[edges.Count - 1].To.Data.Location.ToString();
         }

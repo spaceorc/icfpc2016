@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Runner
+namespace lib
 {
     public class GraphVisualizer<TEdge,TNode>
     {

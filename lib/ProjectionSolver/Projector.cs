@@ -53,7 +53,7 @@ namespace Runner
 
         public Dictionary<Node<EdgeInfo,NodeInfo>,List<NodeProjection>> GetNodeFunction()
         {
-            var dict = Graph.Nodes.ToDictionary(z => z, z => new List<NodeProjection>);
+            var dict = Graph.Nodes.ToDictionary(z => z, z => new List<NodeProjection>());
             foreach (var e in AllNodeProjections)
                 dict[e.Original].Add(e);
             return dict;
@@ -100,8 +100,6 @@ namespace Runner
             var direction = new[] { new Vector(0, 1), new Vector(1, 0), new Vector(0, -1), new Vector(-1, 0) };
 
 
-            var forward = new Dictionary<Node<EdgeInfo, NodeInfo>, NodeProjection>();
-
             for (int i = 0; i < 4; i++)
             {
                 Rational len = 0;
@@ -112,11 +110,11 @@ namespace Runner
 
                     var pr = new NodeProjection { Original = node, Projection = location };
                     stage.Nodes.Add(pr);
-                    forward[node] = pr;
-                    len += square[i].edges[k].Data.length;
+                   len += square[i].edges[k].Data.length;
                 }
             }
 
+            int ptr = 0;
             foreach (var s in square)
                 foreach (var e in s.edges)
                 {
@@ -127,7 +125,11 @@ namespace Runner
                         if (!p.AllSegments.Contains(seg))
                             throw new Exception();
                     }
-                    stage.Edges.Add(new EdgeProjection { begin = forward[e.From], end = forward[e.To], Segment = e.Data.segment });
+                    var begin = stage.Nodes[ptr];
+                    var end = stage.Nodes[(ptr + 1) % stage.Nodes.Count];
+                    ptr++;
+                        
+                    stage.Edges.Add(new EdgeProjection { begin = begin, end = end, Segment = e.Data.segment });
                 }
             return stage;
         }

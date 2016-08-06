@@ -15,13 +15,6 @@ namespace Runner
 {
 	class Program
 	{
-		static void PaintSolver(ProblemSpec spec, PointProjectionSolver solver)
-		{
-			spec = new ProblemSpec(spec.Polygons, solver.Segments.ToArray());
-			var wnd = new Form();
-			wnd.Paint += (s, a) => { new Painter().Paint(a.Graphics, 500, spec); };
-			Application.Run(wnd);
-		}
 
 
 
@@ -32,9 +25,19 @@ namespace Runner
         }
 
 
+        static void SolveTask(int taskNumber)
+        {
+            var spec = new ProblemsRepo().Get(taskNumber);
+            var solver = SolverMaker.CreateSolver(spec);
+            solver = SolverMaker.Solve(solver);
+            if (solver == null) return;
+            SolverMaker.Visualize(solver);
+        }
+
+
         static void NewMain()
         {
-            var task = 43;
+            var task = 42;
             var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt", task);
             var spec = ProblemSpec.Parse(File.ReadAllText(fname));
             var r = Pathfinder.BuildGraph(spec);
@@ -62,7 +65,7 @@ namespace Runner
             viz.GetX = z => (double)z.Data.Location.X;
             viz.GetY = z => (double)z.Data.Location.Y;
 
-            Func<PathStat, string> stat = z => z.pathes.Select(x => (double)(x.edges.AllNodes().Distinct().Count()) / x.edges.Count).Average().ToString();
+            Func<PathStat, string> stat = z => z.pathes.Count().ToString(); ;
 
             viz.EdgeCaption = z=>stat(z.Data);
 
@@ -75,66 +78,15 @@ namespace Runner
 
 		static void Main(string[] args)
 		{
-            NewMain();return;
-			var goodTasks = new[] { 1,2,3,4,5,6,7,8, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
-            var nonTrivial = new[] { 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
+       //     NewMain();return;
 
-            var badTasks = new[] { 43 };
+            var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
 
-			var allTasks = Enumerable.Range(1093, 100);
+            SolveTask(43); return;
 
+            foreach (var e in goodTasks) SolveTask(e);
+            //NewMain();return;
 
-			foreach (var task in badTasks)
-			{
-                var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt",task);
-                var spec = ProblemSpec.Parse(File.ReadAllText(fname));
-
-
-                var solver = SolverMaker.CreateSolver(spec);
-                
-            //    PaintSolver(spec, solver);
-
-                solver = SolverMaker.Solve(solver);
-				if (solver == null)
-				{
-					MessageBox.Show("No solution for " + fname);
-                    continue;
-				}
-
-
-				var wnd = new Form() { ClientSize = new Size(800, 600) };
-
-				wnd.Paint += (s, a) =>
-				{
-					var g = a.Graphics;
-					int size = 200;
-					foreach (var e in solver.Projection.Edges)
-					{
-						var color = Color.Black;
-						if (e.Data.IsLate) color = Color.Orange;
-
-						g.DrawLine(new Pen(color, 1),
-							e.From.Data.Projection.X.AsFloat()*size,
-							e.From.Data.Projection.Y.AsFloat()*size,
-							e.To.Data.Projection.X.AsFloat()*size,
-							e.To.Data.Projection.Y.AsFloat()*size
-							);
-
-						g.FillEllipse(Brushes.Red,
-							e.From.Data.Projection.X.AsFloat()*size - 3,
-							e.From.Data.Projection.Y.AsFloat()*size - 3,
-							6, 6);
-						g.FillEllipse(Brushes.Red,
-							e.To.Data.Projection.X.AsFloat()*size - 3,
-							e.To.Data.Projection.Y.AsFloat()*size - 3,
-							6, 6);
-					}
-				};
-
-				wnd.Text = fname;
-
-				Application.Run(wnd);
-			}
 		}
 	}
 }
