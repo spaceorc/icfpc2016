@@ -1,5 +1,6 @@
 ﻿using DataScience;
 using lib;
+using lib.Api;
 using lib.DiofantEquationSolver;
 using lib.Graphs;
 using System;
@@ -35,9 +36,21 @@ namespace Runner
         }
 
 
-        static void NewMain()
+        static void DrawProblem(int task)
         {
-            var task = 42;
+            var spec = new ProblemsRepo().Get(task);
+            var graph = Pathfinder.BuildGraph(spec);
+            var viz = new GraphVisualizer<EdgeInfo, NodeInfo>();
+            viz.GetX = z => z.Data.Location.X;
+            viz.GetY = z => z.Data.Location.Y;
+            viz.NodeCaption = z => z.Data.Location.ToString();
+            viz.Window(600, graph);
+                 
+        }
+
+        static void NewMain(int task)
+        {
+            
             var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt", task);
             var spec = ProblemSpec.Parse(File.ReadAllText(fname));
             var r = Pathfinder.BuildGraph(spec);
@@ -68,23 +81,34 @@ namespace Runner
             Func<PathStat, string> stat = z => z.pathes.Count().ToString(); ;
 
             viz.EdgeCaption = z=>stat(z.Data);
+            viz.NodeCaption = z => z.Data.Location.ToString();
 
 
             viz.Window(500, gr);
         }
 
+        static void SolveAndSend(int id)
+        {
+            Console.WriteLine(ProblemsSender.SolveAndSend(id));
+            Console.ReadKey();
+            return;
+        }
 
 
 
 		static void Main(string[] args)
 		{
-       //     NewMain();return;
+            //  NewMain(17);return;
+            //SolveAndSend(47); return;
+
+            SolveAndSend(40);return;
+          //  DrawProblem(17);
 
             var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
 
-            SolveTask(13); return;
+           // SolveTask(1170);
 
-            foreach (var e in goodTasks) SolveTask(e);
+           // foreach (var e in goodTasks) SolveTask(e);
             //NewMain();return;
 
 		}

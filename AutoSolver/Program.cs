@@ -3,6 +3,8 @@ using System.Threading;
 using lib;
 using Newtonsoft.Json.Linq;
 using Runner;
+using lib.Api;
+using System.Linq;
 
 namespace AutoSolver
 {
@@ -18,30 +20,30 @@ namespace AutoSolver
 
 			while (true)
 			{
-				Console.WriteLine("Downloading new problems...");
-				var snapshot = client.GetLastSnapshot();
-				foreach (var problem in snapshot.Problems)
-				{
-					if (repo.Find(problem.Id) == null)
-					{
-						var problemSpec = client.GetBlob(problem.SpecHash);
-						Thread.Sleep(1000);
-						repo.Put(problem.Id, problemSpec);
-						Console.WriteLine($"Downloaded problem {problem.Id}");
-					}
-				}
+				//Console.WriteLine("Downloading new problems...");
+				//var snapshot = client.GetLastSnapshot();
+				//foreach (var problem in snapshot.Problems)
+				//{
+				//	if (repo.Find(problem.Id) == null)
+				//	{
+				//		var problemSpec = client.GetBlob(problem.SpecHash);
+				//		Thread.Sleep(1000);
+				//		repo.Put(problem.Id, problemSpec);
+				//		Console.WriteLine($"Downloaded problem {problem.Id}");
+				//	}
+				//}
 
 				Console.WriteLine("Solving...");
 				var problemSpecs = repo.GetAll();
 				var imperfectSolver = new ImperfectSolver();
-				foreach (var problemSpec in problemSpecs)
+				foreach (var problemSpec in problemSpecs.Where(z=>z.id==44))
 				{
 					var response = repo.FindResponse(problemSpec.id);
 					if (response == null)
 					{
 						Console.Write($"Solving {problemSpec.id}...");
 						var solutionSpec = imperfectSolver.SolveMovingInitialSquare(problemSpec);
-						var score = Post(problemSpec, solutionSpec);
+						var score = ProblemsSender.Post(problemSpec, solutionSpec);
 						Console.Write($" imperfect score: {score}");
 
 						if (score != 1.0)
@@ -49,7 +51,7 @@ namespace AutoSolver
 							var t = new Thread(() =>
 							{
 								var spec = GraphExt.Solve(problemSpec);
-								var ps = Post(problemSpec, spec);
+								var ps = ProblemsSender.Post(problemSpec, spec);
 								Console.Write($" perfect score: {ps}");
 							}) { IsBackground = true };
 							t.Start();
@@ -65,27 +67,6 @@ namespace AutoSolver
 
 				Console.WriteLine("Waiting 1 minute...");
 				Thread.Sleep(TimeSpan.FromMinutes(1));
-			}
-		}
-
-		private static double Post(ProblemSpec problemSpec, SolutionSpec solutionSpec)
-		{
-			try
-			{
-				var response = client.PostSolution(problemSpec.id, solutionSpec);
-				repo.PutResponse(problemSpec.id, response);
-				repo.PutSolution(problemSpec.id, solutionSpec);
-				return JObject.Parse(response)["resemblance"].Value<double>();
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine();
-				Console.WriteLine(e);
-				return 0;
-			}
-			finally
-			{
-				Thread.Sleep(1000);
 			}
 		}
 	}

@@ -78,6 +78,7 @@
     <Compile Include="Api\ApiClient.cs" />
     <Compile Include="Api\Paths.cs" />
     <Compile Include="Api\ProblemsRepo.cs" />
+    <Compile Include="Api\ProblemsSender.cs" />
     <Compile Include="Arithmetic.cs" />
     <Compile Include="DataScience\CombinedAccessor.cs" />
     <Compile Include="DataScience\DataConsole.cs" />
@@ -102,6 +103,7 @@
     <Compile Include="ProjectionSolver\Pathfinder.cs" />
     <Compile Include="ProjectionSolver\PointProjectionSolver.cs" />
     <Compile Include="ProjectionSolver\Projector.cs" />
+    <Compile Include="ProjectionSolver\SegmentFamily.cs" />
     <Compile Include="ProjectionSolver\SolverMaker.cs" />
     <Compile Include="SolutionSpecExt.cs" />
     <Compile Include="Vector.cs" />
