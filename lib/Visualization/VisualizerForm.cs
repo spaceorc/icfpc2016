@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using lib.Visualization.ManualSolving;
 using NUnit.Framework;
 
 namespace lib
@@ -29,6 +30,7 @@ namespace lib
 			list.BringToFront();
 			list.Items.AddRange(GetProblems(problemsDir));
 			list.SelectedValueChanged += ListOnSelectedValueChanged;
+			list.DoubleClick += ListOnDoubleClick;
 			splitContainer = new SplitContainer()
 			{
 				Dock = DockStyle.Fill,
@@ -39,6 +41,11 @@ namespace lib
 			Size = new Size(800, 600);
 			Controls.Add(splitContainer);
 			Controls.Add(list);
+		}
+
+		private void ListOnDoubleClick(object sender, EventArgs eventArgs)
+		{
+			new ManualSolverForm(problem).Show(this);
 		}
 
 		protected override void OnLoad(EventArgs e)
@@ -56,7 +63,7 @@ namespace lib
 			if (solution != null)
 			{
 				score = SolutionEvaluator.EvaluateX(problem, solution, 100);
-				Text = $"Score: {score}";
+				Text = $"Score: {score}, polygons: {problem.Polygons.Length}, isConvex: {problem.Polygons.Length == 1 && problem.Polygons[0].IsConvex()}";
 			}
 			splitContainer.Panel1.Invalidate();
 			splitContainer.Panel2.Invalidate();

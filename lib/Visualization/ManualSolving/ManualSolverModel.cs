@@ -1,72 +1,88 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace lib.Visualization.ManualSolving
 {
 	public class ManualSolverModel
 	{
-		public ProblemSpec Problem;
-		public Vector Shift;
-		public Segment[] Segments;
+		public ManualSolverModel(ProblemSpec problem, Vector shift, ImmutableArray<Segment> segments, int? highlightedSegmentIndex, ImmutableList<int> selectedSegmentIndices, PendingOperationType pendingOperation)
+		{
+			Problem = problem;
+			Shift = shift;
+			Segments = segments;
+			HighlightedSegmentIndex = highlightedSegmentIndex;
+			SelectedSegmentIndices = selectedSegmentIndices;
+			PendingOperation = pendingOperation;
+		}
+
+		public readonly ProblemSpec Problem;
+		public readonly Vector Shift;
+		public readonly ImmutableArray<Segment> Segments;
 		public int? HighlightedSegmentIndex;
-		public List<int> SelectedSegmentIndices;
-		public PendingOperationType PendingOperation;
+		public readonly ImmutableList<int> SelectedSegmentIndices;
+		public readonly PendingOperationType PendingOperation;
 
 		public ManualSolverModel(ProblemSpec problem)
 		{
 			Problem = problem;
-			Segments = problem.Segments.ToArray();
-			SelectedSegmentIndices = new List<int>();
-			Shift = problem.MinXY();
+			Segments = problem.Segments.ToImmutableArray();
+			SelectedSegmentIndices = ImmutableList<int>.Empty;
+			Shift = -problem.MinXY();
 		}
-
 		public void UpdateHighlightedSegment(Vector p)
 		{
 			var segment = Segments.OrderBy(s => s.Distance2To(p)).FirstOrDefault();
-			var index = Array.IndexOf(Segments, segment);
+			var index = Segments.IndexOf(segment);
 			HighlightedSegmentIndex = index < 0 ? (int?) null : index;
 		}
 
-		public void SelectSegment()
+		public ManualSolverModel SelectSegment()
 		{
-			if (!HighlightedSegmentIndex.HasValue) return;
+			if (!HighlightedSegmentIndex.HasValue) return this;
 			var index = HighlightedSegmentIndex.Value;
 			if (PendingOperation == PendingOperationType.None)
-				ToggleHighlighted(index);
+				return ToggleHighlighted(index);
 			else
 			{
-				CompleteOperation(index);
+				return CompleteOperation(index);
 			}
 		}
 
-		private void CompleteOperation(int index)
+		private ManualSolverModel CompleteOperation(int index)
 		{
 			var mirror = Segments[index];
 			var selectedSegments = SelectedSegmentIndices.Select(i => Segments[i]).ToList();
-			var reflected = selectedSegments.Select(s => s.Reflect(mirror)).ToArray();
+			var reflected = selectedSegments.Select(s => s.Reflect(mirror));
+			IEnumerable<Segment> res = Segments;
 			if (PendingOperation == PendingOperationType.ReflectMove)
-				Segments = Segments.Where(s => !selectedSegments.Contains(s)).ToArray();
-			Segments = Segments.Concat(reflected).ToArray();
-			PendingOperation = PendingOperationType.None;
-			SelectedSegmentIndices.Clear();
+				res = res.Where(s => !selectedSegments.Contains(s));
+			res = res.Concat(reflected);
+			return With(res, null, ImmutableList<int>.Empty);
 		}
 
-		private void ToggleHighlighted(int index)
+		private ManualSolverModel With(IEnumerable<Segment> segments, int? highlightedSegmentIndex, ImmutableList<int> selectedSegmentIndices, PendingOperationType pendingOperation = PendingOperationType.None)
+		{
+			return new ManualSolverModel(Problem, Shift, segments.ToImmutableArray(), highlightedSegmentIndex, selectedSegmentIndices, pendingOperation);
+		}
+
+		private ManualSolverModel ToggleHighlighted(int index)
 		{
 			if (SelectedSegmentIndices.Contains(index))
-				SelectedSegmentIndices.Remove(index);
+				return With(Segments, HighlightedSegmentIndex, SelectedSegmentIndices.Remove(index));
 			else
-				SelectedSegmentIndices.Add(index);
+				return With(Segments, HighlightedSegmentIndex, SelectedSegmentIndices.Add(index));
 		}
 
-		public void StartOperation(PendingOperationType operation)
+		public ManualSolverModel StartOperation(PendingOperationType operation)
 		{
-			PendingOperation = operation;
+			return With(Segments, HighlightedSegmentIndex, SelectedSegmentIndices, operation);
 		}
-		public void CancelPendingOperation()
+
+		public ManualSolverModel CancelPendingOperation()
 		{
-			PendingOperation = PendingOperationType.None;
+			return With(Segments, HighlightedSegmentIndex, SelectedSegmentIndices, PendingOperationType.None);
 		}
 	}
 }

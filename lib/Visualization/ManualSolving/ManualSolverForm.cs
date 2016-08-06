@@ -12,12 +12,47 @@ namespace lib.Visualization.ManualSolving
 		public ManualSolverForm(ProblemSpec problem)
 		{
 			Model = new ManualSolverModel(problem);
-			var copy = new ToolStripButton("Reflect copy", null, (sender, args) => Model.StartOperation(PendingOperationType.ReflectCopy));
-			var move = new ToolStripButton("Reflect move", null, (sender, args) => Model.StartOperation(PendingOperationType.ReflectMove));
-			var cancel = new ToolStripButton("Cancel", null, (sender, args) => Model.CancelPendingOperation());
-			var menu = new ToolStrip(copy, move, cancel);
+			var copy = new ToolStripMenuItem("Reflect copy", null, (sender, args) => ChangeModel(Model.StartOperation(PendingOperationType.ReflectCopy)));
+			//copy.ShortcutKeys = Keys.Q;
+			var move = new ToolStripMenuItem("Reflect move", null, (sender, args) => ChangeModel(Model.StartOperation(PendingOperationType.ReflectMove)));
+			//move.ShortcutKeys = Keys.W;
+			var cancel = new ToolStripMenuItem("Cancel", null, (sender, args) => ChangeModel(Model.CancelPendingOperation()));
+			//cancel.ShortcutKeys = Keys.Escape;
+			var undo = new ToolStripMenuItem("Undo", null, (sender, args) => Undo());
+			undo.ShortcutKeys = Keys.Z | Keys.Control;
+			var redo = new ToolStripMenuItem("Redo", null, (sender, args) => Redo());
+			redo.ShortcutKeys = Keys.Z | Keys.Control | Keys.Shift;
+			var menu = new ToolStrip(copy, move, cancel, undo, redo);
 			WindowState = FormWindowState.Maximized;
 			this.Controls.Add(menu);
+		}
+
+		private void Undo()
+		{
+			if (!done.Any()) return;
+			undone.Push(Model);
+			Model = done.Pop();
+			Invalidate();
+		}
+
+		private void Redo()
+		{
+			if (!undone.Any()) return;
+			done.Push(Model);
+			Model = undone.Pop();
+			Invalidate();
+		}
+
+		private Stack<ManualSolverModel> done = new Stack<ManualSolverModel>();
+		private Stack<ManualSolverModel> undone = new Stack<ManualSolverModel>();
+
+		private void ChangeModel(ManualSolverModel newModel)
+		{
+			if (newModel == Model) return;
+			if (Model != null) done.Push(Model);
+			undone.Clear();
+			Model = newModel;
+			Invalidate();
 		}
 
 		protected override void OnLoad(EventArgs e)
@@ -32,15 +67,14 @@ namespace lib.Visualization.ManualSolving
 			var scaleFactor = GetScaleFactor();
 			var y = new Rational(e.Y - ClientRectangle.Top, 1)/scaleFactor - Margin;
 			var x = new Rational(e.X - ClientRectangle.Left, 1)/scaleFactor - Margin;
-			Model.UpdateHighlightedSegment(new Vector(x, y));
+			Model.UpdateHighlightedSegment(new Vector(x, y) - Model.Shift);
 			Invalidate();
 		}
 
 		protected override void OnClick(EventArgs e)
 		{
 			base.OnClick(e);
-			Model.SelectSegment();
-			Invalidate();
+			ChangeModel(Model.SelectSegment());
 		}
 
 		public Rational Margin = new Rational(1, 1);
@@ -60,7 +94,7 @@ namespace lib.Visualization.ManualSolving
 			var scaleFactor = GetScaleFactor();
 			g.ScaleTransform(scaleFactor, scaleFactor);
 			new Painter().PaintSkeleton(g,
-				Model.Segments, Model.HighlightedSegmentIndex, Model.SelectedSegmentIndices,
+				Model.Segments.ToArray(), Model.HighlightedSegmentIndex, Model.SelectedSegmentIndices,
 				Model.Shift + new Vector(margin, margin));
 		}
 	}

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using lib;
+using Newtonsoft.Json.Linq;
 using Runner;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace lib.Api
         {
             var repo = new ProblemsRepo();
             var problemSpec = repo.Get(id);
-            var spec = GraphExt.Solve(problemSpec);
+            var spec = ProjectionSolverRunner.Solve(problemSpec);
             return Post(problemSpec, spec);
         }
 

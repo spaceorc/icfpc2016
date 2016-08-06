@@ -55,7 +55,7 @@ namespace Runner
                 foreach (var e in DepthSeatch(Graph, i, length))
                 {
                     var difVertices = e.edges.AllNodes().Distinct().Count();
-                    e.originality = (difVertices) / e.edges.Count;
+                    e.originality = (double)(difVertices) / e.edges.Count;
                     if (e.originality > originalityBorder)
                         yield return e;
                 }

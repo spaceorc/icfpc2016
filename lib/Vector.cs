@@ -20,6 +20,7 @@ namespace lib
 			return new Vector(Rational.Parse(parts[0]), Rational.Parse(parts[1]));
 		}
 		#region value semantics
+		[Pure]
 		public bool Equals(Vector other)
 		{
 			return X.Equals(other.X) && Y.Equals(other.Y);

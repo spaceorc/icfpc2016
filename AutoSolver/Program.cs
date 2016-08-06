@@ -2,7 +2,6 @@
 using System.Threading;
 using lib;
 using Newtonsoft.Json.Linq;
-using Runner;
 using lib.Api;
 using System.Linq;
 
@@ -50,7 +49,7 @@ namespace AutoSolver
 						{
 							var t = new Thread(() =>
 							{
-								var spec = GraphExt.Solve(problemSpec);
+								var spec = ProjectionSolverRunner.Solve(problemSpec);
 								var ps = ProblemsSender.Post(problemSpec, spec);
 								Console.Write($" perfect score: {ps}");
 							}) { IsBackground = true };

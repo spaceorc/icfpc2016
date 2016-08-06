@@ -36,6 +36,7 @@ namespace lib
 		}
 
 		[Test]
+		[Explicit]
 		public void EvaluateAll()
 		{
 			var problems = new ProblemsRepo().GetAll();

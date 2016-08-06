@@ -139,11 +139,18 @@ namespace lib
 		public void ProblemsRating()
 		{
 			var api = new ApiClient();
+			var repo = new ProblemsRepo();
 			var snapshot = api.GetLastSnapshot();
+			var totalConvex = 0.0;
 			foreach (var p in snapshot.Problems.OrderByDescending(p => p.ExpectedScore()))
 			{
-				Console.WriteLine($"id={p.Id} size={p.SolutionSize} expected={p.ExpectedScore()}");
+				var spec = repo.Find(p.Id);
+				var expectedScore = p.ExpectedScore();
+				var convex = spec == null ? null : (spec.Polygons.Length == 1 && spec.Polygons[0].IsConvex()).ToString();
+				Console.WriteLine($"id={p.Id} size={p.SolutionSize} expected={expectedScore} isconvex={convex ?? "Unknown"}");
+				if(convex != null) totalConvex += expectedScore;
 			}
+			Console.WriteLine($"Total convex: {totalConvex}");
 		}
 	}
 }
