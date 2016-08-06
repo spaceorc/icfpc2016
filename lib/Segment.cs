@@ -75,7 +75,7 @@ namespace lib
 		{
 			unchecked
 			{
-				return (Start.GetHashCode() * 397) ^ End.GetHashCode();
+				return Start.GetHashCode() ^ End.GetHashCode();
 			}
 		}
 
