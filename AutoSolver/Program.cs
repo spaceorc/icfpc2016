@@ -67,6 +67,7 @@ namespace AutoSolver
 		{
 			var originalities = new[] { 0, 0.3, 0.95 };
 			var mutex = new object();
+			var solutionFoundEvent = new ManualResetEvent(false);
 			var threads = originalities
 				.Select(coeff =>
 				{
@@ -77,17 +78,19 @@ namespace AutoSolver
 							var spec = ProjectionSolverRunner.Solve(problemSpec);
 							if (spec == null)
 								return;
+							double ps;
 							lock (mutex)
 							{
-								var ps = ProblemsSender.Post(problemSpec, spec);
+								ps = ProblemsSender.Post(problemSpec, spec);
 								Console.Write($" perfect score: {ps}");
-								Thread.Sleep(TimeSpan.FromSeconds(1)); // Avoid sending two solutions in 1 second
 							}
+							if(ps == 1.0)
+								solutionFoundEvent.Set();
 						}
 						catch (Exception e)
 						{
 							if (e is ThreadAbortException)
-								throw;
+								return;
 							Console.WriteLine($"Exception in ProjectionSolverRunner: {e}");
 						}
 					})
@@ -97,7 +100,7 @@ namespace AutoSolver
 				})
 				.ToArray();
 
-			Thread.Sleep(TimeSpan.FromSeconds(30));
+			solutionFoundEvent.WaitOne(TimeSpan.FromSeconds(30));
 
 			foreach(var t in threads)
 				if(t.IsAlive)

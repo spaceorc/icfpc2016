@@ -36,7 +36,8 @@ namespace lib.Api
             }
             catch (Exception e)
             {
-                Console.WriteLine();
+	            if (e is ThreadAbortException)
+		            return 0;
                 Console.WriteLine(e);
                 return 0;
             }
