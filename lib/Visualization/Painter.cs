@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -19,37 +20,54 @@ namespace lib
 			"E00000", "00E000", "0000E0", "E0E000", "E000E0", "00E0E0", "E0E0E0",
 		};
 
-	    public void Paint(Graphics g, int size, Polygon[] polygons, Segment[] segments)
-	    {
-            PaintBackground(g, size);
-            g.ScaleTransform(size, size);
-
-            PaintPolygons(g, polygons);
-            PaintSegments(g, segments);
-        }
-
-	    public void Paint(Graphics g, int size, ProblemSpec spec)
+		public void Paint(Graphics g, int size, Polygon[] polygons, Segment[] segments)
 		{
 			PaintBackground(g, size);
-            g.ScaleTransform(size/1.5f, size/1.5f);
+			g.ScaleTransform(size, size);
 
-            var spec2 = spec.MoveToOrigin();
-            PaintPolygons(g, spec2.Polygons);
-            PaintSegments(g, spec2.Segments);
-        }
-
-	    public void Paint(Graphics g, int size, SolutionSpec spec)
-		{
-            PaintBackground(g, size);
-            g.ScaleTransform(size, size);
-
-            PaintPolygons(g, spec.Polygons);
+			PaintPolygons(g, polygons);
+			PaintSegments(g, segments);
 		}
 
-	    public void PaintDest(Graphics g, int size, SolutionSpec spec)
+		public void Paint(Graphics g, int size, ProblemSpec spec)
 		{
-            PaintBackground(g, size);
-            g.ScaleTransform(size, size);
+			PaintBackground(g, size);
+			g.ScaleTransform(size / 1.5f, size / 1.5f);
+
+			var spec2 = spec.MoveToOrigin();
+			PaintPolygons(g, spec2.Polygons);
+			PaintSegments(g, spec2.Segments);
+		}
+
+		public void PaintSkeleton(Graphics g, Segment[] skeleton, int? highlightedIndex, IList<int> selectedIndices, Vector shift)
+		{
+			for (int index = 0; index < skeleton.Length; index++)
+			{
+				var segment = skeleton[index];
+				var defaultWidth = 0.005f;
+				var pen = new Pen(Color.Black, defaultWidth);
+				if (index == highlightedIndex)
+					pen = new Pen(Color.Yellow, defaultWidth * 2);
+				else if (selectedIndices.Contains(index))
+					pen = new Pen(Color.Red, defaultWidth * 2);
+				else if (Arithmetic.IsSquare(segment.QuadratOfLength))
+					pen = new Pen(Color.Cyan, defaultWidth);
+				PaintSegment(g, pen, segment.Move(shift.X, shift.Y));
+			}
+		}
+
+		public void Paint(Graphics g, int size, SolutionSpec spec)
+		{
+			PaintBackground(g, size);
+			g.ScaleTransform(size, size);
+
+			PaintPolygons(g, spec.Polygons);
+		}
+
+		public void PaintDest(Graphics g, int size, SolutionSpec spec)
+		{
+			PaintBackground(g, size);
+			g.ScaleTransform(size, size);
 
 			var i = 0;
 			var poly = spec.PolygonsDest;
@@ -75,35 +93,39 @@ namespace lib
 			}
 		}
 
-	    private static void PaintBackground(Graphics g, int size)
-	    {
-	        g.FillRectangle(Brushes.Beige, new RectangleF(0, 0, size, size));
-	    }
+		private static void PaintBackground(Graphics g, int size)
+		{
+			g.FillRectangle(Brushes.Beige, new RectangleF(0, 0, size, size));
+		}
 
-	    private void PaintPolygons(Graphics g, Polygon[] polygons)
-	    {
-	        var i = 0;
-	        foreach (var polygon in polygons)
-	        {
-	            Color color = ColorTranslator.FromHtml("#" + ColourValues[i++]);
-	            PaintPolygon(g, color, polygon);
-	        }
-	    }
+		private void PaintPolygons(Graphics g, Polygon[] polygons)
+		{
+			var i = 0;
+			foreach (var polygon in polygons)
+			{
+				Color color = ColorTranslator.FromHtml("#" + ColourValues[i++]);
+				PaintPolygon(g, color, polygon);
+			}
+		}
 
-	    private void PaintSegments(Graphics g, Segment[] segments)
-        {
-            foreach (var segment in segments)
-            {
-                var color = Arithmetic.IsSquare(segment.QuadratOfLength) ? Color.Cyan : Color.Black;
-                PaintSegment(g, color, segment);
-                //PaintNode(g, color, segment.Start);
-                //PaintNode(g, color, segment.End);
-            }
-        }
+		private void PaintSegments(Graphics g, Segment[] segments)
+		{
+			foreach (var segment in segments)
+			{
+				var color = Arithmetic.IsSquare(segment.QuadratOfLength) ? Color.Cyan : Color.Black;
+				PaintSegment(g, color, segment);
+				//PaintNode(g, color, segment.Start);
+				//PaintNode(g, color, segment.End);
+			}
+		}
 
-        public void PaintSegment(Graphics g, Color color, Segment segment)
+		public void PaintSegment(Graphics g, Color color, Segment segment)
 		{
 			g.DrawLine(new Pen(color, 0.005f), segment.Start.X, segment.Start.Y, segment.End.X, segment.End.Y);
+		}
+		public void PaintSegment(Graphics g, Pen pen, Segment segment)
+		{
+			g.DrawLine(pen, segment.Start.X, segment.Start.Y, segment.End.X, segment.End.Y);
 		}
 
 		void PaintNode(Graphics g, Color color, Vector v)
