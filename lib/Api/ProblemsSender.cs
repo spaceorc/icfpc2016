@@ -18,6 +18,7 @@ namespace lib.Api
             var repo = new ProblemsRepo();
             var problemSpec = repo.Get(id);
             var spec = ProjectionSolverRunner.Solve(problemSpec);
+            if (spec == null) return 0;
             return Post(problemSpec, spec);
         }
 

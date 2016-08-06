@@ -265,29 +265,67 @@ namespace Runner
 
         }
 
-
-        public static ProjectionStage TrySquashPoint(CurrentState state, AdjoinedSegmentFamilySubset first, AdjoinedSegmentFamilySubset second)
+        public static IEnumerable<int[]> GetCounting(int[] sizes)
         {
-            foreach(var a in state.nodesMap[first.ProjectedNode])
-                foreach(var b in state.nodesMap[second.ProjectedNode])
+            var result = new int[sizes.Length];
+            while(true)
+            {
+                bool ok = false;
+                for(int position=0;position<sizes.Length;position++)
                 {
-                    var vars = Arithmetic.RationalTriangulate(first.family.Segment, second.family.Segment, a.Projection, b.Projection);
-                    if (vars == null) continue;
-                    foreach(var e in vars)
+                    result[position]++;
+                    if (result[position]>=sizes[position])
                     {
-                        if (e.X < 0 || e.X > 1 || e.Y < 0 || e.Y > 1) continue;
-                        var stage = new ProjectionStage();
-                        var sq = new NodeProjection { Original = first.NonProjectedNode, Projection = e };
-                        stage.Nodes.Add(sq);
-                        stage.Edges.Add(new EdgeProjection { begin = a, end = sq, Segments = first.family.Insides.ToList() });
-                        stage.Edges.Add(new EdgeProjection { begin = b, end = sq, Segments = second.family.Insides.ToList() });
-                        return stage;
+                        result[position] = 0;
+                        continue;
+                    }
+                    else
+                    {
+                        ok = true;
+                        break;
                     }
                 }
-            return null;
+                if (!ok) break;
+                yield return result;
+            }
         }
 
-        public static ProjectionStage FindSquashPoint(Projection p)
+
+        public static IEnumerable<ProjectionStage> TrySquashPoint(CurrentState state, List<AdjoinedSegmentFamilySubset> edges)
+        {
+            var sizes = edges.Select(z => state.nodesMap[z.ProjectedNode].Count).ToArray();
+            foreach (var p in GetCounting(sizes))
+            {
+                var proj = new NodeProjection[sizes.Length];
+                for (int i = 0; i < sizes.Length; i++)
+                    proj[i] = state.nodesMap[edges[i].ProjectedNode][p[i]];
+                var vars = Arithmetic.RationalTriangulate(edges[0].family.Segment, edges[1].family.Segment, proj[0].Projection, proj[1].Projection);
+                if (vars == null) continue;
+                foreach(var v in vars)
+                {
+                    if (v.X < 0 || v.X > 1 || v.Y < 0 || v.Y > 1) continue;
+
+                    var stage = new ProjectionStage();
+                    var sq= new NodeProjection { Original = edges[0].NonProjectedNode, Projection = v };
+                    stage.Nodes.Add(sq);
+                    bool ok = true;
+                    for (int k=0;k<sizes.Length;k++)
+                    {
+                        var len = new Segment(v, proj[k].Projection);
+                        if (len.QuadratOfLength != edges[k].family.Segment.QuadratOfLength)
+                        {
+                            ok = false;
+                            break;
+                        }
+                        stage.Edges.Add(new EdgeProjection { begin = sq, end = proj[k], Segments = edges[k].family.Insides.ToList() });
+                    }
+                    if (ok)
+                        yield return stage;
+                }
+            }
+        }
+
+        public static IEnumerable<ProjectionStage> FindSquashPoint(Projection p)
         {
             var state = GetCurrentState(p);
             var store = new Dictionary<Node<EdgeInfo,NodeInfo>, List<AdjoinedSegmentFamilySubset>>();
@@ -310,17 +348,10 @@ namespace Runner
             }
 
             store = store.Where(z => z.Value.Count >= 2).ToDictionary(z => z.Key, z => z.Value);
-            
-            foreach(var e in store)
-            {
-                for (int i=0;i<e.Value.Count;i++)
-                    for (int j=i+1;j<e.Value.Count;j++)
-                    {
-                        var r = TrySquashPoint(state, e.Value[i], e.Value[j]);
-                        if (r != null) return r;
-                    }
-            }
-            return null;
+
+            foreach (var e in store)
+                foreach (var st in TrySquashPoint(state, e.Value))
+                    yield return st;
         }
     }
 }

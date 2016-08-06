@@ -91,10 +91,10 @@ namespace Runner
             viz.Window(500, gr);
         }
 
-        static void SolveAndSend(int id)
+        static void SolveAndSend(int id, bool wait=true)
         {
             Console.WriteLine(id+":"+ " "+ProblemsSender.SolveAndSend(id));
-          //  Console.ReadKey();
+            if (wait) Console.ReadKey();
             return;
         }
 
@@ -112,15 +112,16 @@ namespace Runner
             //
 
            // DrawPathGraph(49);return;
-           SolveAndSend(42); return;
+           //SolveAndSend(1139); return;
 
             //  SolveAndSend(40);return;
             // DrawProblem(17);
 
-            var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
-            foreach (var e in goodTasks)
-                SolveAndSend(e);
-            //SolveTask(17);
+
+            //что не так с 42?
+            var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
+            foreach (var e in goodTasks) SolveAndSend(e,false);
+           // SolveTask(18);
 
            // foreach (var e in goodTasks) SolveTask(e);
             //NewMain();return;

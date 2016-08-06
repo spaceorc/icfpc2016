@@ -70,7 +70,66 @@ namespace Runner
         }
 
 
-        public static PointProjectionSolver Solve(PointProjectionSolver solver, double originality=0.95)
+        public static bool EvaluateProjection(PointProjectionSolver solver, Projection pr)
+        {
+            if (!pr.IsCompleteProjection()) return false;
+            solver.ProjectionScheme = pr;
+            solver.Projection = GenerateOutGraph(solver.ProjectionScheme, false);
+            var solution = ProjectionSolverRunner.Solve(solver.Projection);
+            if (solution.ValidateFacetSquares()) return true;
+            return false;
+        }
+
+
+        static PointProjectionSolver TrySquashPoint(PointProjectionSolver solver, Projection pr, ProjectionStage stage)
+        {
+            pr.Stages.Push(stage);
+            var res = TryHordEdges(solver, pr);
+            if (res == null)
+                pr.Stages.Pop();
+            return res;
+        }
+
+        static PointProjectionSolver TryHordEdges(PointProjectionSolver solver, Projection pr)
+        {
+            while (true)
+            {
+                if (EvaluateProjection(solver, pr)) return solver;
+                var hordEdgeStage = Projector.AddVeryGoodEdges(pr);
+                if (hordEdgeStage != null)
+                {
+                    pr.Stages.Push(hordEdgeStage);
+                    continue;
+                }
+                else
+                    break;
+            }
+            return null;
+        }
+
+        static PointProjectionSolver TryCycle(PointProjectionSolver solver, List<PPath> cycle)
+        {
+            var pr = Projector.CreateProjection(solver.SegmentFamilies, solver.AllSegments, solver.Graph);
+            pr.Stages.Push(Projector.CreateInitialProjection(cycle, pr));
+
+//            Visualize(solver, pr, cycleCounter.ToString());
+
+            var res=TryHordEdges(solver, pr);
+            if (res != null) return res;
+
+            var squashes = Projector.FindSquashPoint(pr);
+            foreach (var sq in squashes)
+            {
+                var o = TrySquashPoint(solver, pr, sq);
+                if (o != null) return o;
+            }
+            return null;
+        }
+
+        static int cycleCounter = 0;
+
+
+        public static PointProjectionSolver Solve(PointProjectionSolver solver, double originality=0)
         {
             var pathes = Pathfinder.FindAllPathes(solver.Graph, 1, originality);
             var ps = pathes.ToList();
@@ -78,64 +137,13 @@ namespace Runner
 
             //var cs = cycles.ToList();
 
-            int cnt = -1;
-
-            bool interesting = false;
+            cycleCounter = -1;
 
             foreach (var c in cycles)
             {
-                cnt++;
-              //  Console.WriteLine(cnt);
-                var tr = c.SelectMany(z => z.edges.AllNodes().Select(x => x.Data.Location)).ToList();
-
-               // if (cnt == 2794) interesting = true;
-
-                //if (tr.Contains(new Vector(0, 0)) && tr.Contains(new Vector(0, 1)) && tr.Contains(new Vector(new Rational(3, 5), new Rational(6, 5)))) interesting = true;
-
-                
-                
-                var pr = Projector.CreateProjection(solver.SegmentFamilies,solver.AllSegments, solver.Graph);
-                pr.Stages.Push(Projector.CreateInitialProjection(c, pr));
-
-               // if (interesting)
-                 //  Visualize(solver, pr, cnt.ToString());
-
-
-                while (true)
-                {
-                    if (pr.IsCompleteProjection())
-                    {
-                        solver.ProjectionScheme = pr;
-                        solver.Projection=GenerateOutGraph(solver.ProjectionScheme, false);
-                //        Visualize(solver, pr, cnt.ToString());
-                        return solver;
-                        var solution = ProjectionSolverRunner.Solve(solver.Projection);
-                        if (solution.ValidateFacetSquares())
-                        {
-                            Visualize(solver, pr, cnt.ToString());
-                            return solver;
-                        }
-                        else
-                            break;
-                    }
-                     
-                    var st = Projector.AddVeryGoodEdges(pr);
-                    if (st == null)
-                    {
-                        break;
-                        var st1 = Projector.FindSquashPoint(pr);
-                        if (st1 == null)
-                            break;
-                        else
-                            pr.Stages.Push(st1);
-                    }
-                    else
-                    {
-                        pr.Stages.Push(st);
-                    }
-                  //  Visualize(solver, pr);
-
-                }
+                cycleCounter++;
+                var res = TryCycle(solver, c);
+                if (res != null) return res;
             }
             return null;
         }
