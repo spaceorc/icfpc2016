@@ -36,7 +36,7 @@ namespace AutoSolver
 						Console.Write($"Solving {problemSpec.id}...");
 						var solutionSpec = ConvexPolygonSolver.TrySolve(problemSpec) ?? imperfectSolver.SolveMovingInitialSquare(problemSpec);
 						var score = ProblemsSender.Post(problemSpec, solutionSpec);
-						Console.Write($" imperfect or convex score: {score}");
+						Console.Write($" imperfect or convex score: {score} ");
 
 						if (score < 1.0)
 							SolveWithProjectionSolverRunner(problemSpec);
