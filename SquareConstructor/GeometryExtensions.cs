@@ -42,5 +42,19 @@ namespace SquareConstructor
 				vectorAngleMeasure = 4 - vectorAngleMeasure;
 			return vectorAngleMeasure;
 		}
+
+		public static Rational GetSin(Vector vec1, Vector vec2)
+		{
+			if(vec1.Length2 != vec2.Length2)
+				throw new Exception("vectors must be equal");
+			return (vec1.X*vec2.Y - vec1.Y*vec2.X)/vec1.Length2;
+		}
+
+		public static Rational GetCos(Vector vec1, Vector vec2)
+		{
+			if (vec1.Length2 != vec2.Length2)
+				throw new Exception("vectors must be equal");
+			return (vec1.X * vec2.X + vec1.Y * vec2.Y) / vec1.Length2;
+		}
 	}
 }

@@ -23,5 +23,23 @@ namespace SquareConstructor
 			return new Vector(vector.X*Matrix[0, 0] + vector.Y*Matrix[0, 1], vector.X*Matrix[1, 0] + vector.Y*Matrix[1, 1]) +
 				   MoveVector;
 		}
+
+		public static TransposeOperator ConstructOperator(Segment source, Segment destination)
+		{
+			var sVector = source.End - source.Start;
+			var dVector = destination.End - destination.Start;
+
+			var cos = GeometryExtensions.GetCos(sVector, dVector);
+			var sin = GeometryExtensions.GetSin(sVector, dVector);
+
+			var matrix = new TransposeOperator();
+			matrix[0, 0] = matrix[1, 1] = cos;
+			matrix[1, 0] = sin;
+			matrix[0, 1] = -sin;
+
+			var newDVector = matrix.Apply(source.Start);
+			matrix.MoveVector = destination.Start - newDVector;
+			return matrix;
+		}
 	}
 }

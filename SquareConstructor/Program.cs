@@ -11,12 +11,11 @@ namespace SquareConstructor
 	{
 		static void Main(string[] args)
 		{
-			var segment = new Segment(new Vector(0, 0), new Vector(10, 0));
-			Console.WriteLine(segment.GetIntersection(new Segment(new Vector(0, 0), new Vector(10, 1))));
-			Console.WriteLine(segment.GetIntersection(new Segment(new Vector(10, 1), new Vector(0, 0))));
-			Console.WriteLine(segment.GetIntersection(new Segment(new Vector(10, 1), new Vector(10, 0))));
-			Console.WriteLine(segment.GetIntersection(new Segment(new Vector(10, 0), new Vector(10, 1))));
-			Console.WriteLine(segment.GetIntersection(new Segment(new Vector(11, 0), new Vector(10, 1))));
+			Segment s = new Segment(new Vector(0, 0), new Vector(0, 5));
+			Segment d = new Segment(new Vector(1, 2), new Vector(5, 5));
+
+			var matrix = TransposeOperator.ConstructOperator(s, d);
+			Console.WriteLine();
 		}
 	}
 }
