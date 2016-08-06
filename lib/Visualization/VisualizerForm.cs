@@ -41,7 +41,8 @@ namespace lib
 		{
 			var sortByExpectedScore = new ToolStripButton("SortByScore", null, SortByExpectedScoreClick);
 			sortByExpectedScore.CheckOnClick = true;
-			var menu = new ToolStrip(sortByExpectedScore);
+			var solve = new ToolStripButton("Solve", null, SolveClick);
+			var menu = new ToolStrip(sortByExpectedScore, solve);
 			list = new ListBox();
 			list.Width = 300;
 			list.Dock = DockStyle.Left;
@@ -64,6 +65,12 @@ namespace lib
 			Controls.Add(problemPanel);
 			Controls.Add(list);
 			Controls.Add(menu);
+		}
+
+		private void SolveClick(object sender, EventArgs e)
+		{
+			var res = ProblemsSender.TrySolveAndSend(problem);
+			MessageBox.Show($"resemblance = {res}");
 		}
 
 		private object[] GetItems(bool sortScore)

@@ -11,40 +11,57 @@ using System.Threading.Tasks;
 namespace lib.Api
 {
 	public class ProblemsSender
-    {
+	{
 
-        public static double SolveAndSend(int id)
-        {
-            var repo = new ProblemsRepo();
-            var problemSpec = repo.Get(id);
-            var spec = ProjectionSolverRunner.Solve(problemSpec);
+		public static double TrySolveAndSend(ProblemSpec problemSpec)
+		{
+			double res = 0.0;
+			var t = new Thread(() =>
+			{
+				var spec = ProjectionSolverRunner.Solve(problemSpec);
+				res = Post(problemSpec, spec);
+			})
+			{ IsBackground = true };
+			t.Start();
+			if (!t.Join(5000))
+			{
+				t.Abort();
+				t.Join();
+			}
+			return res;
+		}
+		public static double SolveAndSend(int id)
+		{
+			var repo = new ProblemsRepo();
+			var problemSpec = repo.Get(id);
+			var spec = ProjectionSolverRunner.Solve(problemSpec);
             if (spec == null) return 0;
-            return Post(problemSpec, spec);
-        }
+			return Post(problemSpec, spec);
+		}
 
-        public static double Post(ProblemSpec problemSpec, SolutionSpec solutionSpec)
-        {
-            var client = new ApiClient();
-            var repo = new ProblemsRepo();
-            try
-            {
-                var response = client.PostSolution(problemSpec.id, solutionSpec);
-                repo.PutResponse(problemSpec.id, response);
-                repo.PutSolution(problemSpec.id, solutionSpec);
-                var obj = JObject.Parse(response);
-                return obj["resemblance"].Value<double>();
-            }
-            catch (Exception e)
-            {
+		public static double Post(ProblemSpec problemSpec, SolutionSpec solutionSpec)
+		{
+			var client = new ApiClient();
+			var repo = new ProblemsRepo();
+			try
+			{
+				var response = client.PostSolution(problemSpec.id, solutionSpec);
+				repo.PutResponse(problemSpec.id, response);
+				repo.PutSolution(problemSpec.id, solutionSpec);
+				var obj = JObject.Parse(response);
+				return obj["resemblance"].Value<double>();
+			}
+			catch (Exception e)
+			{
 	            if (e is ThreadAbortException)
 		            return 0;
-                Console.WriteLine(e);
-                return 0;
-            }
-            finally
-            {
-                Thread.Sleep(1000);
-            }
-        }
-    }
+				Console.WriteLine(e);
+				return 0;
+			}
+			finally
+			{
+				Thread.Sleep(1000);
+			}
+		}
+	}
 }
