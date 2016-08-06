@@ -95,13 +95,17 @@ namespace lib
         public static Vector[] RationalTriangulate(Segment ax, Segment bx, Vector a, Vector b)
         {
             var ab = new Segment(a, b);
+            if (ab.QuadratOfLength == 0) return null;
 
             var bh_numerator = (ab.QuadratOfLength - ax.QuadratOfLength + bx.QuadratOfLength);
+            
             var relative_bh_length = bh_numerator / (2 *ab.QuadratOfLength);
 
-            Vector eba = new Vector(a.X - b.X, a.Y - b.Y);
+            Vector eba = a - b;
 
-            var h = a + eba * relative_bh_length;
+            var h = b + eba * relative_bh_length;
+
+           // double bh_length_2 = relative_bh_length * relative_bh_length * ab.QuadratOfLength;
 
             Vector oba = new Vector(-eba.Y, eba.X);
 
@@ -111,7 +115,7 @@ namespace lib
             if (!IsSquare(multiplier2)) return null;
 
             var multiplier = Sqrt(multiplier2);
-            var first = h + oba * multiplier2;
+            var first = h + oba * multiplier;
             var second = h - oba * multiplier;
             return new[] { first, second };
         }

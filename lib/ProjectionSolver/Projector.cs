@@ -154,6 +154,7 @@ namespace Runner
                 this.count = count;
                 Insides = family.Segments.Skip(start).Take(count).ToArray();
                 QuadratLength = new Segment(Begin, End).QuadratOfLength;
+                Segment = new Segment(Begin, End);
             }
 
 
@@ -167,6 +168,8 @@ namespace Runner
             {
                 get { return family.Points[start+count]; }
             }
+
+            public Segment Segment { get; internal set; }
         }
 
         public class CurrentState
@@ -257,15 +260,30 @@ namespace Runner
         public class AdjoinedSegmentFamilySubset
         {
             public SegmentFamilySubset family;
-            public bool BeginIsAdjoined;
-            public Vector Adjoinded {  get { return BeginIsAdjoined ? family.Begin : family.End; } }
-            public Vector NotAdjoined {  get { return BeginIsAdjoined ? family.End : family.Begin; } }
-            public Node<EdgeInfo, NodeInfo> Node;
+            public Node<EdgeInfo, NodeInfo> ProjectedNode;
+            public Node<EdgeInfo, NodeInfo> NonProjectedNode;
+
         }
 
 
         public static ProjectionStage TrySquashPoint(CurrentState state, AdjoinedSegmentFamilySubset first, AdjoinedSegmentFamilySubset second)
         {
+            foreach(var a in state.nodesMap[first.ProjectedNode])
+                foreach(var b in state.nodesMap[second.ProjectedNode])
+                {
+                    var vars = Arithmetic.RationalTriangulate(first.family.Segment, second.family.Segment, a.Projection, b.Projection);
+                    if (vars == null) continue;
+                    foreach(var e in vars)
+                    {
+                        if (e.X < 0 || e.X > 1 || e.Y < 0 || e.Y > 1) continue;
+                        var stage = new ProjectionStage();
+                        var sq = new NodeProjection { Original = first.NonProjectedNode, Projection = e };
+                        stage.Nodes.Add(sq);
+                        stage.Edges.Add(new EdgeProjection { begin = a, end = sq, Segments = first.family.Insides.ToList() });
+                        stage.Edges.Add(new EdgeProjection { begin = b, end = sq, Segments = second.family.Insides.ToList() });
+                        return stage;
+                    }
+                }
             return null;
         }
 
@@ -284,16 +302,24 @@ namespace Runner
                 if (startFound && endFound) continue;
                 if (!startFound && !endFound) continue;
 
-                var a = new AdjoinedSegmentFamilySubset { BeginIsAdjoined = startFound, family = e };
-                a.Node = a.BeginIsAdjoined ? start : end;
-                if (!store.ContainsKey(a.Node)) store[a.Node] = new List<AdjoinedSegmentFamilySubset>();
-                store[a.Node].Add(a);
+                var a = new AdjoinedSegmentFamilySubset {  family = e };
+                a.ProjectedNode = startFound ? start : end;
+                a.NonProjectedNode = startFound ? end : start;
+                if (!store.ContainsKey(a.NonProjectedNode)) store[a.NonProjectedNode] = new List<AdjoinedSegmentFamilySubset>();
+                store[a.NonProjectedNode].Add(a);
             }
 
             store = store.Where(z => z.Value.Count >= 2).ToDictionary(z => z.Key, z => z.Value);
             
-
-
+            foreach(var e in store)
+            {
+                for (int i=0;i<e.Value.Count;i++)
+                    for (int j=i+1;j<e.Value.Count;j++)
+                    {
+                        var r = TrySquashPoint(state, e.Value[i], e.Value[j]);
+                        if (r != null) return r;
+                    }
+            }
             return null;
         }
     }
