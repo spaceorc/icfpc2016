@@ -10,7 +10,7 @@ namespace SquareConstructor
 	class TransposeOperator
 	{
 		private Rational[,] Matrix = new Rational[2,2];
-		public Vector MoveVector = new Vector();
+		public Vector MoveVector = new Vector(0, 0);
 
 		public Rational this[int x, int y]
 		{

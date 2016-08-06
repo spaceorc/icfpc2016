@@ -11,7 +11,7 @@ namespace SquareConstructor
 	{
 		static void Main(string[] args)
 		{
-			Segment s = new Segment(new Vector(0, 0), new Vector(0, 5));
+			Segment s = new Segment(new Vector(-4, -10), new Vector(-7, -6));
 			Segment d = new Segment(new Vector(1, 2), new Vector(5, 5));
 
 			var matrix = TransposeOperator.ConstructOperator(s, d);
