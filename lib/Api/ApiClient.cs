@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -32,6 +33,7 @@ namespace lib
 		public SnapshotJson GetLastSnapshot()
 		{
 			var hash = GetSnapshots().Last().Hash;
+			Thread.Sleep(1000);
 			return GetBlob<SnapshotJson>(hash);
 		}
 
@@ -49,7 +51,7 @@ namespace lib
 		{
 			return JObject.Parse(Query(query));
 		}
-		
+
 		public string PostSolution(int problemId, SolutionSpec solution)
 		{
 			using (var client = CreateClient())
@@ -62,7 +64,26 @@ namespace lib
 				if (!res.IsSuccessStatusCode)
 				{
 					Console.WriteLine(res.ToString());
-					Console.WriteLine(res.Headers.RetryAfter);
+					Console.WriteLine(res.Content.ReadAsStringAsync().Result);
+					throw new HttpRequestException(res.ReasonPhrase);
+				}
+				return res.Content.ReadAsStringAsync().Result;
+			}
+		}
+
+		public string PostProblem(long publishTime, SolutionSpec solution)
+		{
+			using (var client = CreateClient())
+			{
+				var content = new MultipartFormDataContent();
+				content.Add(new StringContent(publishTime.ToString()), "publish_time");
+				content.Add(new StringContent(solution.ToString()), "solution_spec", "solution.txt");
+				//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
+				var res = client.PostAsync($"{baseUrl}problem/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
+				if (!res.IsSuccessStatusCode)
+				{
+					Console.WriteLine(res.ToString());
+					Console.WriteLine(res.Content.ReadAsStringAsync().Result);
 					throw new HttpRequestException(res.ReasonPhrase);
 				}
 				return res.Content.ReadAsStringAsync().Result;
@@ -112,6 +133,16 @@ namespace lib
 				var filepath = Path.Combine(Paths.ProblemsDir(), $@"{p.Id:000}.spec.txt");
 				Console.WriteLine($"writing {filepath}");
 				File.WriteAllText(filepath, spec);
+			}
+		}
+		[Test]
+		public void ProblemsRating()
+		{
+			var api = new ApiClient();
+			var snapshot = api.GetLastSnapshot();
+			foreach (var p in snapshot.Problems.OrderByDescending(p => p.ExpectedScore()))
+			{
+				Console.WriteLine($"{p.Id} {p.ExpectedScore()}");
 			}
 		}
 	}

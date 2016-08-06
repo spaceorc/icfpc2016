@@ -1,10 +1,60 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using lib;
 using lib.Graphs;
+using NUnit.Framework;
 
 namespace Runner
 {
+	[TestFixture]
+	public class GraphExt_Should
+	{
+		[Test]
+		[Explicit]
+		public void DoSomething_WhenSomething()
+		{
+			var problemsRepo = new ProblemsRepo();
+			var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
+//			var goodTasks = new[] { 13 };
+			var apiClient = new ApiClient();
+			foreach (var p in goodTasks)
+			{
+				try
+				{
+					Console.WriteLine($"!solving: {p}");
+					var problemSpec = problemsRepo.Get(p);
+					var solutionSpec = GraphExt.Solve(problemSpec);
+					var postSolution = apiClient.PostSolution(p, solutionSpec);
+					Console.WriteLine(postSolution);
+					problemsRepo.PutSolution(p, solutionSpec);
+					problemsRepo.PutResponse(p, postSolution);
+				}
+				catch (Exception e)
+				{
+					problemsRepo.PutSolution(p, e.ToString());
+				}
+				Thread.Sleep(1000);
+			}
+		}
+
+		[Test]
+		[Explicit]
+		public void DoSomething_WhenSomething2()
+		{
+			var problemsRepo = new ProblemsRepo();
+			var problemSpec = problemsRepo.Get(845);
+			Console.WriteLine("problem");
+			Console.WriteLine(problemSpec);
+			problemSpec.CreateVisualizerForm().ShowDialog();
+			var solutionSpec = GraphExt.Solve(problemSpec);
+			solutionSpec.CreateVisualizerForm().ShowDialog();
+			Console.WriteLine("solution");
+			Console.WriteLine(solutionSpec);
+		}
+	}
+
 	internal class GNode<TEdge, TNode>
 	{
 		public readonly Edge<TEdge, TNode> Edge;
@@ -24,17 +74,27 @@ namespace Runner
 		private readonly List<GNode<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>> nodes;
 		private readonly Dictionary<Edge<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>, List<GNode<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>>> referenceMap;
 
-		private class EdgesComparer : IComparer<Edge<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>>
+		private static Rational GetVectorProd(GNode<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> startNode, Edge<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> x)
 		{
-			public int Compare(Edge<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> x, Edge<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> y)
+			Vector a;
+			Vector bX;
+			if (startNode.FromFrom)
 			{
-				var res = x.From.Data.Projection.X * y.To.Data.Projection.Y - x.From.Data.Projection.Y * y.To.Data.Projection.X;
-				if (res > 0)
-					return 1;
-				if (res == 0)
-					return 0;
-				return -1;
+				a = startNode.Edge.From.Data.Projection - startNode.Edge.To.Data.Projection;
+				if (x.From.Data.Projection.Equals(startNode.Edge.To.Data.Projection))
+					bX = x.To.Data.Projection - x.From.Data.Projection;
+				else
+					bX = x.From.Data.Projection - x.To.Data.Projection;
 			}
+			else
+			{
+				a = startNode.Edge.To.Data.Projection - startNode.Edge.From.Data.Projection;
+				if (x.From.Data.Projection.Equals(startNode.Edge.From.Data.Projection))
+					bX = x.To.Data.Projection - x.From.Data.Projection;
+				else
+					bX = x.From.Data.Projection - x.To.Data.Projection;
+			}
+			return a.VectorProdLength(bX);
 		}
 
 		public static SolutionSpec Solve(ProblemSpec problemSpec)
@@ -46,6 +106,12 @@ namespace Runner
 
 		public GraphExt(Graph<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> graph)
 		{
+			foreach (var edge in graph.Edges)
+			{
+				edge.From.EnsureIncidentEdge(edge);
+				edge.To.EnsureIncidentEdge(edge);
+			}
+
 			referenceMap = new Dictionary<Edge<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>, List<GNode<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>>>();
 			nodes = new List<GNode<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>>();
 			foreach (var edge in graph.Edges)
@@ -62,20 +128,21 @@ namespace Runner
 			foreach (var node in nodes)
 				FindCycles(node);
 			var used = new HashSet<GNode<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>>();
-			var n = nodes[0];
 			var res = new List<List<GNode<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>>>();
-			while (used.Count < nodes.Count)
+			foreach (var node in nodes)
 			{
-				if (used.Contains(n))
-					continue;
-				used.Add(n);
-				var cycle = new List<GNode<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>>();
-				while (!used.Contains(n.Next))
+				if (!used.Contains(node))
 				{
-					cycle.Add(n);
-					n = n.Next;
+					var n = node;
+					var cycle = new List<GNode<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>>();
+					while (n != null && used.Add(n))
+					{
+						cycle.Add(n);
+						n = n.Next;
+					}
+					if (n == node)
+						res.Add(cycle);
 				}
-				res.Add(cycle);
 			}
 			return res;
 		}
@@ -83,39 +150,53 @@ namespace Runner
 		public SolutionSpec GetSolution()
 		{
 			var cycles = GetCycles();
-			var sourcePoints = cycles.SelectMany(c => c).Select(n => n.Edge.From.Data.Projection).Distinct().ToArray();
+			var sourcePoints = cycles
+				.SelectMany(c => c.Select(n => n.Edge.From.Data.Projection).Concat(c.Select(n => n.Edge.To.Data.Projection))).Distinct().ToArray();
+
 			var sourcePointIndices = sourcePoints.Select((x, i) => new { x, i }).ToDictionary(x => x.x, x => x.i);
-			var facets = cycles.Select(c => new Facet(c.Select(e => sourcePointIndices[e.Edge.From.Data.Projection]).ToArray())).ToArray();
-			var originalPointsInfo = cycles.SelectMany(c => c).Select(n => new
+			var facets = cycles.Select(c => new Facet(c.Select(e => sourcePointIndices[e.FromFrom ? e.Edge.From.Data.Projection : e.Edge.To.Data.Projection]).ToArray())).ToArray();
+			var originalPointsInfo = cycles.SelectMany(c => c).Select(e => new
 			{
-				vector = n.Edge.From.Data.Original.Data.Location,
-				index = sourcePointIndices[n.Edge.From.Data.Projection]
+				vector = e.FromFrom ? e.Edge.From.Data.Original.Data.Location : e.Edge.To.Data.Original.Data.Location,
+				index = sourcePointIndices[e.FromFrom ? e.Edge.From.Data.Projection : e.Edge.To.Data.Projection]
 			}).ToArray();
 			var originalPoints = new Vector[sourcePoints.Length];
 			foreach (var info in originalPointsInfo)
 				originalPoints[info.index] = info.vector;
-			return  new SolutionSpec(sourcePoints, facets, originalPoints);
+			return new SolutionSpec(sourcePoints, facets, originalPoints);
 		}
 
 		private void FindCycles(GNode<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> startNode)
 		{
-			while (true)
+			while (!startNode.InCycle)
 			{
-				// ReSharper disable once PossibleNullReferenceException
-				if (startNode.InCycle)
-					return;
 				startNode.InCycle = true;
-
-				if (startNode.FromFrom)
+				var commonPoint = startNode.FromFrom ? startNode.Edge.To : startNode.Edge.From;
+				var edges = commonPoint.IncidentEdges.Where(e => !e.Equals(startNode.Edge)).ToList();
+				Edge<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> nextEdge = null;
+				foreach (var edge in edges)
 				{
-					var nextEdge = startNode.Edge.From.IncidentEdges.Where(e => !e.Equals(startNode.Edge)).OrderBy(x => x, new EdgesComparer()).First();
-					startNode.Next = referenceMap[nextEdge].FirstOrDefault(x => x.FromFrom);
+					var checkGoodProd = GetVectorProd(startNode, edge);
+					if (checkGoodProd <= 0)
+					{
+						if (nextEdge == null)
+						{
+							nextEdge = edge;
+						}
+						else
+						{
+							var n = nextEdge.From == commonPoint ? nextEdge.To.Data.Projection - nextEdge.From.Data.Projection : nextEdge.From.Data.Projection - nextEdge.To.Data.Projection;
+							var e = edge.From == commonPoint ? edge.To.Data.Projection - edge.From.Data.Projection : edge.From.Data.Projection - edge.To.Data.Projection;
+							var candidateProd = e.VectorProdLength(n);
+							if (candidateProd < 0)
+								nextEdge = edge;
+						}
+					}
 				}
-				else
-				{
-					var nextEdge = startNode.Edge.To.IncidentEdges.Where(e => !e.Equals(startNode.Edge)).OrderBy(x => x, new EdgesComparer()).First();
-					startNode.Next = referenceMap[nextEdge].FirstOrDefault(x => !x.FromFrom);
-				}
+				if (nextEdge == null)
+					return;
+				var nextFromFrom = nextEdge.From.Data.Projection.Equals(commonPoint.Data.Projection);
+				startNode.Next = referenceMap[nextEdge].First(x => x.FromFrom == nextFromFrom);
 				startNode = startNode.Next;
 			}
 		}

@@ -25,6 +25,11 @@ namespace lib
 			return stateprinter.PrintObject(obj);
 		}
 
+		public static T MaxValue<T>(this IEnumerable<T> items, Func<T, double> score)
+		{
+			return items.OrderByDescending(score).First();
+		}
+
 		public static StringReader ToReader<T>(this string s)
 		{
 			return new StringReader(s);

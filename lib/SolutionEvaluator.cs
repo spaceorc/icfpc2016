@@ -72,7 +72,7 @@ namespace lib
 					if (inProblem || inSolution)
 						union++;
 				}
-			return (double) intersection/union;
+			return union == 0 ? 0 : (double) intersection/union;
 		}
 
 		private struct PointX

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Runner;
 
 namespace lib.Graphs
 {
@@ -12,10 +13,10 @@ namespace lib.Graphs
 
         public override string ToString()
         {
-            return Data.ToString();
+	        return $"{From}->{To}";
         }
 
-        public readonly Node<TEdge,TNode> From;
+	    public readonly Node<TEdge,TNode> From;
         public readonly Node<TEdge, TNode> To;
         public Edge(Node<TEdge, TNode> first, Node<TEdge, TNode> second)
         {
@@ -32,6 +33,7 @@ namespace lib.Graphs
             if (From == node) return To;
             return From;
         }
+
     }
 
     public class Node<TEdge,TNode>
@@ -40,12 +42,13 @@ namespace lib.Graphs
         public readonly int NodeNumber;
 
         public TNode Data;
+
         public override string ToString()
         {
-            return Data.ToString();
+	        return $"{NodeNumber}";
         }
 
-        public Node(int number)
+	    public Node(int number)
         {
             NodeNumber = number;
         }
@@ -57,25 +60,27 @@ namespace lib.Graphs
                 return edges.Select(z => z.OtherNode(this));
             }
         }
-        public IEnumerable<Edge<TEdge, TNode>> IncidentEdges
-        {
-            get
-            {
-                foreach (var e in edges) yield return e;
-            }
-        }
-        public static Edge<TEdge, TNode> Connect(Node<TEdge, TNode> node1, Node<TEdge, TNode> node2, Graph<TEdge, TNode> graph)
+        public IEnumerable<Edge<TEdge, TNode>> IncidentEdges => edges;
+
+	    public static Edge<TEdge, TNode> Connect(Node<TEdge, TNode> node1, Node<TEdge, TNode> node2, Graph<TEdge, TNode> graph)
         {
             if (!graph.Nodes.Contains(node1) || !graph.Nodes.Contains(node2)) throw new ArgumentException();
             var edge = new Edge<TEdge, TNode>(node1, node2);
             node1.edges.Add(edge);
             return edge;
         }
-        public static void Disconnect(Edge<TEdge, TNode> edge)
+
+	    public static void Disconnect(Edge<TEdge, TNode> edge)
         {
             edge.From.edges.Remove(edge);
             edge.To.edges.Remove(edge);
         }
+
+	    public void EnsureIncidentEdge(Edge<TEdge, TNode> edge)
+	    {
+		    if (!edges.Contains(edge))
+				edges.Add(edge);
+		}
     }
 
     public class Graph<TEdge, TNode>
@@ -87,7 +92,7 @@ namespace lib.Graphs
             var c = nodes.Count;
             var node = new Node<TEdge, TNode>(c);
             nodes.Add(node);
-            return c;
+            return node;
         }
 
         

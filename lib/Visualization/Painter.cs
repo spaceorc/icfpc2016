@@ -35,8 +35,8 @@ namespace lib
 			{
 				var color = Arithmetic.IsSquare(segment.QuadratOfLength) ? Color.Cyan : Color.Black;
 				PaintSegment(g, color, segment);
-                PaintNode(g, color, segment.Start);
-                PaintNode(g, color, segment.End);
+                //PaintNode(g, color, segment.Start);
+                //PaintNode(g, color, segment.End);
 
             }
         }
@@ -52,20 +52,47 @@ namespace lib
 				PaintPolygon(g, color, polygon);
 			}
 		}
+		public void PaintDest(Graphics g, int size, SolutionSpec spec)
+		{
+			g.FillRectangle(Brushes.Beige, new RectangleF(0, 0, size, size));
+			g.ScaleTransform(size, size);
+			var i = 0;
+			var poly = spec.PolygonsDest;
+			var vs = poly.SelectMany(p => p.Vertices).ToList();
+			var minX = vs.Select(v => v.X).Min();
+			var minY = vs.Select(v => v.Y).Min();
+			var shift = -new Vector(minX, minY);
+			var fi = 0;
+			foreach (var polygon in poly)
+			{
+				Color color = ColorTranslator.FromHtml("#" + ColourValues[i++]);
+				PaintPolygon(g, color, polygon.Move(-minX, -minY));
+				var vi = 0;
+				foreach (var vertex in polygon.Vertices)
+				{
+					var v = vertex + shift;
+					var font = new Font("Arial", 0.04f);
+					var index = spec.Facets[fi].Vertices[vi];
+					g.DrawString(index.ToString(), font, Brushes.Black, v.X.AsFloat(), v.Y.AsFloat());
+					vi++;
+				}
+				fi++;
+			}
+		}
 
 		public void PaintSegment(Graphics g, Color color, Segment segment)
 		{
-			g.DrawLine(new Pen(color, 0.01f), segment.Start.X, segment.Start.Y, segment.End.X, segment.End.Y);
+			g.DrawLine(new Pen(color, 0.005f), segment.Start.X, segment.Start.Y, segment.End.X, segment.End.Y);
 		}
 
-        void PaintNode(Graphics g, Color color, Vector v)
-        {
-            var font = new Font("Arial", 0.04f);
-            float size = 0.04f;
-            g.FillEllipse(new SolidBrush(color), (float)(v.X-size), (float)(v.Y-size),2*size,2*size);
-            
-            g.DrawString(v.ToString(), font, Brushes.Black, v.X.AsFloat(), v.Y.AsFloat());
-        }
+		void PaintNode(Graphics g, Color color, Vector v)
+		{
+			var font = new Font("Arial", 0.01f);
+			float size = 0.01f;
+			g.FillEllipse(new SolidBrush(color), (float)(v.X - size), (float)(v.Y - size), 2 * size, 2 * size);
+
+			g.DrawString(v.ToString(), font, Brushes.Black, v.X.AsFloat(), v.Y.AsFloat());
+		}
 
 		private void PaintPolygon(Graphics g, Color color, Polygon polygon)
 		{
