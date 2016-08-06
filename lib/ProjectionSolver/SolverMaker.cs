@@ -87,7 +87,7 @@ namespace Runner
                 cnt++;
                 var tr = c.SelectMany(z => z.edges.AllNodes().Select(x => x.Data.Location)).ToList();
 
-                //if (cnt == 298) interesting = true;
+               // if (cnt == 2794) interesting = true;
 
                 //if (tr.Contains(new Vector(0, 0)) && tr.Contains(new Vector(0, 1)) && tr.Contains(new Vector(new Rational(3, 5), new Rational(6, 5)))) interesting = true;
 
@@ -96,8 +96,8 @@ namespace Runner
                 var pr = Projector.CreateProjection(solver.SegmentFamilies,solver.AllSegments, solver.Graph);
                 pr.Stages.Push(Projector.CreateInitialProjection(c, pr));
 
-                if (interesting)
-                   Visualize(solver, pr, cnt.ToString());
+               // if (interesting)
+                 //  Visualize(solver, pr, cnt.ToString());
 
 
                 while (true)
@@ -106,18 +106,18 @@ namespace Runner
                     {
                         solver.ProjectionScheme = pr;
                         solver.Projection=GenerateOutGraph(solver.ProjectionScheme, false);
-                        return solver;
+                        Visualize(solver, pr, cnt.ToString());
+                        break;
                     }
                      
                     var st = Projector.AddVeryGoodEdges(pr);
                     if (st == null)
                     {
-                        break;
-                        //var st1 = Projector.FindSquashPoint(pr);
-                        //if (st1 == null)
-                        //    break;
-                        //else
-                        //    pr.Stages.Push(st1);
+                        var st1 = Projector.FindSquashPoint(pr);
+                        if (st1 == null)
+                            break;
+                        else
+                            pr.Stages.Push(st1);
                     }
                     else
                     {
