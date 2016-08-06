@@ -120,7 +120,14 @@ namespace Runner
             return Graph;
         }
 
-        public static Tuple<List<Segment>,List<Vector>> MakeSegmentsWithIntersections(IEnumerable<Segment> __segments)
+        public static IEnumerable<Segment> GenerateAllSmallSegments(IEnumerable<SegmentFamily> families)
+        {
+            foreach (var f in families)
+                for (int i = 0; i < f.Points.Length - 1; i++)
+                    yield return new Segment(f.Points[i], f.Points[i + 1]);
+        }
+
+        public static Tuple<List<SegmentFamily>,List<Vector>> MakeSegmentsWithIntersections(IEnumerable<Segment> __segments)
         {
             var Segments = __segments.ToList();
 
@@ -139,27 +146,18 @@ namespace Runner
                         vectors.Add(v);
                 }
 
+            var result = new List<SegmentFamily>();
 
-            while (true)
+            foreach(var e in Segments)
             {
-                var newSegments = new List<Segment>();
-                foreach (var e in Segments)
-                {
-                    var inter = vectors.Where(z => !z.Equals(e.Start) && !z.Equals(e.End) && Arithmetic.PointInSegment(z, e)).ToList();
-                    if (inter.Count == 0)
-                        newSegments.Add(e);
-                    else
-                    {
-                        newSegments.Add(new Segment(e.Start, inter[0]));
-                        newSegments.Add(new Segment(inter[0], e.End));
-                    }
-                }
-                if (newSegments.Count == Segments.Count)
-                    break;
-                Segments = newSegments;
+                var points = vectors
+                    .Where(z => Arithmetic.PointInSegment(z, e))
+                    .OrderBy(z => new Segment(e.Start, z).QuadratOfLength)
+                    .ToArray();
+                result.Add(new SegmentFamily(points));
             }
 
-            return Tuple.Create(Segments,vectors);
+            return Tuple.Create(result, vectors);
 
         }
         #endregion

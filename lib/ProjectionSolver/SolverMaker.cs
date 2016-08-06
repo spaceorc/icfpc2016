@@ -24,7 +24,7 @@ namespace Runner
             var solver = new PointProjectionSolver { spec = spec };
             var r = Pathfinder.MakeSegmentsWithIntersections(spec.Segments);
             solver.vectors = r.Item2;
-            solver.AllSegments = r.Item1;
+            solver.AllSegments = Pathfinder.GenerateAllSmallSegments(r.Item1);
             solver.Graph = Pathfinder.BuildGraph(solver.AllSegments, solver.vectors);
             return solver;
         }
