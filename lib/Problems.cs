@@ -129,32 +129,39 @@ namespace lib
 					Thread.Sleep(1000);
 				}
 		}
-		//Не работоспособно!
 		public SolutionSpec Quatro()
 		{
-			var src = $"0,0 1/2,0 1,0 1,1/8 1,1/2 1,1 19/24,1 0,1 0,7/8 0,1/2 1/2,1/2".ToPoints();
+			var src = $"0,0 486602/988027,0 499/991,0 138639903002/266928338401,0 1,0 1,1 451419353/700511143,1 0,1 0,155473566/876379949 0,11/997 499/991,11/997".ToPoints();
 			var dst = src.ToArray();
-			dst[8] = src[8].Reflect(src[9], src[10]);
-			dst[7] = src[7].Reflect(src[9], src[10]).Reflect(dst[8], dst[10]);
-			dst[6] = src[6].Reflect(src[9], src[10]).Reflect(dst[8], dst[10]);
-			dst[5] = src[5].Reflect(src[9], src[10]).Reflect(dst[8], dst[10]).Reflect(dst[6], dst[10]);
-			dst[4] = src[4].Reflect(src[9], src[10]).Reflect(dst[8], dst[10]).Reflect(dst[6], dst[10]);
-			dst[3] = src[3].Reflect(src[9], src[10]).Reflect(dst[8], dst[10]).Reflect(dst[6], dst[10]).Reflect(dst[4], dst[10]);
-			dst[2] = src[2].Reflect(src[9], src[10]).Reflect(dst[8], dst[10]).Reflect(dst[6], dst[10]).Reflect(dst[4], dst[10]).Reflect(dst[3], dst[10]);
-			//dst[1] = src[1].Reflect(src[9], src[10]).Reflect(dst[8], dst[10]).Reflect(dst[6], dst[10]).Reflect(dst[4], dst[10]).Reflect(dst[3], dst[10]);
-			Console.WriteLine($"{dst[1]} {src[1]}");
+			dst[8] = src[8].Reflect(src[10], src[9]);
+			dst[7] = src[7].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]);
+			dst[6] = src[6].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]);
+			dst[5] = src[5].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]);
+			dst[4] = src[4].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]);
+			dst[3] = src[3].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]);
+			dst[2] = src[2].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]).Reflect(dst[10], dst[3]);
+			dst[1] = src[1].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]).Reflect(dst[10], dst[3]).Reflect(dst[10], dst[2]);
+			dst[0] = src[0].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]).Reflect(dst[10], dst[3]).Reflect(dst[10], dst[2]).Reflect(dst[10], dst[1]);
+			Console.WriteLine($"{dst[0]} {src[0]}");
 
 			var facets = new Facet[]
 			{
-				new Facet(10, 9, 0,1 ),
-				new Facet(10, 1,2,3),
-				new Facet(10, 3,4),
-				new Facet(10, 4,5,6),
-				new Facet(10, 6,7, 8),
-				new Facet(10, 8,9),
+				new Facet(10, 9, 0, 1),
+				new Facet(10, 1, 2),
+				new Facet(10, 2, 3),
+				new Facet(10, 3, 4, 5, 6),
+				new Facet(10, 6, 7, 8),
+				new Facet(10, 8, 9),
 
 			};
 			return new SolutionSpec(src, facets, dst);
+		}
+
+		[Test]
+		public void SquareRotated()
+		{
+			var src = "0,0 1,0 1,1 0,1".ToPoints();
+			Console.WriteLine(new SolutionSpec(src, new[] {new Facet(0,1,2,3)}, "4328029871649615121465353437184/8656059743299229793415925725865,-1792728671193156318471947026432/8656059743299229793415925725865 10448788414492386111887872752297/8656059743299229793415925725865,4328029871649615121465353437184/8656059743299229793415925725865 4328029871649614671950572288681/8656059743299229793415925725865,10448788414492386111887872752297/8656059743299229793415925725865 -1792728671193156318471947026432/8656059743299229793415925725865,4328029871649614671950572288681/8656059743299229793415925725865".ToPoints()));
 		}
 
 		[Test, Explicit]

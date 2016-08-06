@@ -35,8 +35,8 @@ namespace lib
 			{
 				var color = Arithmetic.IsSquare(segment.QuadratOfLength) ? Color.Cyan : Color.Black;
 				PaintSegment(g, color, segment);
-                PaintNode(g, color, segment.Start);
-                PaintNode(g, color, segment.End);
+                //PaintNode(g, color, segment.Start);
+                //PaintNode(g, color, segment.End);
 
             }
         }
@@ -82,12 +82,12 @@ namespace lib
 
 		public void PaintSegment(Graphics g, Color color, Segment segment)
 		{
-			g.DrawLine(new Pen(color, 0.01f), segment.Start.X, segment.Start.Y, segment.End.X, segment.End.Y);
+			g.DrawLine(new Pen(color, 0.005f), segment.Start.X, segment.Start.Y, segment.End.X, segment.End.Y);
 		}
 
 		void PaintNode(Graphics g, Color color, Vector v)
 		{
-			var font = new Font("Arial", 0.04f);
+			var font = new Font("Arial", 0.01f);
 			float size = 0.01f;
 			g.FillEllipse(new SolidBrush(color), (float)(v.X - size), (float)(v.Y - size), 2 * size, 2 * size);
 

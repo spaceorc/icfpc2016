@@ -135,5 +135,15 @@ namespace lib
 				File.WriteAllText(filepath, spec);
 			}
 		}
+		[Test]
+		public void ProblemsRating()
+		{
+			var api = new ApiClient();
+			var snapshot = api.GetLastSnapshot();
+			foreach (var p in snapshot.Problems.OrderByDescending(p => p.ExpectedScore()))
+			{
+				Console.WriteLine($"{p.Id} {p.ExpectedScore()}");
+			}
+		}
 	}
 }

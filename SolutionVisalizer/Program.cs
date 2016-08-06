@@ -25,8 +25,8 @@ namespace SolutionVisalizer
 
 		private static SolutionSpec Solve(ProblemSpec arg)
 		{
-			return GraphExt.Solve(arg);
-			//return new ImperfectSolver().SolveMovingInitialSquare(arg);
+			//return GraphExt.Solve(arg);
+			return new ImperfectSolver().SolveMovingInitialSquare(arg);
 		}
 
 		private static string GetProblemsDir()
