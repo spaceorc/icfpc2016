@@ -47,27 +47,54 @@ namespace lib
 	[TestFixture, Explicit]
 	public class ConvexPolygonSolver_Should
 	{
-		[Test]
-		public void Solve()
+		//[TestCase(2414)]
+		//[TestCase(2225)]
+		[TestCase(2267)]
+
+		//[TestCase(2668)]
+		//[TestCase(2777)]
+		//[TestCase(2966)]
+		//[TestCase(3180)]
+		public void Solve(int problemId)
 		{
-			var problemId = 2225;
 			var problemsRepo = new ProblemsRepo();
 			var problem = problemsRepo.Get(problemId);
 			var poly = problem.Polygons.Single();
-
-			foreach (var x in Enumerable.Range(9, 1).Select(x => new Rational(x, 131)))
-				foreach (var y in Enumerable.Range(8, 1).Select(y => new Rational(y, 245)))
+			var apiClient = new ApiClient();
+			var dx = (int)problem.Polygons.SelectMany(p => p.Vertices).Select(x => x.X.Denomerator).Max();
+			var dy = (int)problem.Polygons.SelectMany(p => p.Vertices).Select(x => x.Y.Denomerator).Max();
+			foreach (var x in Enumerable.Range(0, dx).Select(x => new Rational(x, dx)))
+				foreach (var y in Enumerable.Range(0, dy).Select(y => new Rational(y, dy)))
 				{
 					var shift = new Vector(x, y);
+					//var shift = new Vector(0, 0);
 					var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
 					var solution = ConvexPolygonSolver.Solve(poly, initialSolution);
+					var packedSolution = solution.Pack();
+					var packedSolutionSize = packedSolution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
 					var solutionSize = solution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
-					if (solutionSize <= 5080)
+					if (packedSolutionSize <= 5000)
 					{
-						var packedSolution = solution.Pack();
-						var packedSolutionSize = packedSolution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
 						Console.WriteLine($"{shift}: {solutionSize}; packed: {packedSolutionSize}");
-					}
+
+						try
+						{
+							var response = apiClient.PostSolution(problem.id, packedSolution);
+							var resemblance = GetResemblance(response);
+							if (resemblance > GetProblemResemblance(problem.id))
+							{
+								problemsRepo.PutSolution(problem.id, packedSolution);
+								problemsRepo.PutResponse(problem.id, response);
+								Console.Write("Solution improved! ");
+								return;
+							}
+							Console.WriteLine(resemblance);
+						}
+						catch (Exception e)
+						{
+							Console.WriteLine(e);
+						}
+				}
 					//solution.CreateVisualizerForm(true).ShowDialog();
 				}
 
@@ -86,7 +113,8 @@ namespace lib
 		{
 			var apiClient = new ApiClient();
 			var problemsRepo = new ProblemsRepo();
-			foreach (var problem in problemsRepo.GetAll().Where(x => GetProblemResemblance(x.id) < 1.0))
+			foreach (var problem in problemsRepo.GetAll().Where(x => GetProblemResemblance(x.id) < 1.0)
+				.Where(p => new[] {2267,2414,2668,2777, 2966,3180,}.Contains(p.id)))
 			{
 				if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvexViaVectorProd())
 				{
