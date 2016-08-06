@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 namespace lib
@@ -65,6 +66,17 @@ namespace lib
 		{
 			var path = Path.Combine(problemsDir, $"{id:000}.response.txt");
 			return !File.Exists(path) ? null : File.ReadAllText(path);
+		}
+
+		public double GetProblemResemblance(int problemId)
+		{
+			var response = FindResponse(problemId);
+			return response == null ? 0.0 : GetResemblance(response);
+		}
+
+		private double GetResemblance(string response)
+		{
+			return JObject.Parse(response)["resemblance"].Value<double>();
 		}
 
 		public void PutSolution(int id, SolutionSpec solutionSpec)

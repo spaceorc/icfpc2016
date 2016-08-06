@@ -28,13 +28,13 @@ namespace AutoSolver
 				var imperfectSolver = new ImperfectSolver();
 				foreach (var problemSpec in problemSpecs)
 				{
-					var response = repo.FindResponse(problemSpec.id);
-					if (response == null)
+					var resemblance = repo.GetProblemResemblance(problemSpec.id);
+					if (resemblance < 1.0)
 					{
 						Console.Write($"Solving {problemSpec.id}...");
-						var solutionSpec = imperfectSolver.SolveMovingInitialSquare(problemSpec);
+						var solutionSpec = TrySolveConvex(problemSpec) ?? imperfectSolver.SolveMovingInitialSquare(problemSpec);
 						var score = ProblemsSender.Post(problemSpec, solutionSpec);
-						Console.Write($" imperfect score: {score}");
+						Console.Write($" imperfect or convex score: {score}");
 
 						if (score != 1.0)
 							SolveWithProjectionSolverRunner(problemSpec);
@@ -44,6 +44,32 @@ namespace AutoSolver
 
 				Console.WriteLine("Waiting 1 minute...");
 				Thread.Sleep(TimeSpan.FromMinutes(1));
+			}
+		}
+
+		private static SolutionSpec TrySolveConvex(ProblemSpec problem)
+		{
+			if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvexViaVectorProd())
+			{
+				SolutionSpec initialSolution = null;
+				var t = new Thread(() =>
+				{
+					initialSolution = new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem);
+				})
+				{ IsBackground = true };
+				t.Start();
+				if (!t.Join(TimeSpan.FromSeconds(10)))
+				{
+					t.Abort();
+					t.Join();
+					Console.WriteLine("ImperfectSolver sucks! Skipping");
+					return null;
+				}
+				return ConvexPolygonSolver.Solve(problem.Polygons[0], initialSolution);
+			}
+			else
+			{
+				return null;
 			}
 		}
 

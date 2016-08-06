@@ -24,15 +24,21 @@ namespace lib.Api
 
         public static double Post(ProblemSpec problemSpec, SolutionSpec solutionSpec)
         {
-            var client = new ApiClient();
+	        solutionSpec = solutionSpec.Pack();
+			var client = new ApiClient();
             var repo = new ProblemsRepo();
             try
             {
-                var response = client.PostSolution(problemSpec.id, solutionSpec);
-                repo.PutResponse(problemSpec.id, response);
-                repo.PutSolution(problemSpec.id, solutionSpec);
-                var obj = JObject.Parse(response);
-                return obj["resemblance"].Value<double>();
+				var oldResemblance = repo.GetProblemResemblance(problemSpec.id);
+				var response = client.PostSolution(problemSpec.id, solutionSpec);
+				var obj = JObject.Parse(response);
+				var resemblance = obj["resemblance"].Value<double>();
+	            if (resemblance > oldResemblance)
+	            {
+		            repo.PutResponse(problemSpec.id, response);
+		            repo.PutSolution(problemSpec.id, solutionSpec);
+	            }
+	            return resemblance;
             }
             catch (Exception e)
             {
