@@ -109,8 +109,7 @@ namespace Runner
                         var solution = ProjectionSolverRunner.Solve(solver.Projection);
                         if (solution.ValidateFacetSquares())
                         {
-                            Visualize(solver, pr, cnt.ToString());
-                            GenerateOutGraph(pr, false);
+                          //  Visualize(solver, pr, cnt.ToString());
                             return solver;
                         }
                     }
