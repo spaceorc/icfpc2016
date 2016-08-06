@@ -54,11 +54,16 @@ namespace lib
 
 		public string PostSolution(int problemId, SolutionSpec solution)
 		{
+			return PostSolution(problemId, solution.ToString());
+		}
+
+		public string PostSolution(int problemId, string solution)
+		{
 			using (var client = CreateClient())
 			{
 				var content = new MultipartFormDataContent();
 				content.Add(new StringContent(problemId.ToString()), "problem_id");
-				content.Add(new StringContent(solution.ToString()), "solution_spec", "solution.txt");
+				content.Add(new StringContent(solution), "solution_spec", "solution.txt");
 				//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
 				var res = client.PostAsync($"{baseUrl}solution/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
 				if (!res.IsSuccessStatusCode)
@@ -135,6 +140,7 @@ namespace lib
 				File.WriteAllText(filepath, spec);
 			}
 		}
+
 		[Test]
 		public void ProblemsRating()
 		{
@@ -148,7 +154,7 @@ namespace lib
 				var expectedScore = p.ExpectedScore();
 				var convex = spec == null ? null : (spec.Polygons.Length == 1 && spec.Polygons[0].IsConvex()).ToString();
 				Console.WriteLine($"id={p.Id} size={p.SolutionSize} expected={expectedScore} isconvex={convex ?? "Unknown"}");
-				if(convex != null) totalConvex += expectedScore;
+				if (convex != null) totalConvex += expectedScore;
 			}
 			Console.WriteLine($"Total convex: {totalConvex}");
 		}

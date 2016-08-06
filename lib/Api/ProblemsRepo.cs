@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -41,6 +42,12 @@ namespace lib
 				.Select(p => ProblemSpec.Parse(File.ReadAllText(p), ExtractProblemId(p)));
 		}
 
+		public IEnumerable<Tuple<string, int>> GetAllProblemSpecContentAndId()
+		{
+			return Directory.GetFiles(problemsDir, "*.spec.txt")
+				.Select(p => Tuple.Create(File.ReadAllText(p), ExtractProblemId(p)));
+		}
+
 		private static int ExtractProblemId(string fileName)
 		{
 			return int.Parse(Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(fileName) ?? ""));
@@ -71,6 +78,12 @@ namespace lib
 		{
 			File.WriteAllText(GetFilename(id), problemSpec);
 		}
+
+		public string FindSolution(int id)
+		{
+			var path = Path.Combine(problemsDir, $"{id:000}.solution.txt");
+			return !File.Exists(path) ? null : File.ReadAllText(path);
+		}
 	}
 
 	[TestFixture]
@@ -81,6 +94,7 @@ namespace lib
 		{
 			new ProblemsRepo().Get(2).Should().NotBeNull();
 		}
+
 		[Test]
 		public void GetAll()
 		{

@@ -44,7 +44,7 @@ namespace lib
 		public void VisualiseSolution()
 		{
 			var problemsRepo = new ProblemsRepo();
-			var problemSpec = problemsRepo.Get(15);
+			var problemSpec = problemsRepo.Get(1170);
 			Console.WriteLine("problem");
 			Console.WriteLine(problemSpec);
 			problemSpec.CreateVisualizerForm().ShowDialog();
@@ -225,7 +225,7 @@ namespace lib
 		}
 	}
 
-	public class GraphExtensons
+	public static class GraphExtensons
 	{
 		public static Graph<Segment, Vector> CreateGraphFromSegmentsArray(Segment[] segments)
 		{
@@ -264,6 +264,26 @@ namespace lib
 				}
 			}
 			return graph;
+		}
+	}
+
+	[TestFixture]
+	public class GraphExtensions_Should
+	{
+		[Test]
+		public void DoSomething_WhenSomething()
+		{
+			var res = GraphExtensons.CreateGraphFromSegmentsArray(new[]
+			{
+				new Segment(new Vector(0, 0), new Vector(1, 0)),
+				new Segment(new Vector(0, 0), new Vector(0, 1)),
+				new Segment(new Vector(1, new Rational(1, 3)), new Vector(1, 0)),
+				new Segment(new Vector(1, new Rational(1, 3)), new Vector(1, 1)),
+				new Segment(new Vector(1, new Rational(1, 3)), new Vector(new Rational(1, 3), 1)),
+				new Segment(new Vector(0, 1), new Vector(new Rational(1, 3), 1)),
+				new Segment(new Vector(1, 1), new Vector(new Rational(1, 3), 1))
+			});
+			var cycles = new CycleFinder<Segment, Vector>(res, n => n.Data).GetCycles();
 		}
 	}
 }
