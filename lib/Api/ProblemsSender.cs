@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace lib.Api
 {
-    public class ProblemsSender
+	public class ProblemsSender
     {
 
         public static double SolveAndSend(int id)

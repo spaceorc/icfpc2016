@@ -81,6 +81,7 @@
   <ItemGroup>
     <Compile Include="Api\ApiClient.cs" />
     <Compile Include="Api\Paths.cs" />
+    <Compile Include="Api\PostResponseJson.cs" />
     <Compile Include="Api\ProblemsRepo.cs" />
     <Compile Include="Api\ProblemsSender.cs" />
     <Compile Include="Arithmetic.cs" />
@@ -138,9 +139,7 @@
     <Compile Include="Visualization\ManualSolving\PendingOperationType.cs" />
     <Compile Include="Visualization\VisualizationExtensions.cs" />
     <Compile Include="Visualization\Visualizer.cs" />
-    <Compile Include="Visualization\VisualizerForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Visualization\VisualizerForm.cs" />
     <Compile Include="Visualization\PolygonsAndSegmentsForm.cs">
       <SubType>Form</SubType>
     </Compile>

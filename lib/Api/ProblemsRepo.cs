@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace lib
@@ -79,6 +80,19 @@ namespace lib
 		public void Put(int id, string problemSpec)
 		{
 			File.WriteAllText(GetFilename(id), problemSpec);
+		}
+
+		public SnapshotJson GetSnapshot(ApiClient api)
+		{
+			var path = Path.Combine(problemsDir, $"snapshot.txt");
+			if (File.Exists(path))
+				return JsonConvert.DeserializeObject<SnapshotJson>(File.ReadAllText(path));
+			else
+			{
+				var res = api.GetLastSnapshot();
+				File.WriteAllText(path, JsonConvert.SerializeObject(res));
+				return res;
+			}
 		}
 
 		public string FindSolution(int id)

@@ -20,12 +20,8 @@ namespace SolutionVisalizer
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new VisualizerForm(GetProblemsDir()));
-		}
-
-		private static string GetProblemsDir()
-		{
-			return Path.GetFullPath("problems");
+			var form = new VisualizerForm();
+			Application.Run(form);
 		}
 	}
 }
