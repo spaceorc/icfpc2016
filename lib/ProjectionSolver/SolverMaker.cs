@@ -106,8 +106,13 @@ namespace Runner
                     {
                         solver.ProjectionScheme = pr;
                         solver.Projection=GenerateOutGraph(solver.ProjectionScheme, false);
-                        Visualize(solver, pr, cnt.ToString());
-                        break;
+                        var solution = ProjectionSolverRunner.Solve(solver.Projection);
+                        if (solution.ValidateFacetSquares())
+                        {
+                            Visualize(solver, pr, cnt.ToString());
+                            GenerateOutGraph(pr, false);
+                            return solver;
+                        }
                     }
                      
                     var st = Projector.AddVeryGoodEdges(pr);

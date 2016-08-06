@@ -60,11 +60,16 @@ namespace lib
 		public static SolutionSpec Solve(ProblemSpec problemSpec)
 		{
 			var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec));
-			var cycleFinder = new CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(
-				solver.Projection,
-				n => n.Data.Projection);
-			return GetSolution(cycleFinder);
+            return Solve(solver.Projection);
 		}
+
+        public static SolutionSpec Solve(Graph<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> graph)
+        {
+            var cycleFinder = new CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(
+                graph,
+                n => n.Data.Projection);
+            return GetSolution(cycleFinder);
+        }
 
 		private static SolutionSpec GetSolution(CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> cycleFinder)
 		{
