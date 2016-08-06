@@ -82,7 +82,7 @@ namespace lib
             var point = A2 * t2 + B2;
 
             if (IsBetween(segment.Start.X, point.X, segment.End.X) && IsBetween(segment.Start.Y, point.Y, segment.End.Y) && IsBetween(intersector.Start.X, point.X, intersector.End.X) && IsBetween(intersector.Start.Y, point.Y, intersector.End.Y))
-                return point;
+                return new Vector(point.X.Reduce(),point.Y.Reduce());
 
             return null;
         }
@@ -91,5 +91,46 @@ namespace lib
         {
             return (a - x) * (b - x) <= 0;
         }
+
+        public static Vector[] RationalTriangulate(Segment ax, Segment bx, Vector a, Vector b)
+        {
+            var ab = new Segment(a, b);
+
+            var bh_numerator = (ab.QuadratOfLength - ax.QuadratOfLength + bx.QuadratOfLength);
+            var relative_bh_length = bh_numerator / (2 *ab.QuadratOfLength);
+
+            Vector eba = new Vector(a.X - b.X, a.Y - b.Y);
+
+            var h = a + eba * relative_bh_length;
+
+            Vector oba = new Vector(-eba.Y, eba.X);
+
+            var bh2 = bh_numerator * bh_numerator / (4 * (ab.QuadratOfLength));
+
+            var multiplier2 = (bx.QuadratOfLength - bh2) / (ab.QuadratOfLength);
+            if (!IsSquare(multiplier2)) return null;
+
+            var multiplier = Sqrt(multiplier2);
+            var first = h + oba * multiplier2;
+            var second = h - oba * multiplier;
+            return new[] { first, second };
+        }
+
+	    public static Rational Distance2(Vector a, Vector b) => (b - a).Length2;
+
+	    public static Rational Distance2(Vector point, Segment segment)
+	    {
+		    var v = segment.End - segment.Start;
+		    var w = point - segment.Start;
+		    var c1 = w.ScalarProd(v);
+		    var c2 = v.ScalarProd(v);
+		    if (c1 <= 0)
+				return Distance2(point, segment.Start);
+			if (c2 <= c1)
+			    return Distance2(point, segment.End);
+		    var b = c1/c2;
+		    var pb = segment.Start + b*v;
+		    return Distance2(point, pb);
+	    }
     }
 }

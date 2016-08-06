@@ -121,6 +121,14 @@ namespace lib.Graphs
             return Node<TEdge, TNode>.Connect(nodes[index1], nodes[index2], this);
         }
 
+        public void NonDirectedConnect(int index1, int index2, TEdge edge)
+        {
+            var e = DirectedConnect(index1, index2);
+            e.Data = edge;
+            e = DirectedConnect(index2, index1);
+            e.Data = edge;
+        }
+
         public void Delete(Edge<TEdge, TNode> edge)
         {
             Node<TEdge, TNode>.Disconnect(edge);

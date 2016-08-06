@@ -13,6 +13,16 @@ namespace lib
             End = end;
         }
 
+		public Rational Distance2To(Vector p)
+		{
+			return Arithmetic.Distance2(p, this);
+		}
+
+	    public Vector ToVector()
+	    {
+		    return End -Start;
+	    }
+
         public Rational QuadratOfLength
         {
             get
