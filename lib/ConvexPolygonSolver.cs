@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
@@ -76,37 +77,41 @@ namespace lib
 			problemsRepo.PutResponse(problemId, response);*/
 		}
 
-		[Test]
-		[Explicit]
-		public void SolveAll()
+		public static void SolveAll()
 		{
 			var apiClient = new ApiClient();
 			var problemsRepo = new ProblemsRepo();
-			foreach (var problem in problemsRepo.GetAll().Where(ProblemIsNotSolved))
+			foreach (var problem in problemsRepo.GetAll().Where(x => GetProblemResemblance(x.id) < 1.0))
 			{
 				if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvexViaVectorProd())
 				{
-					Console.Out.Write($"Solving convex problem: {problem.id}...");
-					var solution = ConvexPolygonSolver.Solve(problem.Polygons[0], null);
+					Console.Write($"Problem {problem.id} is convex! Solvnig...");
+					var initialSolution = new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem, dpi: 10);
+					var solution = ConvexPolygonSolver.Solve(problem.Polygons[0], initialSolution);
 					try
 					{
 						var response = apiClient.PostSolution(problem.id, solution);
-						problemsRepo.PutSolution(problem.id, solution);
-						problemsRepo.PutResponse(problem.id, response);
-						Console.Out.WriteLine(GetResemblance(response));
+						var resemblance = GetResemblance(response);
+						if (resemblance > GetProblemResemblance(problem.id))
+						{
+							problemsRepo.PutSolution(problem.id, solution);
+							problemsRepo.PutResponse(problem.id, response);
+							Console.Write("Solution improved! ");
+						}
+						Console.WriteLine(resemblance);
 					}
 					catch (Exception e)
 					{
-						Console.Out.WriteLine(e);
+						Console.WriteLine(e);
 					}
 				}
 			}
 		}
 
-		private static bool ProblemIsNotSolved(ProblemSpec problem)
+		private static double GetProblemResemblance(int problemId)
 		{
-			var response = new ProblemsRepo().FindResponse(problem.id);
-			return response == null || GetResemblance(response) < 1.0;
+			var response = new ProblemsRepo().FindResponse(problemId);
+			return response == null ? 0.0 : GetResemblance(response);
 		}
 
 		private static double GetResemblance(string response)
