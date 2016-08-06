@@ -60,6 +60,7 @@ namespace lib
 		public static SolutionSpec Solve(ProblemSpec problemSpec)
 		{
 			var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec));
+            if (solver == null) return null;
             return Solve(solver.Projection);
 		}
 
