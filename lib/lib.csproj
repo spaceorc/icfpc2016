@@ -84,6 +84,7 @@
     <Compile Include="Api\ProblemsRepo.cs" />
     <Compile Include="Api\ProblemsSender.cs" />
     <Compile Include="Arithmetic.cs" />
+    <Compile Include="ConvexPolygonSolver.cs" />
     <Compile Include="DataScience\CombinedAccessor.cs" />
     <Compile Include="DataScience\DataConsole.cs" />
     <Compile Include="DataScience\DataConsoleBuffer.cs" />

@@ -18,6 +18,9 @@ namespace lib
 					facetsToFold.UnionWith(origSpec.GetFacetsWithPoint(i));
 			}
 
+			if (!facetsToFold.Any())
+				return origSpec;
+
 			var newSourcePoints = new List<Vector>(origSpec.SourcePoints);
 			var srcPointsMap = newSourcePoints.Select((x, i) => new { V = x, Index = i }).ToDictionary(x => x.V, x => x.Index);
 			var newDestPoints = new List<Vector>(origSpec.DestPoints);
@@ -304,6 +307,16 @@ namespace lib
 			result.SourcePoints.Should().Equal(expectedSrcPoints.Split('|').Select(Vector.Parse).ToArray());
 			result.Facets.Select(FacetToString).ToArray().Should().BeEquivalentTo(expectedFacets.Split('|'));
 			result.DestPoints.Should().Equal(expectedDestPoints.Split('|').Select(Vector.Parse).ToArray());
+		}
+
+		[Test]
+		[Explicit]
+		public void Fold_Demo()
+		{
+			var origSolution = SolutionSpec.CreateTrivial(x => x);
+			var result = origSolution.Fold("1,3/4 0,1/4");
+			result = result.Fold("1,1 1/4,0");
+			result.CreateVisualizerForm(true).ShowDialog();
 		}
 
 		private object FacetToString(Facet arg)
