@@ -3,7 +3,7 @@ using lib;
 
 namespace SquareConstructor
 {
-	static class GeometryExtensions
+	public static class GeometryExtensions
 	{
 		public static Vector? GetIntersectionWithLine(this Segment segment, Segment line)
 		{

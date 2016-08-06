@@ -91,6 +91,7 @@
     <Compile Include="DiofantEquationSolver\DiofantEquation.cs" />
     <Compile Include="Api\SnapshotRefJson.cs" />
     <Compile Include="DiofantEquationSolver\DiofantEquationSolver_Sould.cs" />
+    <Compile Include="GeometryExtensions.cs" />
     <Compile Include="Graphs\Graph.cs" />
     <Compile Include="Graphs\GraphExtensions.cs" />
     <Compile Include="ImperfectSolver.cs" />
@@ -102,6 +103,7 @@
     <Compile Include="ProjectionSolver\PointProjectionSolver.cs" />
     <Compile Include="ProjectionSolver\Projector.cs" />
     <Compile Include="ProjectionSolver\SolverMaker.cs" />
+    <Compile Include="SolutionSpecExt.cs" />
     <Compile Include="Vector.cs" />
     <Compile Include="Facet.cs" />
     <Compile Include="VectorExtensions.cs" />
