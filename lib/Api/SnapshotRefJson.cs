@@ -21,13 +21,15 @@ namespace lib
 		public string SpecHash;
 		[JsonProperty("problem_size")]
 		public int ProblemSize;
+		[JsonProperty("solution_size")]
+		public int SolutionSize;
 		[JsonProperty("ranking")]
 		public RankingJson[] Ranking;
 
 		public double ExpectedScore()
 		{
-			var n = Ranking.Count(r => r.resemblance > 0.999999);
-			return ProblemSize/(n + 1.0);
+			var n = Ranking.Count(r => r.resemblance == 1.0);
+			return SolutionSize / (n + 2.0);
 		}
 
 		[JsonProperty("problem_id")] public int Id;

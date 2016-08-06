@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 
 namespace lib
@@ -9,17 +10,16 @@ namespace lib
             return polygon.Segments.Any(segment.Equals);
         }
 
-        public static Segment GetCommonSegment(this Polygon polygon, Polygon thatPolygon)
+        public static IEnumerable<Segment> GetCommonSegments(this Polygon polygon, Polygon thatPolygon)
         {
             foreach (var thisSegment in polygon.Segments)
             {
                 foreach (var thatSegment in thatPolygon.Segments)
                 {
                     if (thisSegment.Equals(thatSegment))
-                        return thisSegment;
+                        yield return thisSegment;
                 }
             }
-            return null;
         }
     }
 }

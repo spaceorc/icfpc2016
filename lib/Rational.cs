@@ -95,16 +95,18 @@ namespace lib
 
 		public static Rational operator +(Rational r1, Rational r2)
 		{
+			var nominator = r1.Numerator*r2.Denomerator + r2.Numerator*r1.Denomerator;
 			return new Rational(
-				r1.Numerator * r2.Denomerator + r2.Numerator * r1.Denomerator,
-				r1.Denomerator * r2.Denomerator
+				nominator,
+				nominator == 0 ? 1 : r1.Denomerator * r2.Denomerator
 				).Reduce();
 		}
 		public static Rational operator -(Rational r1, Rational r2)
 		{
+			var nominator = r1.Numerator * r2.Denomerator - r2.Numerator * r1.Denomerator;
 			return new Rational(
-				r1.Numerator * r2.Denomerator - r2.Numerator * r1.Denomerator,
-				r1.Denomerator * r2.Denomerator
+				nominator,
+				nominator == 0 ? 1 : r1.Denomerator * r2.Denomerator
 				).Reduce();
 		}
 

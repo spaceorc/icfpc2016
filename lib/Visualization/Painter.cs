@@ -19,43 +19,38 @@ namespace lib
 			"E00000", "00E000", "0000E0", "E0E000", "E000E0", "00E0E0", "E0E0E0",
 		};
 
-		public void Paint(Graphics g, int size, ProblemSpec spec)
-		{
-			g.FillRectangle(Brushes.Beige, new RectangleF(0, 0, size, size));
-			var spec2 = spec.MoveToOrigin();
-			g.ScaleTransform(size/1.5f, size/1.5f);
-			var i = 0;
-			foreach (var polygon in spec2.Polygons)
-			{
-				Color color = ColorTranslator.FromHtml("#" + ColourValues[i++]);
-				PaintPolygon(g, color, polygon);
-			}
+	    public void Paint(Graphics g, int size, Polygon[] polygons, Segment[] segments)
+	    {
+            PaintBackground(g, size);
+            g.ScaleTransform(size, size);
 
-			foreach (var segment in spec2.Segments)
-			{
-				var color = Arithmetic.IsSquare(segment.QuadratOfLength) ? Color.Cyan : Color.Black;
-				PaintSegment(g, color, segment);
-                //PaintNode(g, color, segment.Start);
-                //PaintNode(g, color, segment.End);
-
-            }
+            PaintPolygons(g, polygons);
+            PaintSegments(g, segments);
         }
 
-		public void Paint(Graphics g, int size, SolutionSpec spec)
+	    public void Paint(Graphics g, int size, ProblemSpec spec)
 		{
-			g.FillRectangle(Brushes.Beige, new RectangleF(0, 0, size, size));
-			g.ScaleTransform(size, size);
-			var i = 0;
-			foreach (var polygon in spec.Polygons)
-			{
-				Color color = ColorTranslator.FromHtml("#" + ColourValues[i++]);
-				PaintPolygon(g, color, polygon);
-			}
+			PaintBackground(g, size);
+            g.ScaleTransform(size/1.5f, size/1.5f);
+
+            var spec2 = spec.MoveToOrigin();
+            PaintPolygons(g, spec2.Polygons);
+            PaintSegments(g, spec2.Segments);
+        }
+
+	    public void Paint(Graphics g, int size, SolutionSpec spec)
+		{
+            PaintBackground(g, size);
+            g.ScaleTransform(size, size);
+
+            PaintPolygons(g, spec.Polygons);
 		}
-		public void PaintDest(Graphics g, int size, SolutionSpec spec)
+
+	    public void PaintDest(Graphics g, int size, SolutionSpec spec)
 		{
-			g.FillRectangle(Brushes.Beige, new RectangleF(0, 0, size, size));
-			g.ScaleTransform(size, size);
+            PaintBackground(g, size);
+            g.ScaleTransform(size, size);
+
 			var i = 0;
 			var poly = spec.PolygonsDest;
 			var vs = poly.SelectMany(p => p.Vertices).ToList();
@@ -80,7 +75,33 @@ namespace lib
 			}
 		}
 
-		public void PaintSegment(Graphics g, Color color, Segment segment)
+	    private static void PaintBackground(Graphics g, int size)
+	    {
+	        g.FillRectangle(Brushes.Beige, new RectangleF(0, 0, size, size));
+	    }
+
+	    private void PaintPolygons(Graphics g, Polygon[] polygons)
+	    {
+	        var i = 0;
+	        foreach (var polygon in polygons)
+	        {
+	            Color color = ColorTranslator.FromHtml("#" + ColourValues[i++]);
+	            PaintPolygon(g, color, polygon);
+	        }
+	    }
+
+	    private void PaintSegments(Graphics g, Segment[] segments)
+        {
+            foreach (var segment in segments)
+            {
+                var color = Arithmetic.IsSquare(segment.QuadratOfLength) ? Color.Cyan : Color.Black;
+                PaintSegment(g, color, segment);
+                //PaintNode(g, color, segment.Start);
+                //PaintNode(g, color, segment.End);
+            }
+        }
+
+        public void PaintSegment(Graphics g, Color color, Segment segment)
 		{
 			g.DrawLine(new Pen(color, 0.005f), segment.Start.X, segment.Start.Y, segment.End.X, segment.End.Y);
 		}

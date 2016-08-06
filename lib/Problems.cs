@@ -9,6 +9,7 @@ namespace lib
 	public class Problems
 	{
 		#region kasha
+
 		public SolutionSpec Kashalot(string r1 = "1/4", string r2 = "3/4")
 		{
 			var p1 = $"{r1},{r1}";
@@ -20,11 +21,11 @@ namespace lib
 			var res = new SolutionSpec(sourcePoints, new Facet[]
 			{
 				new Facet(0, 1, 4),
-				new Facet(4,1,5),
-				new Facet(1,2,5),
-				new Facet(0,4,3),
-				new Facet(3,4,5),
-				new Facet(3,5,2),
+				new Facet(4, 1, 5),
+				new Facet(1, 2, 5),
+				new Facet(0, 4, 3),
+				new Facet(3, 4, 5),
+				new Facet(3, 5, 2),
 			},
 				destPoints
 				);
@@ -69,11 +70,13 @@ namespace lib
 		{
 			Console.WriteLine(Kashalot("4/25", "15/20"));
 		}
+
 		[Test, Explicit]
 		public void PrintKashalot2()
 		{
 			Console.WriteLine(Kashalot2());
 		}
+
 		#endregion
 
 		public SolutionSpec Triangle(Rational a, Rational b)
@@ -94,20 +97,20 @@ namespace lib
 			dst[10] = src[10].Reflect(src[11], src[13]);
 			var facets = new Facet[]
 			{
-				new Facet(0,2, 12),
-				new Facet(0,3,2),
-				new Facet(0,4,3),
-				new Facet(0,5,4),
-				new Facet(0,6,5),
-				new Facet(0,7,6),
-				new Facet(0,8,7),
-				new Facet(0,9,8),
-				new Facet(0,13,9),
-				new Facet(0,12,11, 13),
-				new Facet(1,2,12),
-				new Facet(1,11,12),
-				new Facet(10,9,13),
-				new Facet(10,11,13),
+				new Facet(0, 2, 12),
+				new Facet(0, 3, 2),
+				new Facet(0, 4, 3),
+				new Facet(0, 5, 4),
+				new Facet(0, 6, 5),
+				new Facet(0, 7, 6),
+				new Facet(0, 8, 7),
+				new Facet(0, 9, 8),
+				new Facet(0, 13, 9),
+				new Facet(0, 12, 11, 13),
+				new Facet(1, 2, 12),
+				new Facet(1, 11, 12),
+				new Facet(10, 9, 13),
+				new Facet(10, 11, 13),
 			};
 			return new SolutionSpec(src, facets, dst);
 		}
@@ -129,45 +132,59 @@ namespace lib
 					Thread.Sleep(1000);
 				}
 		}
+
 		public SolutionSpec Quatro()
 		{
-			var src = $"0,0 486602/988027,0 499/991,0 138639903002/266928338401,0 1,0 1,1 451419353/700511143,1 0,1 0,155473566/876379949 0,11/997 499/991,11/997".ToPoints();
+			var src = $"0,0 1/2,0 1,0 1,4/26 1,1 8/14,1 0,1 0,4/6 0,1/2 1/2,1/2".ToPoints();
 			var dst = src.ToArray();
-			dst[8] = src[8].Reflect(src[10], src[9]);
-			dst[7] = src[7].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]);
-			dst[6] = src[6].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]);
-			dst[5] = src[5].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]);
-			dst[4] = src[4].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]);
-			dst[3] = src[3].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]);
-			dst[2] = src[2].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]).Reflect(dst[10], dst[3]);
-			dst[1] = src[1].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]).Reflect(dst[10], dst[3]).Reflect(dst[10], dst[2]);
-			dst[0] = src[0].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]).Reflect(dst[10], dst[3]).Reflect(dst[10], dst[2]).Reflect(dst[10], dst[1]);
-			Console.WriteLine($"{dst[0]} {src[0]}");
+			dst[8] = src[8].Reflect(src[9], src[0]);
+			dst[7] = src[7].Reflect(src[9], src[0]).Reflect(dst[9], dst[8]);
+			dst[6] = src[6].Reflect(src[9], src[0]).Reflect(dst[9], dst[8]).Reflect(dst[9], dst[7]);
+			dst[5] = src[5].Reflect(src[9], src[0]).Reflect(dst[9], dst[8]).Reflect(dst[9], dst[7]);
+			dst[4] = src[4].Reflect(src[9], src[0]).Reflect(dst[9], dst[8]).Reflect(dst[9], dst[7]).Reflect(dst[9], dst[5]);
+			dst[3] = src[3].Reflect(src[9], src[0]).Reflect(dst[9], dst[8]).Reflect(dst[9], dst[7]).Reflect(dst[9], dst[5]);
+			dst[2] =
+				src[2].Reflect(src[9], src[0])
+					.Reflect(dst[9], dst[8])
+					.Reflect(dst[9], dst[7])
+					.Reflect(dst[9], dst[5])
+					.Reflect(dst[9], dst[3]);
+			dst[1] =
+				src[1].Reflect(src[9], src[0])
+					.Reflect(dst[9], dst[8])
+					.Reflect(dst[9], dst[7])
+					.Reflect(dst[9], dst[5])
+					.Reflect(dst[9], dst[3]);
+			//dst[0] = src[0].Reflect(src[10], src[9]).Reflect(dst[10], dst[8]).Reflect(dst[10], dst[6]).Reflect(dst[10], dst[3]).Reflect(dst[10], dst[2]).Reflect(dst[10], dst[1]);
+			Console.WriteLine($"{dst[1]} {src[1]}");
+			var delta = dst[1] - src[1];
+			Console.WriteLine($"{delta.X.AsFloat()} {delta.Y.AsFloat()}");
 
 			var facets = new Facet[]
 			{
-				new Facet(10, 9, 0, 1),
-				new Facet(10, 1, 2),
-				new Facet(10, 2, 3),
-				new Facet(10, 3, 4, 5, 6),
-				new Facet(10, 6, 7, 8),
-				new Facet(10, 8, 9),
-
+				new Facet(9, 0, 1),
+				new Facet(9, 1, 2, 3),
+				new Facet(9, 3, 4, 5),
+				new Facet(9, 5, 6, 7),
+				new Facet(9, 7, 8),
+				new Facet(9, 8, 0),
 			};
 			return new SolutionSpec(src, facets, dst);
-		}
-
-		[Test]
-		public void SquareRotated()
-		{
-			var src = "0,0 1,0 1,1 0,1".ToPoints();
-			Console.WriteLine(new SolutionSpec(src, new[] {new Facet(0,1,2,3)}, "4328029871649615121465353437184/8656059743299229793415925725865,-1792728671193156318471947026432/8656059743299229793415925725865 10448788414492386111887872752297/8656059743299229793415925725865,4328029871649615121465353437184/8656059743299229793415925725865 4328029871649614671950572288681/8656059743299229793415925725865,10448788414492386111887872752297/8656059743299229793415925725865 -1792728671193156318471947026432/8656059743299229793415925725865,4328029871649614671950572288681/8656059743299229793415925725865".ToPoints()));
 		}
 
 		[Test, Explicit]
 		public void PrintQuatro()
 		{
 			Check(Quatro());
+		}
+
+		[Test]
+		public void SquareRotated()
+		{
+			var src = "0,0 1,0 1,1 0,1".ToPoints();
+			Console.WriteLine(new SolutionSpec(src, new[] { new Facet(0, 1, 2, 3) },
+				"4328029871649615121465353437184/8656059743299229793415925725865,-1792728671193156318471947026432/8656059743299229793415925725865 10448788414492386111887872752297/8656059743299229793415925725865,4328029871649615121465353437184/8656059743299229793415925725865 4328029871649614671950572288681/8656059743299229793415925725865,10448788414492386111887872752297/8656059743299229793415925725865 -1792728671193156318471947026432/8656059743299229793415925725865,4328029871649614671950572288681/8656059743299229793415925725865"
+					.ToPoints()));
 		}
 
 		private static void Check(SolutionSpec solution)
