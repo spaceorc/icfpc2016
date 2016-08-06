@@ -49,14 +49,18 @@ namespace lib
 
 		public bool ValidateFacetSquares()
 		{
+			Rational totalSquare = 0;
 			foreach (var facet in Facets)
 			{
 				var sourcePolygon = new Polygon(facet.Vertices.Select(index => SourcePoints[index]).ToArray());
 				var destPolygon = new Polygon(facet.Vertices.Select(index => DestPoints[index]).ToArray());
-				if (sourcePolygon.GetUnsignedSquare() != destPolygon.GetUnsignedSquare())
+				var sourceSquare = sourcePolygon.GetUnsignedSquare();
+				if (sourceSquare != destPolygon.GetUnsignedSquare())
 					return false;
+
+				totalSquare += sourceSquare;
 			}
-			return true;
+			return totalSquare == 1;
 		}
 	}
 }
