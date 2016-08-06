@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace lib
 {
@@ -11,7 +7,7 @@ namespace lib
 	{
 		public readonly BigInteger Numerator;
 		public readonly BigInteger Denomerator;
-
+		private readonly bool Reduced;
 
         public float AsFloat()
         {
@@ -28,41 +24,34 @@ namespace lib
 		}
 
 		public Rational(BigInteger numerator, BigInteger denomerator)
+			: this(numerator, denomerator, false)
 		{
-			if (denomerator == 0) throw new ArgumentException();
+		}
+
+		private Rational(BigInteger numerator, BigInteger denomerator, bool reduced)
+		{
+			if(denomerator == BigInteger.Zero)
+				throw new ArgumentException();
 			Numerator = numerator;
 			Denomerator = denomerator;
+			Reduced = reduced;
 		}
-		
-		public static BigInteger LCM(BigInteger a, BigInteger b)
-        {
-            return a * b / GCD(a, b);
-        }
 
-		public static BigInteger GCD(BigInteger a, BigInteger b)
+		public static BigInteger LCM(BigInteger a, BigInteger b)
 		{
-			BigInteger c;
-			while (!a.IsZero)
-			{
-				c = a;
-				a = b % a;
-				b = c;
-			}
-			return b;
+			return a * b / BigInteger.GreatestCommonDivisor(a, b);
 		}
 
 		public Rational Reduce()
 		{
-			if (Numerator == 0) return new Rational(0, 1);
-			var gcd = GCD(Numerator, Denomerator);
+			if(Reduced)
+				return this;
+			if(Numerator == BigInteger.Zero)
+				return new Rational(BigInteger.Zero, BigInteger.One, true);
+			var gcd = BigInteger.GreatestCommonDivisor(Numerator, Denomerator);
 			var n = Numerator / gcd;
 			var d = Denomerator / gcd;
-			if (d < 0)
-			{
-				n = -n;
-				d = -d;
-			}
-			return new Rational(n, d);
+			return d < 0 ? new Rational(-n, -d, true) : new Rational(n, d, true);
 		}
 
 		public int ToInt()
@@ -73,7 +62,7 @@ namespace lib
 		public bool IsInt()
 		{
 			Reduce();
-			return Denomerator == 1;
+			return Denomerator == BigInteger.One;
 		}
 
 		#region Перегрузки методов
@@ -87,8 +76,7 @@ namespace lib
 
 		public override bool Equals(object obj)
 		{
-			if (obj == null) return false;
-			if (!(obj is Rational)) return false;
+			if(!(obj is Rational)) return false;
 			var r1 = Reduce();
 			var r2 = ((Rational) obj).Reduce();
 			return r1.Numerator == r2.Numerator && r1.Denomerator == r2.Denomerator;
@@ -97,7 +85,10 @@ namespace lib
 		public override int GetHashCode()
 		{
 			var r = Reduce();
-			return r.Numerator.GetHashCode() ^ r.Denomerator.GetHashCode();
+			unchecked
+			{
+				return (r.Numerator.GetHashCode() * 397) ^ r.Denomerator.GetHashCode();
+			}
 		}
 
 		#endregion
@@ -109,7 +100,7 @@ namespace lib
 			var nominator = r1.Numerator*r2.Denomerator + r2.Numerator*r1.Denomerator;
 			return new Rational(
 				nominator,
-				nominator == 0 ? 1 : r1.Denomerator * r2.Denomerator
+				nominator == BigInteger.Zero ? BigInteger.One : r1.Denomerator * r2.Denomerator
 				).Reduce();
 		}
 		public static Rational operator -(Rational r1, Rational r2)
@@ -117,33 +108,33 @@ namespace lib
 			var nominator = r1.Numerator * r2.Denomerator - r2.Numerator * r1.Denomerator;
 			return new Rational(
 				nominator,
-				nominator == 0 ? 1 : r1.Denomerator * r2.Denomerator
+				nominator == BigInteger.Zero ? BigInteger.One : r1.Denomerator * r2.Denomerator
 				).Reduce();
 		}
 
 		public static Rational operator *(Rational a, Rational b)
 		{
-			return new Rational(a.Numerator * b.Numerator, a.Denomerator * b.Denomerator);
+			return new Rational(a.Numerator * b.Numerator, a.Denomerator * b.Denomerator).Reduce();
 		}
 
 		public static Rational operator /(Rational a, Rational b)
 		{
-			return new Rational(a.Numerator * b.Denomerator, a.Denomerator * b.Numerator);
+			return new Rational(a.Numerator * b.Denomerator, a.Denomerator * b.Numerator).Reduce();
 		}
 
 
 		public static Rational operator +(Rational r1, int n2)
 		{
-			return r1 + new Rational(n2, 1);
+			return r1 + new Rational(n2, BigInteger.One, true);
 		}
 
 		public static Rational operator -(Rational r)
 		{
-			return new Rational(-r.Numerator, r.Denomerator);
+			return new Rational(-r.Numerator, r.Denomerator, r.Reduced);
 		}
 		public static implicit operator Rational(int r)
 		{
-			return new Rational(r, 1);
+			return new Rational(r, BigInteger.One, true);
 		}
 
 		public static Rational operator +(int n2, Rational r1)
@@ -167,8 +158,7 @@ namespace lib
 
 		public int CompareTo(object obj)
 		{
-			if (obj == null) throw new Exception();
-			if (!(obj is Rational)) throw new Exception();
+			if(!(obj is Rational)) throw new Exception();
 			var r = (Rational) obj;
 			return (Numerator * r.Denomerator).CompareTo(Denomerator * r.Numerator);
 		}
