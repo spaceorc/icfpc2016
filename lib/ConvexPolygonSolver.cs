@@ -29,20 +29,7 @@ namespace lib
 					return solution;
 			}
 		}
-
-		public static bool IsConvexViaVectorProd(this Polygon poly)
-		{
-			for (int i = 0; i < poly.Segments.Length; i++)
-			{
-				var thisEdge = poly.Segments[i];
-				var nextEdge = poly.Segments[(i + 1)%poly.Segments.Length];
-				var prod = thisEdge.ToVector().VectorProdLength(nextEdge.ToVector());
-				if (prod < 0)
-					return false;
 			}
-			return true;
-		}
-	}
 
 	[TestFixture, Explicit]
 	public class ConvexPolygonSolver_Should
@@ -97,7 +84,7 @@ namespace lib
 				}
 					//solution.CreateVisualizerForm(true).ShowDialog();
 				}
-
+*/
 
 			//solution.CreateVisualizerForm(false).ShowDialog();
 
@@ -109,6 +96,12 @@ namespace lib
 			problemsRepo.PutResponse(problemId, response);*/
 		}
 
+		private static SolutionSpec Solve2225(Vector shift, Polygon poly)
+		{
+			var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
+			return ConvexPolygonSolver.Solve(poly, initialSolution);
+		}
+
 		public static void SolveAll()
 		{
 			var apiClient = new ApiClient();
@@ -116,14 +109,11 @@ namespace lib
 			foreach (var problem in problemsRepo.GetAll().Where(x => GetProblemResemblance(x.id) < 1.0)
 				.Where(p => new[] {2267,2414,2668,2777, 2966,3180,}.Contains(p.id)))
 			{
-				if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvexViaVectorProd())
+				if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvex())
 				{
 					Console.Write($"Problem {problem.id} is convex! Solvnig...");
 					SolutionSpec initialSolution = null;
-					var t = new Thread(() =>
-					{
-						initialSolution = new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem);
-					})
+					var t = new Thread(() => { initialSolution = new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem); })
 					{ IsBackground = true };
 					t.Start();
 					if (!t.Join(TimeSpan.FromSeconds(10)))

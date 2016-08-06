@@ -16,6 +16,11 @@ namespace AutoSolver
 
 		static void Main(string[] args)
 		{
+			ConvexPolygonSolver_Should.SolveAll();
+		}
+
+		static void Main2(string[] args)
+		{
 			repo = new ProblemsRepo();
 			client = new ApiClient();
 
