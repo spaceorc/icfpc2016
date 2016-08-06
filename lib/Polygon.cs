@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using FluentAssertions;
 using NUnit.Framework;
-using SquareConstructor;
 
 namespace lib
 {
@@ -82,14 +81,12 @@ namespace lib
 
 		public bool IsConvex()
 		{
-			for(int i = 0; i < Vertices.Length; i++)
+			for (int i = 0; i < Segments.Length; i++)
 			{
-				var v0 = Vertices[i];
-				var v1 = Vertices[(i + 1) % Vertices.Length];
-				var v2 = Vertices[(i + 2) % Vertices.Length];
-				var vec1 = new Vector(v1.X - v0.X, v1.Y - v0.Y);
-				var vec2 = new Vector(v2.X - v1.X, v2.Y - v1.Y);
-				if(GeometryExtensions.GetAngleMeasure(vec1, vec2) > 2)
+				var thisEdge = Segments[i];
+				var nextEdge = Segments[(i + 1) % Segments.Length];
+				var prod = thisEdge.ToVector().VectorProdLength(nextEdge.ToVector());
+				if (prod < 0)
 					return false;
 			}
 			return true;
