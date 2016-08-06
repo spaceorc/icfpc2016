@@ -122,6 +122,9 @@
     <Compile Include="Visualization\VisualizerForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Visualization\PolygonsAndSegmentsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -129,6 +132,11 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Visualization\PolygonsAndSegmentsForm.resx">
+      <DependentUpon>PolygonsAndSegmentsForm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
