@@ -1,12 +1,6 @@
-﻿using lib;
-using Newtonsoft.Json.Linq;
-using Runner;
+﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace lib.Api
 {
@@ -63,10 +57,6 @@ namespace lib.Api
 		            return 0;
 				Console.WriteLine(e);
 				return 0;
-			}
-			finally
-			{
-				Thread.Sleep(1000);
 			}
 		}
 	}
