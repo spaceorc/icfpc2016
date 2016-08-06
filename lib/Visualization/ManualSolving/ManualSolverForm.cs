@@ -12,7 +12,10 @@ namespace lib.Visualization.ManualSolving
 		public ManualSolverForm(ProblemSpec problem)
 		{
 			Model = new ManualSolverModel(problem);
-			var menu = new ToolStrip();
+			var copy = new ToolStripButton("Reflect copy", null, (sender, args) => Model.StartOperation(PendingOperationType.ReflectCopy));
+			var move = new ToolStripButton("Reflect move", null, (sender, args) => Model.StartOperation(PendingOperationType.ReflectMove));
+			var cancel = new ToolStripButton("Cancel", null, (sender, args) => Model.CancelPendingOperation());
+			var menu = new ToolStrip(copy, move, cancel);
 			WindowState = FormWindowState.Maximized;
 			this.Controls.Add(menu);
 		}
@@ -26,7 +29,6 @@ namespace lib.Visualization.ManualSolving
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			base.OnMouseMove(e);
-			Text = $"{e.X} {e.Y} {e.Location}";
 			var scaleFactor = GetScaleFactor();
 			var y = new Rational(e.Y - ClientRectangle.Top, 1)/scaleFactor - Margin;
 			var x = new Rational(e.X - ClientRectangle.Left, 1)/scaleFactor - Margin;
@@ -37,7 +39,7 @@ namespace lib.Visualization.ManualSolving
 		protected override void OnClick(EventArgs e)
 		{
 			base.OnClick(e);
-			Model.ToggleHighlightedToSelected();
+			Model.SelectSegment();
 			Invalidate();
 		}
 
@@ -52,6 +54,7 @@ namespace lib.Visualization.ManualSolving
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			base.OnPaint(e);
+			Text = Model.PendingOperation.ToString();
 			var g = e.Graphics;
 			Rational margin = Margin;
 			var scaleFactor = GetScaleFactor();
