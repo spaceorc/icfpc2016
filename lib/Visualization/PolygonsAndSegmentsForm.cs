@@ -6,8 +6,7 @@ namespace lib
 {
     public class PolygonsAndSegmentsForm : Form
     {
-        private Polygon[] polygons;
-        private Segment[] segments;
+        private ProblemSpec Problem;
         private Panel panel1;
         private readonly Painter painter = new Painter();
 
@@ -18,14 +17,12 @@ namespace lib
 
         private void Panel1_Paint(object sender, PaintEventArgs e)
         {
-            painter.Paint(e.Graphics, Math.Min(panel1.ClientSize.Width, panel1.ClientSize.Height),
-                polygons ?? new Polygon[0], segments ?? new Segment[0]);
+            painter.Paint(e.Graphics, Math.Min(panel1.ClientSize.Width, panel1.ClientSize.Height), Problem);
         }
 
         public void SetData(Polygon[] polygons, Segment[] segments)
         {
-            this.polygons = polygons;
-            this.segments = segments;
+	        this.Problem = new ProblemSpec(polygons, segments);
             panel1.Invalidate();
         }
 
