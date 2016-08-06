@@ -58,7 +58,7 @@ namespace lib
 
 		public Polygon Reflect(Segment mirror)
 		{
-			return new Polygon(Vertices.Select(v => v.Reflect(mirror)).ToArray());
+			return new Polygon(Vertices.Select(v => v.Reflect(mirror)).ToArray()) {IsReflected = !IsReflected};
 		}
 
 		public Rational GetUnsignedSquare()
