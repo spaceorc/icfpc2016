@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using lib;
 using Newtonsoft.Json.Linq;
 using lib.Api;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AutoSolver
 {
@@ -19,23 +21,12 @@ namespace AutoSolver
 
 			while (true)
 			{
-				//Console.WriteLine("Downloading new problems...");
-				//var snapshot = client.GetLastSnapshot();
-				//foreach (var problem in snapshot.Problems)
-				//{
-				//	if (repo.Find(problem.Id) == null)
-				//	{
-				//		var problemSpec = client.GetBlob(problem.SpecHash);
-				//		Thread.Sleep(1000);
-				//		repo.Put(problem.Id, problemSpec);
-				//		Console.WriteLine($"Downloaded problem {problem.Id}");
-				//	}
-				//}
+				DownloadNewProblems();
 
 				Console.WriteLine("Solving...");
 				var problemSpecs = repo.GetAll();
 				var imperfectSolver = new ImperfectSolver();
-				foreach (var problemSpec in problemSpecs.Where(z=>z.id==44))
+				foreach (var problemSpec in problemSpecs)
 				{
 					var response = repo.FindResponse(problemSpec.id);
 					if (response == null)
@@ -46,20 +37,7 @@ namespace AutoSolver
 						Console.Write($" imperfect score: {score}");
 
 						if (score != 1.0)
-						{
-							var t = new Thread(() =>
-							{
-								var spec = ProjectionSolverRunner.Solve(problemSpec);
-								var ps = ProblemsSender.Post(problemSpec, spec);
-								Console.Write($" perfect score: {ps}");
-							}) { IsBackground = true };
-							t.Start();
-							if (!t.Join(TimeSpan.FromSeconds(30)))
-							{
-								t.Abort();
-								t.Join();
-							}
-						}
+							SolveWithProjectionSolverRunner(problemSpec);
 						Console.WriteLine();
 					}
 				}
@@ -67,6 +45,66 @@ namespace AutoSolver
 				Console.WriteLine("Waiting 1 minute...");
 				Thread.Sleep(TimeSpan.FromMinutes(1));
 			}
+		}
+
+		private static void DownloadNewProblems()
+		{
+			Console.WriteLine("Downloading new problems...");
+			var snapshot = client.GetLastSnapshot();
+			foreach (var problem in snapshot.Problems)
+			{
+				if (repo.Find(problem.Id) == null)
+				{
+					var problemSpec = client.GetBlob(problem.SpecHash);
+					Thread.Sleep(1000);
+					repo.Put(problem.Id, problemSpec);
+					Console.WriteLine($"Downloaded problem {problem.Id}");
+				}
+			}
+		}
+
+		private static void SolveWithProjectionSolverRunner(ProblemSpec problemSpec)
+		{
+			var originalities = new[] { 0, 0.3, 0.95 };
+			var mutex = new object();
+			var threads = originalities
+				.Select(coeff =>
+				{
+					var thread = new Thread(() =>
+					{
+						try
+						{
+							var spec = ProjectionSolverRunner.Solve(problemSpec);
+							if (spec == null)
+								return;
+							lock (mutex)
+							{
+								var ps = ProblemsSender.Post(problemSpec, spec);
+								Console.Write($" perfect score: {ps}");
+								Thread.Sleep(TimeSpan.FromSeconds(1)); // Avoid sending two solutions in 1 second
+							}
+						}
+						catch (Exception e)
+						{
+							if (e is ThreadAbortException)
+								throw;
+							Console.WriteLine($"Exception in ProjectionSolverRunner: {e}");
+						}
+					})
+					{ IsBackground = true };
+					thread.Start();
+					return thread;
+				})
+				.ToArray();
+
+			Thread.Sleep(TimeSpan.FromSeconds(30));
+
+			foreach(var t in threads)
+				if(t.IsAlive)
+				{
+					t.Abort();
+					t.Join();
+				}
 		}
 	}
 }

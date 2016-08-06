@@ -57,10 +57,10 @@ namespace lib
 
 	public static class ProjectionSolverRunner
 	{
-		public static SolutionSpec Solve(ProblemSpec problemSpec)
+		public static SolutionSpec Solve(ProblemSpec problemSpec, double originality = 0.3)
 		{
-			var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec));
-            return Solve(solver.Projection);
+			var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec), originality);
+            return solver != null ? Solve(solver.Projection) : null;
 		}
 
         public static SolutionSpec Solve(Graph<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> graph)
