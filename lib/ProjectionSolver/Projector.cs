@@ -30,8 +30,8 @@ namespace Runner
         public List<EdgeProjection> Edges = new List<EdgeProjection>();
     }
 
-    public class Projection
-    {
+     public partial class Projection
+     {
         public Graph<EdgeInfo, NodeInfo> Graph;
         public List<Segment> AllSegments;
         public Stack<ProjectionStage> Stages = new Stack<ProjectionStage>();
@@ -41,6 +41,7 @@ namespace Runner
         {
             get
             {
+
                 return Stages.SelectMany(z => z.Nodes);
             }
         }
@@ -183,6 +184,11 @@ namespace Runner
             {
                 return subs.Insides.All(z => edgesMap[z].Count != 0);
             }
+
+            public bool IsMapped(Node<EdgeInfo,NodeInfo> node)
+            {
+                return node != null && nodesMap[node].Count != 0;
+            }
         }
 
 
@@ -194,6 +200,8 @@ namespace Runner
             ep.nodesMap = p.GetNodeFunction();
             return ep;
         }
+
+
 
         public static EdgeProjection TryInsertFamily(SegmentFamilySubset subset, CurrentState state)
         {
@@ -242,6 +250,50 @@ namespace Runner
                     return stage;
                 }
             }
+            return null;
+        }
+
+
+        public class AdjoinedSegmentFamilySubset
+        {
+            public SegmentFamilySubset family;
+            public bool BeginIsAdjoined;
+            public Vector Adjoinded {  get { return BeginIsAdjoined ? family.Begin : family.End; } }
+            public Vector NotAdjoined {  get { return BeginIsAdjoined ? family.End : family.Begin; } }
+            public Node<EdgeInfo, NodeInfo> Node;
+        }
+
+
+        public static ProjectionStage TrySquashPoint(CurrentState state, AdjoinedSegmentFamilySubset first, AdjoinedSegmentFamilySubset second)
+        {
+            return null;
+        }
+
+        public static ProjectionStage FindSquashPoint(Projection p)
+        {
+            var state = GetCurrentState(p);
+            var store = new Dictionary<Node<EdgeInfo,NodeInfo>, List<AdjoinedSegmentFamilySubset>>();
+            foreach(var e in GetAllPossibleSegments(p.SegmentsFamily))
+            {
+                var start = state.GetNode(e.Begin);
+                var end = state.GetNode(e.End);
+
+                var startFound = state.IsMapped(start);
+                var endFound = state.IsMapped(end);
+
+                if (startFound && endFound) continue;
+                if (!startFound && !endFound) continue;
+
+                var a = new AdjoinedSegmentFamilySubset { BeginIsAdjoined = startFound, family = e };
+                a.Node = a.BeginIsAdjoined ? start : end;
+                if (!store.ContainsKey(a.Node)) store[a.Node] = new List<AdjoinedSegmentFamilySubset>();
+                store[a.Node].Add(a);
+            }
+
+            store = store.Where(z => z.Value.Count >= 2).ToDictionary(z => z.Key, z => z.Value);
+            
+
+
             return null;
         }
     }
