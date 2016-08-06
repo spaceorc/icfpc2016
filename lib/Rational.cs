@@ -137,6 +137,11 @@ namespace lib
 			return new Rational(r, BigInteger.One, true);
 		}
 
+		public static implicit operator Rational(string s)
+		{
+			return Rational.Parse(s);
+		}
+
 		public static Rational operator +(int n2, Rational r1)
 		{
 			return r1 + n2;

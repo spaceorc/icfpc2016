@@ -35,6 +35,14 @@ namespace lib
 			return new Vector(minX, minY);
 		}
 
+		public Vector MaxXY()
+		{
+			var vs = Polygons.SelectMany(p => p.Vertices).ToList();
+			var maxX = vs.Select(p => p.X).Max();
+			var maxY = vs.Select(p => p.Y).Max();
+			return new Vector(maxX, maxY);
+		}
+
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
