@@ -42,7 +42,6 @@ namespace lib
 			var sortByExpectedScore = new ToolStripButton("SortByScore", null, SortByExpectedScoreClick);
 			sortByExpectedScore.CheckOnClick = true;
 			var menu = new ToolStrip(sortByExpectedScore);
-			Controls.Add(menu);
 			list = new ListBox();
 			list.Width = 300;
 			list.Dock = DockStyle.Left;
@@ -64,6 +63,7 @@ namespace lib
 			Size = new Size(800, 600);
 			Controls.Add(problemPanel);
 			Controls.Add(list);
+			Controls.Add(menu);
 		}
 
 		private object[] GetItems(bool sortScore)
