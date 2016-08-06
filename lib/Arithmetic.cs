@@ -82,7 +82,7 @@ namespace lib
             var point = A2 * t2 + B2;
 
             if (IsBetween(segment.Start.X, point.X, segment.End.X) && IsBetween(segment.Start.Y, point.Y, segment.End.Y) && IsBetween(intersector.Start.X, point.X, intersector.End.X) && IsBetween(intersector.Start.Y, point.Y, intersector.End.Y))
-                return point;
+                return new Vector(point.X.Reduce(),point.Y.Reduce());
 
             return null;
         }
@@ -90,6 +90,30 @@ namespace lib
         private static bool IsBetween(Rational a, Rational x, Rational b)
         {
             return (a - x) * (b - x) <= 0;
+        }
+
+        public static Vector[] RationalTriangulate(Segment ax, Segment bx, Vector a, Vector b)
+        {
+            var ab = new Segment(a, b);
+
+            var bh_numerator = (ab.QuadratOfLength - ax.QuadratOfLength + bx.QuadratOfLength);
+            var relative_bh_length = bh_numerator / (2 *ab.QuadratOfLength);
+
+            Vector eba = new Vector(a.X - b.X, a.Y - b.Y);
+
+            var h = a + eba * relative_bh_length;
+
+            Vector oba = new Vector(-eba.Y, eba.X);
+
+            var bh2 = bh_numerator * bh_numerator / (4 * (ab.QuadratOfLength));
+
+            var multiplier2 = (bx.QuadratOfLength - bh2) / (ab.QuadratOfLength);
+            if (!IsSquare(multiplier2)) return null;
+
+            var multiplier = Sqrt(multiplier2);
+            var first = h + oba * multiplier2;
+            var second = h - oba * multiplier;
+            return new[] { first, second };
         }
     }
 }
