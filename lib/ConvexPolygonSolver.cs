@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
@@ -113,7 +114,11 @@ namespace lib
 				{
 					Console.Write($"Problem {problem.id} is convex! Solvnig...");
 					SolutionSpec initialSolution = null;
-					var t = new Thread(() => { initialSolution = new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem); })
+					var problemPolygon = problem.Polygons[0];
+					var t = new Thread(() =>
+					{
+						initialSolution = GetInitialSolutionAlongRationalEdge(problemPolygon) ?? new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem);
+					})
 					{ IsBackground = true };
 					t.Start();
 					if (!t.Join(TimeSpan.FromSeconds(10)))
@@ -123,7 +128,7 @@ namespace lib
 						Console.WriteLine("ImperfectSolver sucks! Skipping");
 						continue;
 					}
-					var solution = ConvexPolygonSolver.Solve(problem.Polygons[0], initialSolution).Pack();
+					var solution = ConvexPolygonSolver.Solve(problemPolygon, initialSolution).Pack();
 					try
 					{
 						var response = apiClient.PostSolution(problem.id, solution);
@@ -144,6 +149,28 @@ namespace lib
 			}
 		}
 
+		private static SolutionSpec GetInitialSolutionAlongRationalEdge(Polygon problemPolygon)
+		{
+			var longestRationalEdge = problemPolygon.Segments.Where(x => Arithmetic.IsSquare(x.QuadratOfLength)).OrderBy(x => x.QuadratOfLength).LastOrDefault();
+			if (longestRationalEdge == null)
+				return null;
+			return GetInitialSolutionAlongRationalEdge(longestRationalEdge);
+		}
+
+		public static SolutionSpec GetInitialSolutionAlongRationalEdge(Segment rationalEdge)
+		{
+			var initialSolution = SolutionSpec.CreateTrivial(x => x + rationalEdge.Start);
+			var edgeLen = new Rational(Arithmetic.Sqrt(rationalEdge.QuadratOfLength.Numerator), Arithmetic.Sqrt(rationalEdge.QuadratOfLength.Denomerator));
+			var a = rationalEdge.ToVector() / edgeLen;
+			var b = Vector.Parse("1,0");
+			if (b.VectorProdLength(a) == 0)
+				return initialSolution;
+			var bisect = new Rational(1, 2) * (a + b);
+			var mirror = new Segment(Vector.Parse("0,0"), bisect);
+			var reflectedDestPoints = initialSolution.DestPoints.Select(x => x.Reflect(mirror)).ToArray();
+			return new SolutionSpec(initialSolution.SourcePoints, initialSolution.Facets, reflectedDestPoints);
+		}
+
 		private static double GetProblemResemblance(int problemId)
 		{
 			var response = new ProblemsRepo().FindResponse(problemId);
@@ -153,6 +180,22 @@ namespace lib
 		private static double GetResemblance(string response)
 		{
 			return JObject.Parse(response)["resemblance"].Value<double>();
+		}
+
+		[Test]
+		public void GetInitialSolutionAlongRationalEdge_6()
+		{
+			var solution = GetInitialSolutionAlongRationalEdge("15/29,-6/29 35/29,15/29");
+			//solution.CreateVisualizerForm(true).ShowDialog();
+			solution.DestPoints.Should().Equal("15/29,-6/29|35/29,15/29|56/29,-5/29|36/29,-26/29".Split('|').Select(Vector.Parse).ToArray());
+	}
+
+		[Test]
+		public void GetInitialSolutionAlongRationalEdge_82()
+		{
+			var solution = GetInitialSolutionAlongRationalEdge("41/68,58/71 27/68,58/71");
+			//solution.CreateVisualizerForm(true).ShowDialog();
+			solution.DestPoints.Should().Equal("41/68,58/71|109/68,58/71|109/68,129/71|41/68,129/71".Split('|').Select(Vector.Parse).ToArray());
 		}
 	}
 }
