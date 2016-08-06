@@ -142,7 +142,7 @@ namespace lib
 			var snapshot = api.GetLastSnapshot();
 			foreach (var p in snapshot.Problems.OrderByDescending(p => p.ExpectedScore()))
 			{
-				Console.WriteLine($"{p.Id} {p.ExpectedScore()}");
+				Console.WriteLine($"id={p.Id} size={p.SolutionSize} expected={p.ExpectedScore()}");
 			}
 		}
 	}
