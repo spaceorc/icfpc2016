@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using FluentAssertions;
 using NUnit.Framework;
 
 namespace lib
@@ -107,7 +108,7 @@ namespace lib
 		//http://2016sv.icfpcontest.org/problem/view/3156
 		public SolutionSpec SkewedTriangle(Rational a)
 		{
-			var src = $"1/2,1/2 0,0 0,{a} 0,1 1,1 1,{1-a} 1,0".ToPoints();
+			var src = $"1/2,1/2 0,0 0,{a} 0,1 1,1 1,{1 - a} 1,0".ToPoints();
 			var dst = src.ToArray();
 			dst[2] = src[2].Reflect(dst[0], dst[1]);
 			dst[3] = src[3].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]);
@@ -128,7 +129,7 @@ namespace lib
 		[Test, Explicit]
 		public void PrintSkewedTriangleWithHole()
 		{
-			var solutionSpec = SkewedTriangleWithHole(new Rational(49,90), new Rational(1,10));
+			var solutionSpec = SkewedTriangleWithHole(new Rational(49, 90), new Rational(1, 10));
 			solutionSpec.CreateVisualizerForm(true).ShowDialog();
 			Console.WriteLine(solutionSpec);
 		}
@@ -139,6 +140,53 @@ namespace lib
 			var solutionSpec = SkewedTriangle(new Rational(12, 20));
 			solutionSpec.CreateVisualizerForm(true).ShowDialog();
 			Console.WriteLine(solutionSpec);
+		}
+
+		public SolutionSpec D4(Rational a, Rational b, Rational c, Rational d)
+		{
+			var src = $"1/2,1/2 {1 - b},0 1/2,0 0,0 0,1/2 0,1 1/2,1 {1 - a},1 1,1 1,{1 - a} 1,1/2 1,{b} 1,0 {c},{1 - c} {d},{d}".ToPoints();
+			Console.WriteLine(src.Length);
+			var dst = src.ToArray();
+			Console.WriteLine(dst.Length);
+			Action<int, int, int> r = (who, m1, m2) => dst[who] = dst[who].Reflect(dst[m1], dst[m2]);
+			r(3, 2, 14);
+			dst[4] = dst[2];
+			r(13, 0, 14); r(13, 0, 4);
+			r(5, 0, 14); r(5, 0, 4); r(5, 4, 13);
+			dst[6] = dst[2];
+			r(7, 0, 14); r(7, 0, 4); r(7, 0, 13);
+			r(12, 0, 1);
+			r(11, 0, 1); r(11, 0, 12);
+			r(10, 0, 1); r(10, 0, 12); r(10, 0, 11);
+			r(9, 0, 1); r(9, 0, 12); r(9, 0, 11); r(9, 0, 10);
+			r(8, 0, 1); r(8, 0, 12); r(8, 0, 11); r(8, 0, 10); r(8, 0, 9);
+			var facets = new Facet[]
+			{
+				new Facet(0, 1,2,14),
+				new Facet(0, 14,4),
+				new Facet(0, 4,13),
+				new Facet(0, 13,6,7),
+				new Facet(0, 7,8),
+				new Facet(0, 8,9),
+				new Facet(0, 9,10),
+				new Facet(0, 10,11),
+				new Facet(0, 11,12),
+				new Facet(0, 12,1),
+				new Facet(3,4,14),
+				new Facet(3,2,14),
+				new Facet(4,13,5),
+				new Facet(6,13,5),
+			};
+			return new SolutionSpec(src, facets, dst);
+		}
+
+		[Test]
+		public void PrintD4()
+		{
+			var sol = D4(new Rational(9,20), new Rational(19, 40), new Rational(12, 40), new Rational(13, 40));
+			sol.ValidateFacetSquares().Should().BeTrue();
+			Console.WriteLine(sol.Pack());
+			sol.CreateVisualizerForm(true).ShowDialog();
 		}
 
 		public SolutionSpec Triangle(Rational a, Rational b)
