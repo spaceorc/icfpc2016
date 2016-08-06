@@ -46,5 +46,17 @@ namespace lib
 			sb.Append(DestPoints.StrJoin(Environment.NewLine));
 			return sb.ToString();
 		}
+
+		public bool ValidateFacetSquares()
+		{
+			foreach (var facet in Facets)
+			{
+				var sourcePolygon = new Polygon(facet.Vertices.Select(index => SourcePoints[index]).ToArray());
+				var destPolygon = new Polygon(facet.Vertices.Select(index => DestPoints[index]).ToArray());
+				if (sourcePolygon.GetUnsignedSquare() != destPolygon.GetUnsignedSquare())
+					return false;
+			}
+			return true;
+		}
 	}
 }
