@@ -54,7 +54,7 @@ namespace AutoSolver
 
 		private static SolutionSpec TrySolveConvex(ProblemSpec problem)
 		{
-			if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvexViaVectorProd())
+			if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvex())
 			{
 				SolutionSpec initialSolution = null;
 				var t = new Thread(() =>
