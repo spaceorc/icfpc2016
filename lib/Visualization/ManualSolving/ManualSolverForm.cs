@@ -67,7 +67,7 @@ namespace lib.Visualization.ManualSolving
 			var scaleFactor = GetScaleFactor();
 			var y = new Rational(e.Y - ClientRectangle.Top, 1)/scaleFactor - Margin;
 			var x = new Rational(e.X - ClientRectangle.Left, 1)/scaleFactor - Margin;
-			Model.UpdateHighlightedSegment(new Vector(x, y));
+			Model.UpdateHighlightedSegment(new Vector(x, y) - Model.Shift);
 			Invalidate();
 		}
 

@@ -29,7 +29,7 @@ namespace lib.Visualization.ManualSolving
 			Problem = problem;
 			Segments = problem.Segments.ToImmutableArray();
 			SelectedSegmentIndices = ImmutableList<int>.Empty;
-			Shift = problem.MinXY();
+			Shift = -problem.MinXY();
 		}
 		public void UpdateHighlightedSegment(Vector p)
 		{
