@@ -80,19 +80,28 @@ namespace lib.Graphs
 
     public class Graph<TEdge, TNode>
     {
-        private Node<TEdge, TNode>[] nodes;
+        private List<Node<TEdge, TNode>> nodes;
 
-        public Graph(int nodesCount)
+        public Node<TEdge,TNode> AddNode()
         {
-            nodes = Enumerable.Range(0, nodesCount).Select(z => new Node<TEdge, TNode>(z)).ToArray();
+            var c = nodes.Count;
+            var node = new Node<TEdge, TNode>(c);
+            nodes.Add(node);
+            return c;
         }
 
-        public int Length { get { return nodes.Length; } }
+        
+        public Graph(int nodesCount)
+        {
+            nodes = Enumerable.Range(0, nodesCount).Select(z => new Node<TEdge, TNode>(z)).ToList();
+        }
+
+        public int Length { get { return nodes.Count; } }
 
         public Node<TEdge, TNode> this[int index] { get { return nodes[index]; } }
 
 
-        public int NodesCount {  get { return nodes.Length; } }
+        public int NodesCount {  get { return nodes.Count; } }
 
         public IEnumerable<Node<TEdge, TNode>> Nodes
         {

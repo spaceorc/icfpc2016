@@ -67,6 +67,7 @@ namespace Runner
         #endregion
 
 
+       
         public Graph<ProjectedEdgeInfo, ProjectedNodeInfo> Projection;
 
         public Graph<EdgeInfo,NodeInfo> Graph;
@@ -307,6 +308,9 @@ namespace Runner
 
             int used = 0;
 
+            AddHordes();
+
+            List<Segment> busy = new List<Segment>();
             foreach(var s in segments)
             {
                 var starts = Projection.Nodes.Where(z => z.Data.Original.Data.Location.Equals(s.Start)).ToList();
@@ -320,12 +324,40 @@ namespace Runner
                             var e = Projection.DirectedConnect(start.NodeNumber, end.NodeNumber);
                             e.Data = new ProjectedEdgeInfo { IsLate = true };
                             used++;
+                            busy.Add(s);
                         }
                     }
             }
 
             return used;
         }
+
+
+        void AddHordes()
+        {
+            var vertices = Projection.Nodes.Select(z => z.Data.Projection).ToList();
+            foreach (var start in vertices)
+                foreach (var end in vertices)
+                    foreach (var start1 in vertices)
+                        foreach (var end1 in vertices)
+                        {
+                            if (start.Equals(end)) continue;
+                            if (start1.Equals(end1)) continue;
+                            var seg = new Segment(start, end);
+                            var seg1 = new Segment(start1, end1);
+                            var intersect = Arithmetic.GetIntersection(seg, seg1);
+                            if (!intersect.HasValue) continue;
+                            var v = intersect.Value;
+                            v = new Vector(v.X.Reduce(), v.Y.Reduce());
+                            if (vertices.Contains(v)) continue;
+                            vertices.Add(v);
+                            var node = Projection.AddNode();
+                            node.Data = new ProjectedNodeInfo { Original = null, Projection = v };
+                        }
+
+        }
+
+        
 
         public bool IsCircular(Path path)
         {
