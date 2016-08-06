@@ -52,12 +52,12 @@ namespace lib
 		{
 			return JObject.Parse(Query(query));
 		}
-		
+
 		public string PostSolution(int problemId, SolutionSpec solution)
 		{
 			return PostSolution(problemId, solution.ToString());
 		}
-		
+
 		private static readonly Stopwatch sw = Stopwatch.StartNew();
 
 		public string PostSolution(int problemId, string solution)
@@ -70,11 +70,7 @@ namespace lib
 				{
 					var content = new MultipartFormDataContent();
 					content.Add(new StringContent(problemId.ToString()), "problem_id");
-			using (var client = CreateClient())
-			{
-				var content = new MultipartFormDataContent();
-				content.Add(new StringContent(problemId.ToString()), "problem_id");
-				content.Add(new StringContent(solution), "solution_spec", "solution.txt");
+					content.Add(new StringContent(solution), "solution_spec", "solution.txt");
 					//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
 					var res = client.PostAsync($"{baseUrl}solution/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
 					if (!res.IsSuccessStatusCode)
