@@ -16,7 +16,7 @@ namespace AutoSolver
 
 		static void Main(string[] args)
 		{
-			ConvexPolygonSolver_Should.SolveAll();
+			ConvexPolygonSolver.SolveAll();
 		}
 
 		static void Main2(string[] args)

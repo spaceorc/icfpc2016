@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using FluentAssertions;
@@ -30,95 +29,19 @@ namespace lib
 					return solution;
 			}
 		}
-			}
-
-	[TestFixture, Explicit]
-	public class ConvexPolygonSolver_Should
-	{
-		//[TestCase(2414)]
-		//[TestCase(2225)]
-		[TestCase(2267)]
-
-		//[TestCase(2668)]
-		//[TestCase(2777)]
-		//[TestCase(2966)]
-		//[TestCase(3180)]
-		public void Solve(int problemId)
-		{
-			var problemsRepo = new ProblemsRepo();
-			var problem = problemsRepo.Get(problemId);
-			var poly = problem.Polygons.Single();
-			var apiClient = new ApiClient();
-			var dx = (int)problem.Polygons.SelectMany(p => p.Vertices).Select(x => x.X.Denomerator).Max();
-			var dy = (int)problem.Polygons.SelectMany(p => p.Vertices).Select(x => x.Y.Denomerator).Max();
-			foreach (var x in Enumerable.Range(0, dx).Select(x => new Rational(x, dx)))
-				foreach (var y in Enumerable.Range(0, dy).Select(y => new Rational(y, dy)))
-				{
-					var shift = new Vector(x, y);
-					//var shift = new Vector(0, 0);
-					var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
-					var solution = ConvexPolygonSolver.Solve(poly, initialSolution);
-					var packedSolution = solution.Pack();
-					var packedSolutionSize = packedSolution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
-					var solutionSize = solution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
-					if (packedSolutionSize <= 5000)
-					{
-						Console.WriteLine($"{shift}: {solutionSize}; packed: {packedSolutionSize}");
-
-						try
-						{
-							var response = apiClient.PostSolution(problem.id, packedSolution);
-							var resemblance = GetResemblance(response);
-							if (resemblance > GetProblemResemblance(problem.id))
-							{
-								problemsRepo.PutSolution(problem.id, packedSolution);
-								problemsRepo.PutResponse(problem.id, response);
-								Console.Write("Solution improved! ");
-								return;
-							}
-							Console.WriteLine(resemblance);
-						}
-						catch (Exception e)
-						{
-							Console.WriteLine(e);
-						}
-				}
-					//solution.CreateVisualizerForm(true).ShowDialog();
-				}
-*/
-
-			//solution.CreateVisualizerForm(false).ShowDialog();
-
-
-/*
-			problemsRepo.PutSolution(problemId, solution);
-
-			var response = new ApiClient().PostSolution(problemId, solution);
-			problemsRepo.PutResponse(problemId, response);*/
-		}
-
-		private static SolutionSpec Solve2225(Vector shift, Polygon poly)
-		{
-			var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
-			return ConvexPolygonSolver.Solve(poly, initialSolution);
-		}
 
 		public static void SolveAll()
 		{
 			var apiClient = new ApiClient();
 			var problemsRepo = new ProblemsRepo();
-			foreach (var problem in problemsRepo.GetAll().Where(x => GetProblemResemblance(x.id) < 1.0)
-				.Where(p => new[] {2267,2414,2668,2777, 2966,3180,}.Contains(p.id)))
+			foreach (var problem in problemsRepo.GetAll().Where(x => GetProblemResemblance(x.id) < 1.0))
 			{
 				if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvex())
 				{
 					Console.Write($"Problem {problem.id} is convex! Solvnig...");
 					SolutionSpec initialSolution = null;
 					var problemPolygon = problem.Polygons[0];
-					var t = new Thread(() =>
-					{
-						initialSolution = GetInitialSolutionAlongRationalEdge(problemPolygon) ?? new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem);
-					})
+					var t = new Thread(() => { initialSolution = GetInitialSolutionAlongRationalEdge(problemPolygon) ?? new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem); })
 					{ IsBackground = true };
 					t.Start();
 					if (!t.Join(TimeSpan.FromSeconds(10)))
@@ -128,7 +51,7 @@ namespace lib
 						Console.WriteLine("ImperfectSolver sucks! Skipping");
 						continue;
 					}
-					var solution = ConvexPolygonSolver.Solve(problemPolygon, initialSolution).Pack();
+					var solution = Solve(problemPolygon, initialSolution).Pack();
 					try
 					{
 						var response = apiClient.PostSolution(problem.id, solution);
@@ -161,39 +84,100 @@ namespace lib
 		{
 			var initialSolution = SolutionSpec.CreateTrivial(x => x + rationalEdge.Start);
 			var edgeLen = new Rational(Arithmetic.Sqrt(rationalEdge.QuadratOfLength.Numerator), Arithmetic.Sqrt(rationalEdge.QuadratOfLength.Denomerator));
-			var a = rationalEdge.ToVector() / edgeLen;
+			var a = rationalEdge.ToVector()/edgeLen;
 			var b = Vector.Parse("1,0");
 			if (b.VectorProdLength(a) == 0)
 				return initialSolution;
-			var bisect = new Rational(1, 2) * (a + b);
+			var bisect = new Rational(1, 2)*(a + b);
 			var mirror = new Segment(Vector.Parse("0,0"), bisect);
 			var reflectedDestPoints = initialSolution.DestPoints.Select(x => x.Reflect(mirror)).ToArray();
 			return new SolutionSpec(initialSolution.SourcePoints, initialSolution.Facets, reflectedDestPoints);
 		}
 
-		private static double GetProblemResemblance(int problemId)
+		public static double GetProblemResemblance(int problemId)
 		{
 			var response = new ProblemsRepo().FindResponse(problemId);
 			return response == null ? 0.0 : GetResemblance(response);
 		}
 
-		private static double GetResemblance(string response)
+		public static double GetResemblance(string response)
 		{
 			return JObject.Parse(response)["resemblance"].Value<double>();
+		}
+	}
+
+	[TestFixture, Explicit]
+	public class ConvexPolygonSolver_Should
+	{
+		//[TestCase(2414)]
+		//[TestCase(2225)]
+		[TestCase(2267)]
+
+		//[TestCase(2668)]
+		//[TestCase(2777)]
+		//[TestCase(2966)]
+		//[TestCase(3180)]
+		public void Solve(int problemId)
+		{
+			var problemsRepo = new ProblemsRepo();
+			var problem = problemsRepo.Get(problemId);
+			var poly = problem.Polygons.Single();
+			var apiClient = new ApiClient();
+			var dx = (int) problem.Polygons.SelectMany(p => p.Vertices).Select(x => x.X.Denomerator).Max();
+			var dy = (int) problem.Polygons.SelectMany(p => p.Vertices).Select(x => x.Y.Denomerator).Max();
+			foreach (var x in Enumerable.Range(0, dx).Select(x => new Rational(x, dx)))
+				foreach (var y in Enumerable.Range(0, dy).Select(y => new Rational(y, dy)))
+				{
+					var shift = new Vector(x, y);
+					//var shift = new Vector(0, 0);
+					var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
+					var solution = ConvexPolygonSolver.Solve(poly, initialSolution);
+					var packedSolution = solution.Pack();
+					var packedSolutionSize = packedSolution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
+					var solutionSize = solution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
+					if (packedSolutionSize <= 5000)
+					{
+						Console.WriteLine($"{shift}: {solutionSize}; packed: {packedSolutionSize}");
+
+						try
+						{
+							var response = apiClient.PostSolution(problem.id, packedSolution);
+							var resemblance = ConvexPolygonSolver.GetResemblance(response);
+							if (resemblance > ConvexPolygonSolver.GetProblemResemblance(problem.id))
+							{
+								problemsRepo.PutSolution(problem.id, packedSolution);
+								problemsRepo.PutResponse(problem.id, response);
+								Console.Write("Solution improved! ");
+								return;
+							}
+							Console.WriteLine(resemblance);
+						}
+						catch (Exception e)
+						{
+							Console.WriteLine(e);
+						}
+					}
+				}
+		}
+
+		private static SolutionSpec Solve2225(Vector shift, Polygon poly)
+		{
+			var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
+			return ConvexPolygonSolver.Solve(poly, initialSolution);
 		}
 
 		[Test]
 		public void GetInitialSolutionAlongRationalEdge_6()
 		{
-			var solution = GetInitialSolutionAlongRationalEdge("15/29,-6/29 35/29,15/29");
+			var solution = ConvexPolygonSolver.GetInitialSolutionAlongRationalEdge("15/29,-6/29 35/29,15/29");
 			//solution.CreateVisualizerForm(true).ShowDialog();
 			solution.DestPoints.Should().Equal("15/29,-6/29|35/29,15/29|56/29,-5/29|36/29,-26/29".Split('|').Select(Vector.Parse).ToArray());
-	}
+		}
 
 		[Test]
 		public void GetInitialSolutionAlongRationalEdge_82()
 		{
-			var solution = GetInitialSolutionAlongRationalEdge("41/68,58/71 27/68,58/71");
+			var solution = ConvexPolygonSolver.GetInitialSolutionAlongRationalEdge("41/68,58/71 27/68,58/71");
 			//solution.CreateVisualizerForm(true).ShowDialog();
 			solution.DestPoints.Should().Equal("41/68,58/71|109/68,58/71|109/68,129/71|41/68,129/71".Split('|').Select(Vector.Parse).ToArray());
 		}
