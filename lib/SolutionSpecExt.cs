@@ -9,6 +9,18 @@ namespace lib
 {
 	public static class SolutionSpecExt
 	{
+		public static SolutionSpec Reflect(this SolutionSpec origSpec, Segment segment)
+		{
+			var reflectedDestPoints = origSpec.DestPoints.Select(x => x.Reflect(segment)).ToArray();
+			return new SolutionSpec(origSpec.SourcePoints, origSpec.Facets, reflectedDestPoints);
+		}
+
+		public static SolutionSpec Shift(this SolutionSpec origSpec, Vector vector)
+		{
+			var shiftedDestPoints = origSpec.DestPoints.Select(x => x + vector).ToArray();
+			return new SolutionSpec(origSpec.SourcePoints, origSpec.Facets, shiftedDestPoints);
+		}
+
 		public static SolutionSpec Fold(this SolutionSpec origSpec, Segment segment)
 		{
 			var facetsToFold = new HashSet<Facet>();

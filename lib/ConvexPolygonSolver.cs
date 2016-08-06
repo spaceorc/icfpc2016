@@ -4,6 +4,7 @@ using System.Threading;
 using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using SquareConstructor;
 
 namespace lib
 {
@@ -13,7 +14,6 @@ namespace lib
 		{
 			if (poly.GetSignedSquare() < 0)
 				throw new InvalidOperationException("poly.GetSignedSquare() < 0");
-
 			var solution = initialSolution ?? SolutionSpec.CreateTrivial(x => x);
 			while (true)
 			{
@@ -41,7 +41,16 @@ namespace lib
 					Console.Write($"Problem {problem.id} is convex! Solvnig...");
 					SolutionSpec initialSolution = null;
 					var problemPolygon = problem.Polygons[0];
-					var t = new Thread(() => { initialSolution = GetInitialSolutionAlongRationalEdge(problemPolygon) ?? new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem); })
+					var t = new Thread(() =>
+					{
+						var initialSolutionAlongRationalEdge = GetInitialSolutionAlongRationalEdge(problemPolygon);
+						if (initialSolutionAlongRationalEdge == null)
+						{
+							initialSolution = new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem);
+							return;
+						}
+						initialSolution = initialSolutionAlongRationalEdge;
+					})
 					{ IsBackground = true };
 					t.Start();
 					if (!t.Join(TimeSpan.FromSeconds(10)))
@@ -77,7 +86,16 @@ namespace lib
 			var longestRationalEdge = problemPolygon.Segments.Where(x => Arithmetic.IsSquare(x.QuadratOfLength)).OrderBy(x => x.QuadratOfLength).LastOrDefault();
 			if (longestRationalEdge == null)
 				return null;
-			return GetInitialSolutionAlongRationalEdge(longestRationalEdge);
+			var initialSolutionAlongRationalEdge = GetInitialSolutionAlongRationalEdge(longestRationalEdge);
+			var projections = problemPolygon.Vertices.Select(x => x.GetProjectionOntoLine(longestRationalEdge)).ToList();
+			var minX = projections.Min(p => p.X);
+			var minY = projections.Min(p => p.Y);
+			var maxX = projections.Max(p => p.X);
+			var maxY = projections.Max(p => p.Y);
+			var projectionsCenter = new Vector((maxX +minX)/2, (maxY + minY) / 2);
+			var squareEdgeCenter = (initialSolutionAlongRationalEdge.DestPoints[0] + initialSolutionAlongRationalEdge.DestPoints[1])/2;
+			var shift = projectionsCenter - squareEdgeCenter;
+			return initialSolutionAlongRationalEdge.Shift(shift);
 		}
 
 		public static SolutionSpec GetInitialSolutionAlongRationalEdge(Segment rationalEdge)
@@ -87,11 +105,13 @@ namespace lib
 			var a = rationalEdge.ToVector()/edgeLen;
 			var b = Vector.Parse("1,0");
 			if (b.VectorProdLength(a) == 0)
-				return initialSolution;
-			var bisect = new Rational(1, 2)*(a + b);
-			var mirror = new Segment(Vector.Parse("0,0"), bisect);
-			var reflectedDestPoints = initialSolution.DestPoints.Select(x => x.Reflect(mirror)).ToArray();
-			return new SolutionSpec(initialSolution.SourcePoints, initialSolution.Facets, reflectedDestPoints);
+			{
+				if (b.ScalarProd(a)> 0)
+					return initialSolution;
+				return initialSolution.Reflect(rationalEdge);
+			}
+			var bisect = new Segment(rationalEdge.Start, a + b + rationalEdge.Start);
+			return initialSolution.Reflect(bisect).Reflect(rationalEdge);
 		}
 
 		public static double GetProblemResemblance(int problemId)
@@ -160,18 +180,12 @@ namespace lib
 				}
 		}
 
-		private static SolutionSpec Solve2225(Vector shift, Polygon poly)
-		{
-			var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
-			return ConvexPolygonSolver.Solve(poly, initialSolution);
-		}
-
 		[Test]
 		public void GetInitialSolutionAlongRationalEdge_6()
 		{
 			var solution = ConvexPolygonSolver.GetInitialSolutionAlongRationalEdge("15/29,-6/29 35/29,15/29");
 			//solution.CreateVisualizerForm(true).ShowDialog();
-			solution.DestPoints.Should().Equal("15/29,-6/29|35/29,15/29|56/29,-5/29|36/29,-26/29".Split('|').Select(Vector.Parse).ToArray());
+			solution.DestPoints.Should().Equal("15/29,-6/29|35/29,15/29|14/29,35/29|-6/29,14/29".Split('|').Select(Vector.Parse).ToArray());
 		}
 
 		[Test]
@@ -179,7 +193,15 @@ namespace lib
 		{
 			var solution = ConvexPolygonSolver.GetInitialSolutionAlongRationalEdge("41/68,58/71 27/68,58/71");
 			//solution.CreateVisualizerForm(true).ShowDialog();
-			solution.DestPoints.Should().Equal("41/68,58/71|109/68,58/71|109/68,129/71|41/68,129/71".Split('|').Select(Vector.Parse).ToArray());
+			solution.DestPoints.Should().Equal("41/68,58/71|109/68,58/71|109/68,-13/71|41/68,-13/71".Split('|').Select(Vector.Parse).ToArray());
+		}
+
+		[Test]
+		public void GetInitialSolutionAlongRationalEdge()
+		{
+			var solution = ConvexPolygonSolver.GetInitialSolutionAlongRationalEdge("1,2 1,3");
+			//solution.CreateVisualizerForm(true).ShowDialog();
+			solution.DestPoints.Should().Equal("1,2|1,3|0,3|0,2".Split('|').Select(Vector.Parse).ToArray());
 		}
 	}
 }
