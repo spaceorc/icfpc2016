@@ -39,28 +39,9 @@ namespace lib
 				if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvex())
 				{
 					Console.Write($"Problem {problem.id} is convex! Solvnig...");
-					SolutionSpec initialSolution = null;
-					var problemPolygon = problem.Polygons[0];
-					var t = new Thread(() =>
-					{
-						var initialSolutionAlongRationalEdge = GetInitialSolutionAlongRationalEdge(problemPolygon);
-						if (initialSolutionAlongRationalEdge == null)
-						{
-							initialSolution = new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem);
-							return;
-						}
-						initialSolution = initialSolutionAlongRationalEdge;
-					})
-					{ IsBackground = true };
-					t.Start();
-					if (!t.Join(TimeSpan.FromSeconds(10)))
-					{
-						t.Abort();
-						t.Join();
-						Console.WriteLine("ImperfectSolver sucks! Skipping");
+					var solution = TrySolve(problem);
+					if (solution == null)
 						continue;
-					}
-					var solution = Solve(problemPolygon, initialSolution).Pack();
 					try
 					{
 						var response = apiClient.PostSolution(problem.id, solution);
@@ -79,6 +60,29 @@ namespace lib
 					}
 				}
 			}
+		}
+
+		public static SolutionSpec TrySolve(ProblemSpec problem)
+		{
+			if (problem.Polygons.Length > 1 || !problem.Polygons.Single().IsConvex())
+				return null;
+
+			SolutionSpec initialSolution = null;
+			var problemPolygon = problem.Polygons[0];
+			var t = new Thread(() =>
+			{
+				initialSolution = GetInitialSolutionAlongRationalEdge(problemPolygon) ?? new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem);
+			})
+			{ IsBackground = true };
+			t.Start();
+			if (!t.Join(TimeSpan.FromSeconds(10)))
+			{
+				t.Abort();
+				t.Join();
+				Console.WriteLine("ImperfectSolver sucks! Skipping");
+				return null;
+			}
+			return Solve(problemPolygon, initialSolution);
 		}
 
 		private static SolutionSpec GetInitialSolutionAlongRationalEdge(Polygon problemPolygon)

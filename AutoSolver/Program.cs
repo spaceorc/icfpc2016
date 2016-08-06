@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using lib;
-using Newtonsoft.Json.Linq;
 using lib.Api;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace AutoSolver
 {
@@ -14,12 +11,12 @@ namespace AutoSolver
 		private static ApiClient client;
 		private static ProblemsRepo repo;
 
-		static void Main(string[] args)
+		static void Main2(string[] args)
 		{
 			ConvexPolygonSolver.SolveAll();
 		}
 
-		static void Main2(string[] args)
+		static void Main(string[] args)
 		{
 			repo = new ProblemsRepo();
 			client = new ApiClient();
@@ -37,11 +34,11 @@ namespace AutoSolver
 					if (resemblance < 1.0)
 					{
 						Console.Write($"Solving {problemSpec.id}...");
-						var solutionSpec = TrySolveConvex(problemSpec) ?? imperfectSolver.SolveMovingInitialSquare(problemSpec);
+						var solutionSpec = ConvexPolygonSolver.TrySolve(problemSpec) ?? imperfectSolver.SolveMovingInitialSquare(problemSpec);
 						var score = ProblemsSender.Post(problemSpec, solutionSpec);
 						Console.Write($" imperfect or convex score: {score}");
 
-						if (score != 1.0)
+						if (score < 1.0)
 							SolveWithProjectionSolverRunner(problemSpec);
 						Console.WriteLine();
 					}
@@ -49,32 +46,6 @@ namespace AutoSolver
 
 				Console.WriteLine("Waiting 1 minute...");
 				Thread.Sleep(TimeSpan.FromMinutes(1));
-			}
-		}
-
-		private static SolutionSpec TrySolveConvex(ProblemSpec problem)
-		{
-			if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvex())
-			{
-				SolutionSpec initialSolution = null;
-				var t = new Thread(() =>
-				{
-					initialSolution = new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem);
-				})
-				{ IsBackground = true };
-				t.Start();
-				if (!t.Join(TimeSpan.FromSeconds(10)))
-				{
-					t.Abort();
-					t.Join();
-					Console.WriteLine("ImperfectSolver sucks! Skipping");
-					return null;
-				}
-				return ConvexPolygonSolver.Solve(problem.Polygons[0], initialSolution);
-			}
-			else
-			{
-				return null;
 			}
 		}
 
@@ -87,7 +58,6 @@ namespace AutoSolver
 				if (repo.Find(problem.Id) == null)
 				{
 					var problemSpec = client.GetBlob(problem.SpecHash);
-					Thread.Sleep(1000);
 					repo.Put(problem.Id, problemSpec);
 					Console.WriteLine($"Downloaded problem {problem.Id}");
 				}
