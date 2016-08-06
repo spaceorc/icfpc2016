@@ -27,6 +27,13 @@ namespace lib
 				Segments.Select(s => s.Move(-minX, -minY)).ToArray()
 				);
 		}
+		public Vector MinXY()
+		{
+			var vs = Polygons.SelectMany(p => p.Vertices).ToList();
+			var minX = vs.Select(p => p.X).Min();
+			var minY = vs.Select(p => p.Y).Min();
+			return new Vector(minX, minY);
+		}
 
 		public override string ToString()
 		{

@@ -118,8 +118,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rational_Should.cs" />
     <Compile Include="SolutionSpec_Should.cs" />
+    <Compile Include="Visualization\ManualSolving\ManualSolverForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Visualization\ManualSolving\ManualSolverForm_Should.cs" />
+    <Compile Include="Visualization\ManualSolving\ManualSolverModel.cs" />
     <Compile Include="Visualization\Painter.cs" />
     <Compile Include="Visualization\Painter_Utils.cs" />
+    <Compile Include="Visualization\ManualSolving\PendingOperationType.cs" />
     <Compile Include="Visualization\VisualizationExtensions.cs" />
     <Compile Include="Visualization\Visualizer.cs" />
     <Compile Include="Visualization\VisualizerForm.cs">
