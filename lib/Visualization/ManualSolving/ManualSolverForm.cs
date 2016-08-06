@@ -13,11 +13,10 @@ namespace lib.Visualization.ManualSolving
 		{
 			Model = new ManualSolverModel(problem);
 			var copy = new ToolStripMenuItem("Reflect copy", null, (sender, args) => ChangeModel(Model.StartOperation(PendingOperationType.ReflectCopy)));
-			//copy.ShortcutKeys = Keys.Q;
+			copy.ShortcutKeys = Keys.Q | Keys.Control;
 			var move = new ToolStripMenuItem("Reflect move", null, (sender, args) => ChangeModel(Model.StartOperation(PendingOperationType.ReflectMove)));
-			//move.ShortcutKeys = Keys.W;
+			move.ShortcutKeys = Keys.W | Keys.Control;
 			var cancel = new ToolStripMenuItem("Cancel", null, (sender, args) => ChangeModel(Model.CancelPendingOperation()));
-			//cancel.ShortcutKeys = Keys.Escape;
 			var undo = new ToolStripMenuItem("Undo", null, (sender, args) => Undo());
 			undo.ShortcutKeys = Keys.Z | Keys.Control;
 			var redo = new ToolStripMenuItem("Redo", null, (sender, args) => Redo());

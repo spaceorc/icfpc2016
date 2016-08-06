@@ -20,13 +20,7 @@ namespace SolutionVisalizer
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new VisualizerForm(GetProblemsDir(), Solve));
-		}
-
-		private static SolutionSpec Solve(ProblemSpec arg)
-		{
-			//return GraphExt.Solve(arg);
-			return new ImperfectSolver().SolveMovingInitialSquare(arg);
+			Application.Run(new VisualizerForm(GetProblemsDir()));
 		}
 
 		private static string GetProblemsDir()
