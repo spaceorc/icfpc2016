@@ -33,8 +33,8 @@ namespace lib
 			Numerator = numerator;
 			Denomerator = denomerator;
 		}
-
-        public static BigInteger LCM(BigInteger a, BigInteger b)
+		
+		public static BigInteger LCM(BigInteger a, BigInteger b)
         {
             return a * b / GCD(a, b);
         }
@@ -63,6 +63,17 @@ namespace lib
 				d = -d;
 			}
 			return new Rational(n, d);
+		}
+
+		public int ToInt()
+		{
+			return (int)BigInteger.Divide(Numerator, Denomerator);
+		}
+
+		public bool IsInt()
+		{
+			Reduce();
+			return Denomerator == 1;
 		}
 
 		#region Перегрузки методов

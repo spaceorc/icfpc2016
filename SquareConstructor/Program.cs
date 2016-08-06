@@ -12,6 +12,9 @@ namespace SquareConstructor
 	{
 		static void Main(string[] args)
 		{
+			var matrix = new SegmentsMatrix(10);
+			List<bool> successes = new List<bool>();
+			
 			var problem =
 				@"1
 10
@@ -44,7 +47,7 @@ namespace SquareConstructor
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             var form = new PolygonsAndSegmentsForm();
-            form.SetData(null, null);
+            form.SetData(spec.Polygons, polygons.SelectMany(p => p.Segments).ToArray());
             Application.Run(form);
         }
 	}

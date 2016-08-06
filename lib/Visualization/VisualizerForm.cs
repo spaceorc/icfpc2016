@@ -56,7 +56,7 @@ namespace lib
 			if (solution != null)
 			{
 				score = SolutionEvaluator.EvaluateX(problem, solution, 100);
-				Text = $"Score: {score}";
+				Text = $"Score: {score}, polygons: {problem.Polygons.Length}, isConvex: {problem.Polygons.Length == 1 && problem.Polygons[0].IsConvex()}";
 			}
 			splitContainer.Panel1.Invalidate();
 			splitContainer.Panel2.Invalidate();
