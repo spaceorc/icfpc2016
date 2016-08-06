@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -32,6 +33,7 @@ namespace lib
 		public SnapshotJson GetLastSnapshot()
 		{
 			var hash = GetSnapshots().Last().Hash;
+			Thread.Sleep(1000);
 			return GetBlob<SnapshotJson>(hash);
 		}
 

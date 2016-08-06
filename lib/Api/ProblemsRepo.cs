@@ -25,6 +25,11 @@ namespace lib
 			return ProblemSpec.Parse(File.ReadAllText(GetFilename(id)));
 		}
 
+		public ProblemSpec Find(int id)
+		{
+			return File.Exists(GetFilename(id)) ? ProblemSpec.Parse(File.ReadAllText(GetFilename(id))) : null;
+		}
+
 		private string GetFilename(int id)
 		{
 			return Path.Combine(problemsDir, $"{id:000}.spec.txt");
@@ -32,16 +37,24 @@ namespace lib
 
 		public IEnumerable<ProblemSpec> GetAll()
 		{
-			return
-				Enumerable.Range(1, int.MaxValue)
-					.Select(id => new { id, fn = GetFilename(id) })
-					.TakeWhile(p => File.Exists(p.fn))
-					.Select(p => ProblemSpec.Parse(File.ReadAllText(p.fn), p.id));
-
+			return Directory.GetFiles(problemsDir, "*.spec.txt")
+				.Select(p => ProblemSpec.Parse(File.ReadAllText(p), ExtractProblemId(p)));
 		}
+
+		private static int ExtractProblemId(string fileName)
+		{
+			return int.Parse(Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(fileName) ?? ""));
+		}
+
 		public void PutResponse(int id, string response)
 		{
 			File.WriteAllText(Path.Combine(problemsDir, $"{id:000}.response.txt"), response);
+		}
+
+		public string FindResponse(int id)
+		{
+			var path = Path.Combine(problemsDir, $"{id:000}.response.txt");
+			return !File.Exists(path) ? null : File.ReadAllText(path);
 		}
 
 		public void PutSolution(int id, SolutionSpec solutionSpec)
@@ -52,6 +65,11 @@ namespace lib
 		public void PutSolution(int id, string solutionSpec)
 		{
 			File.WriteAllText(Path.Combine(problemsDir, $"{id:000}.solution.txt"), solutionSpec);
+		}
+
+		public void Put(int id, string problemSpec)
+		{
+			File.WriteAllText(GetFilename(id), problemSpec);
 		}
 	}
 

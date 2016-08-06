@@ -44,7 +44,7 @@ namespace Runner
 		public void DoSomething_WhenSomething2()
 		{
 			var problemsRepo = new ProblemsRepo();
-			var problemSpec = problemsRepo.Get(47);
+			var problemSpec = problemsRepo.Get(845);
 			Console.WriteLine("problem");
 			Console.WriteLine(problemSpec);
 			problemSpec.CreateVisualizerForm().ShowDialog();
