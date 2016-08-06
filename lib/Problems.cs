@@ -79,6 +79,68 @@ namespace lib
 
 		#endregion
 
+		//http://2016sv.icfpcontest.org/problem/view/3356
+		public SolutionSpec SkewedTriangleWithHole(Rational a, Rational b)
+		{
+			var src = $"1/2,1/2 0,0 0,{a} 0,1 1,1 1,{1 - a} 1,0 1,{b} {1 - b / 3},{b / 3} {1 - b},0".ToPoints();
+			var dst = src.ToArray();
+			dst[2] = src[2].Reflect(dst[0], dst[1]);
+			dst[3] = src[3].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]);
+			dst[4] = src[4].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]).Reflect(dst[0], dst[3]);
+			dst[5] = src[5].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]).Reflect(dst[0], dst[3]).Reflect(dst[0], dst[4]);
+			dst[7] = src[7].Reflect(dst[0], dst[6]);
+			dst[6] = dst[6].Reflect(dst[8], dst[9]);
+			var facets = new Facet[]
+			{
+				new Facet(0, 2, 1),
+				new Facet(0, 3, 2),
+				new Facet(0, 4, 3),
+				new Facet(0, 5, 4),
+				new Facet(0, 8, 7, 5),
+				new Facet(0, 1, 9, 8),
+				new Facet(8, 9, 6),
+				new Facet(8, 6, 7)
+			};
+			return new SolutionSpec(src, facets, dst);
+		}
+
+		//http://2016sv.icfpcontest.org/problem/view/3156
+		public SolutionSpec SkewedTriangle(Rational a)
+		{
+			var src = $"1/2,1/2 0,0 0,{a} 0,1 1,1 1,{1-a} 1,0".ToPoints();
+			var dst = src.ToArray();
+			dst[2] = src[2].Reflect(dst[0], dst[1]);
+			dst[3] = src[3].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]);
+			dst[4] = src[4].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]).Reflect(dst[0], dst[3]);
+			dst[5] = src[5].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]).Reflect(dst[0], dst[3]).Reflect(dst[0], dst[4]);
+			var facets = new Facet[]
+			{
+				new Facet(0, 2, 1),
+				new Facet(0, 3, 2),
+				new Facet(0, 4, 3),
+				new Facet(0, 5, 4),
+				new Facet(0, 6, 5),
+				new Facet(0, 1, 6),
+			};
+			return new SolutionSpec(src, facets, dst);
+		}
+
+		[Test, Explicit]
+		public void PrintSkewedTriangleWithHole()
+		{
+			var solutionSpec = SkewedTriangleWithHole(new Rational(49,90), new Rational(1,10));
+			solutionSpec.CreateVisualizerForm(true).ShowDialog();
+			Console.WriteLine(solutionSpec);
+		}
+
+		[Test, Explicit]
+		public void PrintSkewedTriangle()
+		{
+			var solutionSpec = SkewedTriangle(new Rational(12, 20));
+			solutionSpec.CreateVisualizerForm(true).ShowDialog();
+			Console.WriteLine(solutionSpec);
+		}
+
 		public SolutionSpec Triangle(Rational a, Rational b)
 		{
 			var p12 = $"{a},{a}";

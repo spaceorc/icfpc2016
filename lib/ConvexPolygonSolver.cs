@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
@@ -86,7 +87,20 @@ namespace lib
 				if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvexViaVectorProd())
 				{
 					Console.Write($"Problem {problem.id} is convex! Solvnig...");
-					var initialSolution = new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem, dpi: 10);
+					SolutionSpec initialSolution = null;
+					var t = new Thread(() =>
+					{
+						initialSolution = new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem);
+					})
+					{ IsBackground = true };
+					t.Start();
+					if (!t.Join(TimeSpan.FromSeconds(10)))
+					{
+						t.Abort();
+						t.Join();
+						Console.WriteLine("ImperfectSolver sucks! Skipping");
+						continue;
+					}
 					var solution = ConvexPolygonSolver.Solve(problem.Polygons[0], initialSolution);
 					try
 					{
