@@ -133,7 +133,7 @@ namespace lib
 			}
 			catch (Exception e)
 			{
-				throw new Exception("Responce Format Error: " + resp);
+				throw new Exception($"Responce Format Error: {resp}", e);
 			}
 		}
 

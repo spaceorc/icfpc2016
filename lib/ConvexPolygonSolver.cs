@@ -25,7 +25,7 @@ namespace lib
 			for (var i = 0; i < problems.Count; i++)
 			{
 				var problem = problems[i];
-				Console.Write($"{sw.Elapsed:g} Problem {problem.id:0000} ({i:0000}/{problems.Count:0000}) ");
+				Console.Write($"{sw.Elapsed:c} Problem {problem.id:0000} ({i:0000}/{problems.Count:0000}) ");
 				var solution = TrySolveSingleProblem(problem);
 				if (solution != null)
 					ProblemsSender.Post(solution, problem.id);
@@ -51,7 +51,7 @@ namespace lib
 			else
 			{
 				convexPolygon = positivePolygon.GetConvexBoundary();
-				Console.Write("NOT_CONVEX using boundary ");
+				Console.Write("NOT_CONVEX ");
 			}
 			return TrySolveInOneShot(problem, convexPolygon);
 		}
