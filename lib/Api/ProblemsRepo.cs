@@ -47,6 +47,11 @@ namespace lib
 				.Select(p => ProblemSpec.Parse(File.ReadAllText(p), ExtractProblemId(p)));
 		}
 
+		public IEnumerable<ProblemSpec> GetAllNotSolvedPerfectly()
+		{
+			return GetAll().Where(x => GetProblemResemblance(x.id) < 1.0);
+		}
+
 		public IEnumerable<Tuple<string, int>> GetAllProblemSpecContentAndId()
 		{
 			return Directory.GetFiles(problemsDir, "*.spec.txt")
