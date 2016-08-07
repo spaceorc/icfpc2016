@@ -40,12 +40,12 @@ namespace lib.ProjectionSolver
             //    new Vector(0, 0),
             //    new Vector(2, 6));
 
-            ShowRibbonStat(ribbons.Concat(nonRibbons));
+            //ShowRibbonStat(ribbons.Concat(nonRibbons));
 
             //foreach (var e in goodTasks)
 
             //DrawProblem(5811);
-            //UltraSolver.SolveAndShow(5811);
+            UltraSolver.SolveAndShow(5157);
 //UltraSolver.SolveAndSend(41);
 
             
