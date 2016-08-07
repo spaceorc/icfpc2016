@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading;
-using SquareConstructor;
 
 namespace lib.Api
 {
@@ -14,8 +13,13 @@ namespace lib.Api
 			var res = 0.0;
 			var t = new Thread(() =>
 			{
+<<<<<<< HEAD
+				var spec = ProjectionSolverRunner.Solve(problemSpec);
+				res = Post(problemSpec.id, spec);
+=======
 				var spec = UltraSolver.AutoSolve(problemSpec);
-				res = Post(spec, problemSpec.id);
+				res = Post(problemSpec, spec);
+>>>>>>> b4fbfadfd5c0aec2dc094ddfd5b5c65f58005bcd
 			})
 			{ IsBackground = true };
 			t.Start();
@@ -27,10 +31,9 @@ namespace lib.Api
 			return res;
 		}
 
-		public static double Post(SolutionSpec solutionSpec, int problemId, bool pack = true)
+		public static double Post(int problemId, SolutionSpec solutionSpec)
 		{
-			if (pack)
-				solutionSpec = solutionSpec.Pack();
+			solutionSpec = solutionSpec.Pack();
 
 			var existingSolution = repo.FindSolution(problemId);
 			if (existingSolution == solutionSpec.ToString())
@@ -50,26 +53,19 @@ namespace lib.Api
 			return DoPost(problemId, solutionSpec);
 		}
 
-		private static double DoPost(int problemSpecId, SolutionSpec solutionSpec)
+		private static double DoPost(int problemId, SolutionSpec solutionSpec)
 		{
 			var client = new ApiClient();
 			try
 			{
-				var oldResemblance = repo.GetProblemResemblance(problemSpecId);
-				var response = client.PostSolution(problemSpecId, solutionSpec);
+				var oldResemblance = repo.GetProblemResemblance(problemId);
+				var response = client.PostSolution(problemId, solutionSpec);
 				var resemblance = repo.GetResemblance(response);
 				if (resemblance >= oldResemblance)
 				{
-					repo.PutResponse(problemSpecId, response);
-					repo.PutSolution(problemSpecId, solutionSpec);
-					if (resemblance > oldResemblance)
-					{
-						Console.ForegroundColor = resemblance >= 1.0 ? ConsoleColor.Green : ConsoleColor.White;
-						Console.Out.Write($" solution improved! new score: {resemblance} ");
-						Console.ResetColor();
-					}
-					else
-						Console.Out.Write($" just solution changed! old = new score: {resemblance} ");
+					repo.PutResponse(problemId, response);
+					repo.PutSolution(problemId, solutionSpec);
+					Console.Out.Write($" solution improved! new score: {resemblance} ");
 				}
 				return resemblance;
 			}

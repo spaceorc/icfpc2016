@@ -57,6 +57,8 @@ namespace lib.ProjectionSolver
                     ptr++;
 
                     stage.Edges.Add(new EdgeProjection { begin = begin, end = end, Segments = new List<Segment> { e.Data.segment } });
+
+                   
                 }
             return stage;
         }
@@ -87,7 +89,6 @@ namespace lib.ProjectionSolver
                     var length = new Segment(s.Projection, f.Projection).QuadratOfLength;
                     if (length != new Segment(subset.Begin, subset.End).QuadratOfLength) continue;
                     result.Add(new EdgeProjection { begin = s, end = f, Segments = subset.Insides.ToList() });
-                    
                 }
             return result;
         }
@@ -114,10 +115,17 @@ namespace lib.ProjectionSolver
 
             foreach (var subs in GetAllPossibleSegments(p.SegmentsFamily))
             {
+                var startNode = ep.GetNode(subs.Begin)?.NodeNumber;
+                var endNode = ep.GetNode(subs.End)?.NodeNumber;
+
+                //if ((startNode == 9 && endNode == 8) || (startNode == 8 && endNode == 9)) Console.Write("!");
+
+
                 var res = TryInsertFamily(subs, ep);
                 if (res != null && res.Count!=0)
                 {
                     stage.Edges.AddRange(res);
+                  //  foreach (var t in res) Console.WriteLine($"{t.begin.Original.NodeNumber} {t.end.Original.NodeNumber}");
                     return stage;
                 }
             }
@@ -159,7 +167,7 @@ namespace lib.ProjectionSolver
         }
 
 
-        public static IEnumerable<ProjectionStage> TrySquashPoint(ProjectionCurrentState state, List<AdjoinedSegmentFamilySubset> edges)
+        public static IEnumerable<ProjectionStage> TrySquashPoint(ProjectionCurrentState state, List<AdjoinedSegmentFamilySubset> edges, Projection pr)
         {
             var sizes = edges.Select(z => state.nodesMap[z.ProjectedNode].Count).ToArray();
             foreach (var p in GetCounting(sizes))
@@ -171,7 +179,7 @@ namespace lib.ProjectionSolver
                 if (vars == null) continue;
                 foreach(var v in vars)
                 {
-                    if (v.X < 0 || v.X > 1 || v.Y < 0 || v.Y > 1) continue;
+                    if (v.X < 0 || v.X > pr.SideX || v.Y < 0 || v.Y > pr.SideY) continue;
 
                     var stage = new ProjectionStage();
                     var sq= new NodeProjection { Original = edges[0].NonProjectedNode, Projection = v };
@@ -218,7 +226,7 @@ namespace lib.ProjectionSolver
             store = store.Where(z => z.Value.Count >= 2).ToDictionary(z => z.Key, z => z.Value);
 
             foreach (var e in store)
-                foreach (var st in TrySquashPoint(state, e.Value))
+                foreach (var st in TrySquashPoint(state, e.Value, p))
                     yield return st;
         }
     }

@@ -4,7 +4,9 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using lib;
 using lib.Api;
+using lib.ProjectionSolver;
 using lib.Visualization.ManualSolving;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -37,6 +39,7 @@ namespace lib
 		private Panel problemPanel;
 		private SnapshotJson snapshotJson;
 		private Dictionary<int, ProblemJson> problemsJson;
+	    private ListBox output;
 
 
 
@@ -55,8 +58,12 @@ namespace lib
 				list = new ListBox();
 				list.Width = 300;
 				list.Dock = DockStyle.Left;
-				list.BringToFront();
-				snapshotJson = repo.GetSnapshot(api);
+                list.BringToFront();
+
+                output = new ListBox();
+                output.Dock = DockStyle.Bottom;
+
+                snapshotJson = repo.GetSnapshot(api);
 				problemsJson = snapshotJson.Problems.ToDictionary(p => p.Id, p => p);
 
 				list.Items.AddRange(GetItems(false));
@@ -72,6 +79,7 @@ namespace lib
 
 				Size = new Size(800, 600);
 				Controls.Add(problemPanel);
+				Controls.Add(output);
 				Controls.Add(list);
 				Controls.Add(menu);
 			}
@@ -165,8 +173,11 @@ namespace lib
 			{
 				try
 				{
+                    
 					painter.Paint(graphics, Math.Min(clientSize.Height, clientSize.Width), problem);
 					Text = problem.id.ToString();
+
+                    PaintRibbonGistToOutput();
 				}
 				catch
 				{
@@ -174,9 +185,25 @@ namespace lib
 				}
 			}
 		}
-	}
 
-	[TestFixture]
+	    private void PaintRibbonGistToOutput()
+	    {
+            var solver = SolverMaker.CreateSolver(problem);
+	        var gist = RibbonIndicator.RibbonGist(solver);
+	        var r = RibbonIndicator.Indicate(gist);
+	        output.Items.Clear();
+	        if (r.HasValue)
+	        {
+	            output.Items.Add("RIBBON!");
+	        }
+	        foreach (var g in gist)
+	        {
+	            output.Items.Add(string.Format("{0}\t{1}", g.Key, g.Value));
+	        }
+	    }
+    }
+
+    [TestFixture]
 	public class VisualizerForm_Should
 	{
 		[Test]

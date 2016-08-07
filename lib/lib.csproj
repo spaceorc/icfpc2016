@@ -121,9 +121,12 @@
     <Compile Include="ProjectionSolver\PointProjectionSolver.cs" />
     <Compile Include="ProjectionSolver\ProjectionDataClasses.cs" />
     <Compile Include="ProjectionSolver\Projector.cs" />
+    <Compile Include="ProjectionSolver\RibbonIndicator.cs" />
     <Compile Include="ProjectionSolver\SegmentFamily.cs" />
     <Compile Include="ProjectionSolver\SegmentFamilySubset.cs" />
+    <Compile Include="ProjectionSolver\SolutionSpecBuilder.cs" />
     <Compile Include="ProjectionSolver\SolverMaker.cs" />
+    <Compile Include="ProjectionSolver\UltraSolver.cs" />
     <Compile Include="ProjectionSolver\WayFinder.cs" />
     <Compile Include="SolutionPacker.cs" />
     <Compile Include="SolutionSpecExt.cs" />

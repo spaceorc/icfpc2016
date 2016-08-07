@@ -12,6 +12,10 @@ namespace lib.ProjectionSolver
     {
         public Node<EdgeInfo, NodeInfo> Original;
         public Vector Projection;
+        public override string ToString()
+        {
+            return Original.NodeNumber + " -> " + Projection.ToString();
+        }
     }
 
     public class EdgeProjection

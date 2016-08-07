@@ -18,7 +18,7 @@ namespace lib.ProjectionSolver
                 yield return path;
                 yield break;
             }
-            if (path.length > 1 || path.originality < originalityBorder)
+            if (path.length > 1 || path.originalityByVertices < originalityBorder)
                 yield break;
 
 

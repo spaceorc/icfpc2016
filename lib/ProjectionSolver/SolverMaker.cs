@@ -67,7 +67,7 @@ namespace lib.ProjectionSolver
             var viz = new GraphVisualizer<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>();
             viz.GetX = z => z.Data.Projection.X;
             viz.GetY = z => z.Data.Projection.Y;
-            viz.NodeCaption = z => z.Data.Original.Data.Location.ToString();
+           // viz.NodeCaption = z => z.Data.Original.Data.Location.ToString();
             viz.Window(500, gr, name);
         }
 
@@ -77,9 +77,8 @@ namespace lib.ProjectionSolver
             if (!pr.IsCompleteProjection()) return false;
             solver.ProjectionScheme = pr;
             solver.Projection = GenerateOutGraph(solver.ProjectionScheme, false);
-            var solution = ProjectionSolverRunner.Solve(solver.Projection);
-            if (solution.AreFacetsValid(pr.SideY*pr.SideX)) return true;
-            return false;
+            var solution = SolutionSpecBuilder.BuildSolutionByGraph(solver.Projection);
+            return solution.AreFacetsValid(pr.SideY*pr.SideX);
         }
 
 
@@ -96,7 +95,7 @@ namespace lib.ProjectionSolver
         {
             while (true)
             {
-                //Visualize(solver, pr);
+              //  Visualize(solver, pr);
                 if (EvaluateProjection(solver, pr)) return solver;
                 var hordEdgeStage = Projector.AddVeryGoodEdges(pr);
                 if (hordEdgeStage != null)
@@ -115,7 +114,9 @@ namespace lib.ProjectionSolver
             var pr = new Projection(solver.Graph, solver.AllSegments, solver.SegmentFamilies, cycle[0].length, cycle[1].length);
             pr.Stages.Push(Projector.CreateInitialProjection(cycle, pr));
 
-            //Visualize(solver, pr, cycleCounter.ToString());
+			//Console.WriteLine(string.Join(" ||| ", cycle));
+           // Visualize(solver, pr, cycleCounter.ToString());
+			
 
             var res=TryHordEdges(solver, pr);
             if (res != null) return res;
@@ -132,20 +133,33 @@ namespace lib.ProjectionSolver
         static int cycleCounter = 0;
 
 
-        public static PointProjectionSolver Solve(PointProjectionSolver solver, Rational otherSide, double originality=0)
+        public static PointProjectionSolver Solve(PointProjectionSolver solver, Rational otherSide, double metricaBorder = 0, bool usePerimeterFinder = true)
         {
-            var pathes = Pathfinder.FindAllPathes(solver.Graph, 1, originality);
-            var ps1 = pathes.ToList();
+	        IEnumerable<List<PPath>> cycles;
+	        if (usePerimeterFinder)
+	        {
+		        var pathLengths = new [] { 1, otherSide, 1, otherSide };
+		        var wayFinder = new WayFinder(solver.Graph, pathLengths.Distinct().ToList());
+				cycles = new PerimeterFinder(wayFinder, pathLengths).Find();
+	        }
+	        else
+	        {
+		        var originality = metricaBorder;
+		        var pathes = Pathfinder.FindAllPathes(solver.Graph, 1, originality);
+		        var ps1 = pathes.ToList();
 
-            var ps2 = otherSide == 1 ? ps1.ToList() : Pathfinder.FindAllPathes(solver.Graph, otherSide, originality).ToList();
+		        var ps2 = otherSide == 1
+			        ? ps1.ToList()
+			        : Pathfinder.FindAllPathes(solver.Graph, otherSide, originality).ToList();
 
-            var cycles = Pathfinder.FindAllCycles(ps1, ps2).ToList();
+		        cycles = Pathfinder.FindAllCycles(ps1, ps2);
+	        }
 
-            //var cs = cycles.ToList();
+	        //var cs = cycles.ToList();
 
             cycleCounter = -1;
 
-            foreach (var c in cycles.Skip(1))
+            foreach (var c in cycles)
             {
                 cycleCounter++;
                 var res = TryCycle(solver, c);
