@@ -28,7 +28,7 @@ namespace lib
 				Console.Write($"{sw.Elapsed:c} Problem {problem.id:0000} ({i:0000}/{problems.Count:0000}) ");
 				var solution = TrySolveSingleProblem(problem);
 				if (solution != null)
-					ProblemsSender.Post(solution, problem.id);
+					ProblemsSender.Post(solution, problem.id, storeSolutionWithSameResemblance: true);
 				else
 				{
 					Console.ForegroundColor = ConsoleColor.Yellow;

@@ -26,7 +26,7 @@ namespace lib.Api
 			return res;
 		}
 
-		public static double Post(SolutionSpec solutionSpec, int problemId, bool pack = true)
+		public static double Post(SolutionSpec solutionSpec, int problemId, bool pack = true, bool storeSolutionWithSameResemblance = false)
 		{
 			if (pack)
 				solutionSpec = solutionSpec.Pack();
@@ -48,10 +48,10 @@ namespace lib.Api
 				return 0;
 			}
 
-			return DoPost(problemId, solutionSpec);
+			return DoPost(problemId, solutionSpec, storeSolutionWithSameResemblance);
 		}
 
-		private static double DoPost(int problemSpecId, SolutionSpec solutionSpec)
+		private static double DoPost(int problemSpecId, SolutionSpec solutionSpec, bool storeSolutionWithSameResemblance)
 		{
 			var client = new ApiClient();
 			try
@@ -61,8 +61,11 @@ namespace lib.Api
 				var resemblance = repo.GetResemblance(response);
 				if (resemblance >= oldResemblance)
 				{
-					repo.PutResponse(problemSpecId, response);
-					repo.PutSolution(problemSpecId, solutionSpec);
+					if (resemblance > oldResemblance || storeSolutionWithSameResemblance)
+					{
+						repo.PutResponse(problemSpecId, response);
+						repo.PutSolution(problemSpecId, solutionSpec);
+					}
 					if (resemblance > oldResemblance)
 					{
 						Console.ForegroundColor = resemblance >= 1.0 ? ConsoleColor.Green : ConsoleColor.White;
