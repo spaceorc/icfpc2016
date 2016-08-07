@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 namespace lib
@@ -67,6 +68,17 @@ namespace lib
 			return !File.Exists(path) ? null : File.ReadAllText(path);
 		}
 
+		public double GetProblemResemblance(int problemId)
+		{
+			var response = FindResponse(problemId);
+			return response == null ? 0.0 : GetResemblance(response);
+		}
+
+		private double GetResemblance(string response)
+		{
+			return JObject.Parse(response)["resemblance"].Value<double>();
+		}
+
 		public void PutSolution(int id, SolutionSpec solutionSpec)
 		{
 			File.WriteAllText(Path.Combine(problemsDir, $"{id:000}.solution.txt"), solutionSpec.ToString());
@@ -85,14 +97,12 @@ namespace lib
 		public SnapshotJson GetSnapshot(ApiClient api)
 		{
 			var path = Path.Combine(problemsDir, $"snapshot.txt");
-			if (File.Exists(path))
-				return JsonConvert.DeserializeObject<SnapshotJson>(File.ReadAllText(path));
-			else
+			if (!File.Exists(path) || File.GetLastWriteTime(path) < DateTime.Now - TimeSpan.FromHours(1))
 			{
-				var res = api.GetLastSnapshot();
-				File.WriteAllText(path, JsonConvert.SerializeObject(res));
-				return res;
+				var res = api.GetLastSnapshotString();
+				File.WriteAllText(path, res);
 			}
+			return JsonConvert.DeserializeObject<SnapshotJson>(File.ReadAllText(path));
 		}
 
 		public string FindSolution(int id)

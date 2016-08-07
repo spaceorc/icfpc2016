@@ -37,6 +37,12 @@ namespace lib
 			Thread.Sleep(1000);
 			return GetBlob<SnapshotJson>(hash);
 		}
+		public string GetLastSnapshotString()
+		{
+			var hash = GetSnapshots().Last().Hash;
+			Thread.Sleep(1000);
+			return GetBlob(hash);
+		}
 
 		public string GetBlob(string hash)
 		{

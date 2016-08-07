@@ -1,19 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using lib;
 
 namespace SquareConstructor
 {
 	public static class GeometryExtensions
 	{
+		public static Vector GetProjectionOntoLine(this Vector point, Segment line)
+		{
+			var lineVector = line.ToVector();
+			var perp = new Vector(-lineVector.Y, lineVector.X);
+			var projectionOntoLine = new Segment(point, point + perp).GetLineIntersectionWithLine(line).Value;
+			return projectionOntoLine;
+		}
+
 		public static Vector? GetIntersectionWithLine(this Segment segment, Segment line)
 		{
-			var A1 = segment.End - segment.Start;
-			var B1 = segment.Start;
+			var point = GetLineIntersectionWithLine(segment, line);
+			if (point.HasValue)
+			{
+				if (IsBetween(segment.Start.X, point.Value.X, segment.End.X) && IsBetween(segment.Start.Y, point.Value.Y, segment.End.Y))
+					return point;
+			}
+			return null;
+		}
 
-			var A2 = line.End - line.Start;
-			var B2 = line.Start;
+		public static Vector? GetLineIntersectionWithLine(this Segment thisLine, Segment otherLine)
+		{
+			var A1 = thisLine.End - thisLine.Start;
+			var B1 = thisLine.Start;
+
+			var A2 = otherLine.End - otherLine.Start;
+			var B2 = otherLine.Start;
 
 			var denominator = A1.Y*A2.X - A2.Y*A1.X;
 
@@ -21,13 +38,7 @@ namespace SquareConstructor
 				return null;
 
 			var t2 = ((B2.Y - B1.Y) * A1.X + (B1.X - B2.X) * A1.Y) / denominator;
-
-			var point = A2 * t2 + B2;
-
-			if (IsBetween(segment.Start.X, point.X, segment.End.X) && IsBetween(segment.Start.Y, point.Y, segment.End.Y))
-				return point;
-
-			return null;
+			return A2 * t2 + B2;
 		}
 
 		public static Vector? GetIntersection(this Segment segment, Segment intersector)

@@ -17,11 +17,13 @@ namespace lib
 		public ProblemSpec Spec;
 		public double ExpectedScore;
 		public double OurResemblance;
+		public ProblemJson json;
+		public string Owner => json?.Owner ?? "";
 		public bool IsSolved => OurResemblance == 1.0;
 
 		public override string ToString()
 		{
-			return $"{Id} Exp {ExpectedScore:#} {(IsSolved ? "SOLVED" : OurResemblance.ToString("#.###"))}";
+			return $"{Id} Exp {ExpectedScore:#} {(IsSolved ? "SOLVED" : OurResemblance.ToString("#.###"))} {Owner}";
 		}
 	}
 
@@ -41,7 +43,8 @@ namespace lib
 		{
 			var sortByExpectedScore = new ToolStripButton("SortByScore", null, SortByExpectedScoreClick);
 			sortByExpectedScore.CheckOnClick = true;
-			var menu = new ToolStrip(sortByExpectedScore);
+			var solve = new ToolStripButton("Solve", null, SolveClick);
+			var menu = new ToolStrip(sortByExpectedScore, solve);
 			list = new ListBox();
 			list.Width = 300;
 			list.Dock = DockStyle.Left;
@@ -66,6 +69,12 @@ namespace lib
 			Controls.Add(menu);
 		}
 
+		private void SolveClick(object sender, EventArgs e)
+		{
+			var res = ProblemsSender.TrySolveAndSend(problem);
+			MessageBox.Show($"resemblance = {res}");
+		}
+
 		private object[] GetItems(bool sortScore)
 		{
 			var allItems = repo.GetAll().Select(CreateItem);
@@ -87,7 +96,10 @@ namespace lib
 				res.OurResemblance = json.resemblance;
 			}
 			if (problemsJson.ContainsKey(problem.id))
+			{
+				res.json = problemsJson[problem.id];
 				res.ExpectedScore = problemsJson[problem.id].ExpectedScore();
+			}
 			return res;
 		}
 

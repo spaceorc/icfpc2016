@@ -102,24 +102,25 @@ namespace lib.ProjectionSolver
 
 		static void Main(string[] args)
 		{
+			ConvexPolygonSolver.SolveAll();
+			return;
+			//Arithmetic.RationalTriangulate(
+			//    new Segment(new Vector(0,0), new Vector(3, 3)),
+			//    new Segment(new Vector(3, 3), new Vector(2, 6)),
+			//    new Vector(0, 0),
+			//    new Vector(2, 6));
 
-            //Arithmetic.RationalTriangulate(
-            //    new Segment(new Vector(0,0), new Vector(3, 3)),
-            //    new Segment(new Vector(3, 3), new Vector(2, 6)),
-            //    new Vector(0, 0),
-            //    new Vector(2, 6));
+			//
 
-            //
-
-           // DrawPathGraph(49);return;
+			// DrawPathGraph(49);return;
          //  SolveAndSend(1763); return;
 
-            //  SolveAndSend(40);return;
-            // DrawProblem(17);
+			//  SolveAndSend(40);return;
+			// DrawProblem(17);
 
 
-            //что не так с 42?
-            var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
+			//что не так с 42?
+			var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
          //   foreach (var e in goodTasks) SolveAndSend(e,false);
             SolveTask(15);
 

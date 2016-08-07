@@ -113,6 +113,7 @@
     <Compile Include="ProjectionSolver\SegmentFamily.cs" />
     <Compile Include="ProjectionSolver\SegmentFamilySubset.cs" />
     <Compile Include="ProjectionSolver\SolverMaker.cs" />
+    <Compile Include="SolutionPacker.cs" />
     <Compile Include="SolutionSpecExt.cs" />
     <Compile Include="SolvedProblemsFinder.cs" />
     <Compile Include="Vector.cs" />
