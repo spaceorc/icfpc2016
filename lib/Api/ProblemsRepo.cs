@@ -80,7 +80,7 @@ namespace lib
 			return response == null ? 0.0 : GetResemblance(response);
 		}
 
-		private double GetResemblance(string response)
+		public double GetResemblance(string response)
 		{
 			return JObject.Parse(response)["resemblance"].Value<double>();
 		}

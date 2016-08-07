@@ -138,8 +138,8 @@ namespace lib
 						try
 						{
 							var response = apiClient.PostSolution(problem.id, packedSolution);
-							var resemblance = ConvexPolygonSolver.GetResemblance(response);
-							if (resemblance > ConvexPolygonSolver.GetProblemResemblance(problem.id))
+							var resemblance = problemsRepo.GetResemblance(response);
+							if (resemblance > problemsRepo.GetProblemResemblance(problem.id))
 							{
 								problemsRepo.PutSolution(problem.id, packedSolution);
 								problemsRepo.PutResponse(problem.id, response);
