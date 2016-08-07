@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using FluentAssertions;
-using Newtonsoft.Json.Linq;
+using lib.Api;
 using NUnit.Framework;
 using SquareConstructor;
 
@@ -30,36 +30,37 @@ namespace lib
 			}
 		}
 
-		public static void SolveAll()
+		public static void SolveAllNotSolvedPerfectly()
 		{
-			var apiClient = new ApiClient();
 			var problemsRepo = new ProblemsRepo();
-			foreach (var problem in problemsRepo.GetAll().Where(x => GetProblemResemblance(x.id) < 1.0))
+			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly().Reverse())
 			{
-				if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvex())
+				if (problem.Polygons.Length == 1)
 				{
-					Console.Write($"Problem {problem.id} is convex! Solvnig...");
-					var solution = TrySolve(problem);
-					if (solution == null)
-						continue;
-					try
+					SolutionSpec solution;
+					if (problem.Polygons.Single().IsConvex())
 					{
-						var response = apiClient.PostSolution(problem.id, solution);
-						var resemblance = GetResemblance(response);
-						if (resemblance > GetProblemResemblance(problem.id))
-						{
-							problemsRepo.PutSolution(problem.id, solution);
-							problemsRepo.PutResponse(problem.id, response);
-							Console.Write("Solution improved! ");
-						}
-						Console.WriteLine(resemblance);
+						Console.Write($"Problem {problem.id} is convex! Solvnig...");
+						solution = TrySolve(problem);
 					}
-					catch (Exception e)
+					else
 					{
-						Console.WriteLine(e);
+						Console.Write($"Problem {problem.id} is not convex! Solvnig using convex boundary...");
+						solution = TrySolveWithBoundary(problem);
 					}
+					if (solution != null)
+						ProblemsSender.Post(problem, solution);
+					Console.WriteLine();
 				}
 			}
+		}
+
+		public static SolutionSpec TrySolveWithBoundary(ProblemSpec problem)
+		{
+			if (problem.Polygons.Length > 1)
+				return null;
+			var convexProblem = new ProblemSpec(new [] {problem.Polygons.Single().GetConvexBoundary()}, problem.Segments);
+			return TrySolve(convexProblem);
 		}
 
 		public static SolutionSpec TrySolve(ProblemSpec problem)
@@ -96,7 +97,7 @@ namespace lib
 			var minY = projections.Min(p => p.Y);
 			var maxX = projections.Max(p => p.X);
 			var maxY = projections.Max(p => p.Y);
-			var projectionsCenter = new Vector((maxX +minX)/2, (maxY + minY) / 2);
+			var projectionsCenter = new Vector((maxX + minX)/2, (maxY + minY)/2);
 			var squareEdgeCenter = (initialSolutionAlongRationalEdge.DestPoints[0] + initialSolutionAlongRationalEdge.DestPoints[1])/2;
 			var shift = projectionsCenter - squareEdgeCenter;
 			return initialSolutionAlongRationalEdge.Shift(shift);
@@ -110,23 +111,12 @@ namespace lib
 			var b = Vector.Parse("1,0");
 			if (b.VectorProdLength(a) == 0)
 			{
-				if (b.ScalarProd(a)> 0)
+				if (b.ScalarProd(a) > 0)
 					return initialSolution;
 				return initialSolution.Reflect(rationalEdge);
 			}
 			var bisect = new Segment(rationalEdge.Start, a + b + rationalEdge.Start);
 			return initialSolution.Reflect(bisect).Reflect(rationalEdge);
-		}
-
-		public static double GetProblemResemblance(int problemId)
-		{
-			var response = new ProblemsRepo().FindResponse(problemId);
-			return response == null ? 0.0 : GetResemblance(response);
-		}
-
-		public static double GetResemblance(string response)
-		{
-			return JObject.Parse(response)["resemblance"].Value<double>();
 		}
 	}
 
@@ -157,8 +147,8 @@ namespace lib
 					var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
 					var solution = ConvexPolygonSolver.Solve(poly, initialSolution);
 					var packedSolution = solution.Pack();
-					var packedSolutionSize = packedSolution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
-					var solutionSize = solution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
+					var packedSolutionSize = packedSolution.Size();
+					var solutionSize = solution.Size();
 					if (packedSolutionSize <= 5000)
 					{
 						Console.WriteLine($"{shift}: {solutionSize}; packed: {packedSolutionSize}");
@@ -166,8 +156,8 @@ namespace lib
 						try
 						{
 							var response = apiClient.PostSolution(problem.id, packedSolution);
-							var resemblance = ConvexPolygonSolver.GetResemblance(response);
-							if (resemblance > ConvexPolygonSolver.GetProblemResemblance(problem.id))
+							var resemblance = problemsRepo.GetResemblance(response);
+							if (resemblance > problemsRepo.GetProblemResemblance(problem.id))
 							{
 								problemsRepo.PutSolution(problem.id, packedSolution);
 								problemsRepo.PutResponse(problem.id, response);

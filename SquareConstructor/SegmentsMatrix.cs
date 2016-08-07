@@ -28,6 +28,11 @@ namespace SquareConstructor
 
 		public bool TryAddPolygon(Polygon polygon)
 		{
+			if (polygon.Vertices.Any(vertex => vertex.X < 0 || vertex.X > 1 || vertex.Y < 0 || vertex.Y > 1))
+			{
+				return false;
+			}
+
 			int lastAddedSegment = 0;
 			for (; lastAddedSegment < polygon.Segments.Length; lastAddedSegment++)
 			{
@@ -44,6 +49,11 @@ namespace SquareConstructor
 			}
 
 			return lastAddedSegment == polygon.Segments.Length;
+		}
+
+		public void RemovePolygon(Polygon polygon)
+		{
+			polygon.Segments.ForEach(segment => RemoveSegment(segment, polygon));
 		}
 
 		private bool AddSegment(Segment segment, Polygon polygon)

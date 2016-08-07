@@ -1,16 +1,17 @@
-﻿using Newtonsoft.Json.Linq;
-using lib.ProjectionSolver;
+﻿using lib.ProjectionSolver;
 using System;
+using System.Net.Http;
 using System.Threading;
 
 namespace lib.Api
 {
 	public class ProblemsSender
 	{
+		private static readonly ProblemsRepo repo = new ProblemsRepo();
 
 		public static double TrySolveAndSend(ProblemSpec problemSpec)
 		{
-			double res = 0.0;
+			var res = 0.0;
 			var t = new Thread(() =>
 			{
 				var spec = ProjectionSolverRunner.Solve(problemSpec);
@@ -27,61 +28,51 @@ namespace lib.Api
 		}
 
 
-        public static double SolveAndSendStrip(int id, Rational otherSide)
-        {
-            var repo = new ProblemsRepo();
-            var problemSpec = repo.Get(id);
-            var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec), otherSide, 0);
-
-            if (solver == null) return 0;
-
-            var cycleFinder = new CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(
-               solver.Projection,
-               n => n.Data.Projection);
-
-            var cycles = cycleFinder.GetCycles();
-            var reflectedCycles = CycleReflector.GetUnribbonedCycles(cycles);
-            var spec = ProjectionSolverRunner.GetSolutionsFromCycles(reflectedCycles);
-
-            spec = spec.Pack();
-            if (spec == null) return 0;
-            return Post(problemSpec, spec);
-        }
-
-		public static double SolveAndSend(int id)
+			
+		public static double Post(ProblemSpec problemSpec, SolutionSpec solutionSpec)
 		{
-			var repo = new ProblemsRepo();
-			var problemSpec = repo.Get(id);
-			var spec = ProjectionSolverRunner.Solve(problemSpec);
-            
-            spec=spec.Pack();
-            if (spec == null) return 0;
-			return Post(problemSpec, spec);
+			solutionSpec = solutionSpec.Pack();
+
+			var existingSolution = repo.FindSolution(problemSpec.id);
+			if (existingSolution == solutionSpec.ToString())
+			{
+				var resemblance = repo.GetProblemResemblance(problemSpec.id);
+				Console.Out.Write($" solution is the same! current score: {resemblance} ");
+				return resemblance;
+			}
+
+			var solutionSize = solutionSpec.Size();
+			if (solutionSize > 5000)
+			{
+				Console.Out.Write($" solution size limit exceeded {solutionSize} ");
+				return 0;
+			}
+
+			return DoPost(problemSpec, solutionSpec);
 		}
-		
-        public static double Post(ProblemSpec problemSpec, SolutionSpec solutionSpec)
-        {
-	        solutionSpec = solutionSpec.Pack();
+
+		private static double DoPost(ProblemSpec problemSpec, SolutionSpec solutionSpec)
+		{
 			var client = new ApiClient();
-            var repo = new ProblemsRepo();
-            try
-            {
+			try
+			{
 				var oldResemblance = repo.GetProblemResemblance(problemSpec.id);
 				var response = client.PostSolution(problemSpec.id, solutionSpec);
-				var obj = JObject.Parse(response);
-				var resemblance = obj["resemblance"].Value<double>();
-	            if (resemblance > oldResemblance)
-	            {
-		            repo.PutResponse(problemSpec.id, response);
-		            repo.PutSolution(problemSpec.id, solutionSpec);
-		            Console.Out.Write("solution improved! ");
-	            }
-	            return resemblance;
-            }
-            catch (Exception e)
-            {
-	            if (e is ThreadAbortException)
-		            return 0;
+				var resemblance = repo.GetResemblance(response);
+				if (resemblance > oldResemblance)
+				{
+					repo.PutResponse(problemSpec.id, response);
+					repo.PutSolution(problemSpec.id, solutionSpec);
+					Console.Out.Write($" solution improved! new score: {resemblance} ");
+				}
+				return resemblance;
+			}
+			catch (Exception e)
+			{
+				if (e is ThreadAbortException)
+					return 0;
+				if (e is HttpRequestException)
+					return 0;
 				Console.WriteLine(e);
 				return 0;
 			}

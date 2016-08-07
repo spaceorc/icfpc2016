@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -46,6 +47,11 @@ namespace lib
 				.Select(p => ProblemSpec.Parse(File.ReadAllText(p), ExtractProblemId(p)));
 		}
 
+		public IEnumerable<ProblemSpec> GetAllNotSolvedPerfectly()
+		{
+			return GetAll().Where(x => GetProblemResemblance(x.id) < 1.0);
+		}
+
 		public IEnumerable<Tuple<string, int>> GetAllProblemSpecContentAndId()
 		{
 			return Directory.GetFiles(problemsDir, "*.spec.txt")
@@ -74,7 +80,7 @@ namespace lib
 			return response == null ? 0.0 : GetResemblance(response);
 		}
 
-		private double GetResemblance(string response)
+		public double GetResemblance(string response)
 		{
 			return JObject.Parse(response)["resemblance"].Value<double>();
 		}
@@ -99,8 +105,15 @@ namespace lib
 			var path = Path.Combine(problemsDir, $"snapshot.txt");
 			if (!File.Exists(path) || File.GetLastWriteTime(path) < DateTime.Now - TimeSpan.FromHours(1))
 			{
-				var res = api.GetLastSnapshotString();
-				File.WriteAllText(path, res);
+				try
+				{
+					var res = api.GetLastSnapshotString();
+					File.WriteAllText(path, res);
+				}
+				catch (Exception e)
+				{
+					MessageBox.Show(e.Message, "Cant donwload fresh snapshot");
+				}
 			}
 			return JsonConvert.DeserializeObject<SnapshotJson>(File.ReadAllText(path));
 		}

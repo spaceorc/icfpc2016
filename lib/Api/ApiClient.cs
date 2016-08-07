@@ -79,13 +79,19 @@ namespace lib
 					content.Add(new StringContent(solution), "solution_spec", "solution.txt");
 					//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
 					var res = client.PostAsync($"{baseUrl}solution/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
+					var result = res.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 					if (!res.IsSuccessStatusCode)
 					{
-						Console.WriteLine(res.ToString());
-						Console.WriteLine(res.Content.ReadAsStringAsync().Result);
+						if (result.Contains("\"ok\":false"))
+							Console.Write(result);
+						else
+						{
+							Console.WriteLine(res.ToString());
+							Console.WriteLine(result);
+						}
 						throw new HttpRequestException(res.ReasonPhrase);
 					}
-					return res.Content.ReadAsStringAsync().Result;
+					return result;
 				}
 			}
 			finally
@@ -122,15 +128,13 @@ namespace lib
 			}
 		}
 
-
 		private string Query(string query)
 		{
 			if (sw.Elapsed < TimeSpan.FromSeconds(1))
 				Thread.Sleep(TimeSpan.FromSeconds(1));
 			try
 			{
-				using (var client = CreateClient())
-					return client.GetStringAsync($"{baseUrl}{query}").Result;
+				return DoQueryWithAttempts(query);
 			}
 			finally
 			{
@@ -138,8 +142,29 @@ namespace lib
 			}
 		}
 
+		private string DoQueryWithAttempts(string query)
+		{
+			var attempt = 0;
+			while (true)
+			{
+				try
+				{
+					using (var client = CreateClient())
+						return client.GetStringAsync($"{baseUrl}{query}").Result;
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine("Will retry failed query: {0}\r\n{1}", query, e);
+					if (++attempt > 10)
+						throw new InvalidOperationException($"Query failed with attempts: {query}", e);
+					Thread.Sleep(TimeSpan.FromSeconds(1));
+				}
+			}
+		}
+
 		private HttpClient CreateClient()
 		{
+			AskTimeSlot();
 			var handler = new HttpClientHandler()
 			{
 				AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
@@ -150,6 +175,29 @@ namespace lib
 			client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
 			client.DefaultRequestHeaders.ExpectContinue = false;
 			return client;
+		}
+
+		private void AskTimeSlot()
+		{
+			try
+			{
+				using (var client = new HttpClient())
+				{
+					client.BaseAddress = new Uri("http://spaceorc-t430:666/");
+					var message = client.GetAsync("/ask").GetAwaiter().GetResult();
+					if (!message.IsSuccessStatusCode)
+					{
+						Console.WriteLine("Bad response from TimeManager. Just waiting 1 seconds...");
+						Thread.Sleep(1000);
+						return;
+					}
+					message.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+				}
+			}
+			catch (Exception)
+			{
+				Console.WriteLine("TimeManager is unavailable");
+			}
 		}
 	}
 

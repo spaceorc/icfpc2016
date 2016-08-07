@@ -6,6 +6,7 @@ namespace lib
     public class Segment
     {
         public readonly Vector Start, End;
+	    public int Id;
 
 
         public Vector Direction {  get { return End - Start; } }

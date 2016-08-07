@@ -44,7 +44,12 @@ namespace SquareConstructor
 
 		public Polygon TransposePolygon(Polygon polygon)
 		{
-			return new Polygon(polygon.Vertices.Select(Apply).ToArray());
+			var result = new Polygon(polygon.Vertices.Select(Apply).ToArray()) {Id = polygon.Id, IsReflected = polygon.IsReflected};
+			for (int i = 0; i < polygon.Segments.Length; i++)
+			{
+				result.Segments[i].Id = polygon.Segments[i].Id;
+			}
+			return result;
 		}
 	}
 }

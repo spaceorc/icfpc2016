@@ -43,36 +43,44 @@ namespace lib
 
 		public VisualizerForm()
 		{
-			var sortByExpectedScore = new ToolStripButton("SortByScore", null, SortByExpectedScoreClick);
-			sortByExpectedScore.CheckOnClick = true;
+			try
+			{
+				var sortByExpectedScore = new ToolStripButton("SortByScore", null, SortByExpectedScoreClick);
+				sortByExpectedScore.CheckOnClick = true;
 
             var sortById = new ToolStripButton("SortById", null, SortByIdClick);
             sortById.CheckOnClick = true;
 
-            var solve = new ToolStripButton("Solve", null, SolveClick);
+				var solve = new ToolStripButton("Solve", null, SolveClick);
 			var menu = new ToolStrip(sortByExpectedScore, sortById, solve);
-			list = new ListBox();
-			list.Width = 300;
-			list.Dock = DockStyle.Left;
-			list.BringToFront();
-			snapshotJson = repo.GetSnapshot(api);
-			problemsJson = snapshotJson.Problems.ToDictionary(p => p.Id, p => p);
+				list = new ListBox();
+				list.Width = 300;
+				list.Dock = DockStyle.Left;
+				list.BringToFront();
+				snapshotJson = repo.GetSnapshot(api);
+				problemsJson = snapshotJson.Problems.ToDictionary(p => p.Id, p => p);
 
-			list.Items.AddRange(GetItems(false));
-			list.SelectedValueChanged += ListOnSelectedValueChanged;
-			list.DoubleClick += ListOnDoubleClick;
+				list.Items.AddRange(GetItems(false));
+				list.SelectedValueChanged += ListOnSelectedValueChanged;
+				list.DoubleClick += ListOnDoubleClick;
 
-			problemPanel = new Panel()
+				problemPanel = new Panel()
+				{
+					Dock = DockStyle.Fill,
+				};
+
+				problemPanel.Paint += (sender, args) => PaintProblem(args.Graphics, problemPanel.ClientSize);
+
+				Size = new Size(800, 600);
+				Controls.Add(problemPanel);
+				Controls.Add(list);
+				Controls.Add(menu);
+			}
+			catch (Exception e)
 			{
-				Dock = DockStyle.Fill,
-			};
-
-			problemPanel.Paint += (sender, args) => PaintProblem(args.Graphics, problemPanel.ClientSize);
-
-			Size = new Size(800, 600);
-			Controls.Add(problemPanel);
-			Controls.Add(list);
-			Controls.Add(menu);
+				Console.WriteLine(e);
+				throw;
+			}
 		}
 
 

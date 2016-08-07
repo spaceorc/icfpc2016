@@ -11,12 +11,12 @@ namespace AutoSolver
 		private static ApiClient client;
 		private static ProblemsRepo repo;
 
-		static void Main2(string[] args)
+		static void Main(string[] args)
 		{
-			ConvexPolygonSolver.SolveAll();
+			ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
 		}
 
-		static void Main(string[] args)
+		static void Main2(string[] args)
 		{
 			repo = new ProblemsRepo();
 			client = new ApiClient();
@@ -26,22 +26,17 @@ namespace AutoSolver
 				DownloadNewProblems();
 
 				Console.WriteLine("Solving...");
-				var problemSpecs = repo.GetAll();
 				var imperfectSolver = new ImperfectSolver();
-				foreach (var problemSpec in problemSpecs)
+				foreach (var problemSpec in repo.GetAllNotSolvedPerfectly())
 				{
-					var resemblance = repo.GetProblemResemblance(problemSpec.id);
-					if (resemblance < 1.0)
-					{
-						Console.Write($"Solving {problemSpec.id}...");
-						var solutionSpec = ConvexPolygonSolver.TrySolve(problemSpec) ?? imperfectSolver.SolveMovingInitialSquare(problemSpec);
-						var score = ProblemsSender.Post(problemSpec, solutionSpec);
-						Console.Write($" imperfect or convex score: {score} ");
+					Console.Write($"Solving {problemSpec.id}...");
+					var solutionSpec = ConvexPolygonSolver.TrySolve(problemSpec) ?? imperfectSolver.SolveMovingInitialSquare(problemSpec);
+					var score = ProblemsSender.Post(problemSpec, solutionSpec);
+					Console.Write($" imperfect or convex score: {score} ");
 
-						if (score < 1.0)
-							SolveWithProjectionSolverRunner(problemSpec);
-						Console.WriteLine();
-					}
+					if (score < 1.0)
+						SolveWithProjectionSolverRunner(problemSpec);
+					Console.WriteLine();
 				}
 
 				Console.WriteLine("Waiting 1 minute...");

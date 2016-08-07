@@ -95,18 +95,48 @@ namespace lib.ProjectionSolver
 
         static void SolveAndSend(int id, bool wait=true)
         {
-            Console.WriteLine(id+":"+ " "+ProblemsSender.SolveAndSend(id));
+            Console.WriteLine(id+":"+ " "+SolveAndSendInternal(id));
             if (wait) Console.ReadKey();
             return;
         }
 
         static void SolveAndSendStrip(int id, Rational otherSide)
         {
-            Console.WriteLine(id + ":" + " " + ProblemsSender.SolveAndSendStrip(id,otherSide));
+            Console.WriteLine(id + ":" + " " + SolveAndSendStripInternal(id,otherSide));
             Console.ReadKey();
             return;
         }
 
+
+        public static double SolveAndSendStripInternal(int id, Rational otherSide)
+        {
+            var repo = new ProblemsRepo();
+            var problemSpec = repo.Get(id);
+            var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec), otherSide, 0);
+
+            if (solver == null) return 0;
+
+            var cycleFinder = new CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(
+               solver.Projection,
+               n => n.Data.Projection);
+
+            var cycles = cycleFinder.GetCycles();
+            var reflectedCycles = CycleReflector.GetUnribbonedCycles(cycles);
+            var spec = ProjectionSolverRunner.GetSolutionsFromCycles(reflectedCycles);
+
+            spec = spec.Pack();
+            if (spec == null) return 0;
+            return ProblemsSender.Post(problemSpec, spec);
+        }
+
+        public static double SolveAndSendInternal(int id)
+        {
+            var problemSpec = new ProblemsRepo().Get(id);
+            var spec = ProjectionSolverRunner.Solve(problemSpec);
+            if (spec == null)
+                return 0;
+            return ProblemsSender.Post(problemSpec, spec);
+        }
 
         static void Main(string[] args)
 		{

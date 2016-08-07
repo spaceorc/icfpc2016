@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using lib;
 using lib.ProjectionSolver;
+using SquareConstructor;
 using Path = System.IO.Path;
 
 namespace SolutionVisalizer
@@ -23,5 +24,7 @@ namespace SolutionVisalizer
 			var form = new VisualizerForm();
 			Application.Run(form);
 		}
+
+		
 	}
 }

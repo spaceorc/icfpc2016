@@ -47,7 +47,13 @@ namespace lib
 			return sb.ToString();
 		}
 
-		public bool ValidateFacetSquares(Rational requiredSize)
+		
+		public int Size()
+		{
+			return ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
+		}
+
+	public bool ValidateFacetSquares(Rational requiredSize)
 		{
 			Rational totalSquare = 0;
 			foreach (var facet in Facets)
