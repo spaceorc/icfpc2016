@@ -12,14 +12,14 @@ namespace AutoSolver
 		private static readonly ApiClient client = new ApiClient();
 		private static readonly ProblemsRepo repo = new ProblemsRepo();
 
-		static void Main2(string[] args)
+		static void Main(string[] args)
 		{
 			var newProblems = DownloadNewProblems();
 			ConvexPolygonSolver.SolveAll(newProblems);
 			ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
 		}
 
-		static void Main(string[] args)
+		static void Main2(string[] args)
 		{
 			while (true)
 			{
