@@ -124,7 +124,7 @@ namespace lib.ProjectionSolver
 
             spec = spec.Pack();
             if (spec == null) return 0;
-            return ProblemsSender.Post(problemSpec, spec);
+            return ProblemsSender.Post(spec, problemSpec.id);
         }
 
         public static double SolveAndSendInternal(int id)
@@ -133,7 +133,7 @@ namespace lib.ProjectionSolver
             var spec = ProjectionSolverRunner.Solve(problemSpec);
             if (spec == null)
                 return 0;
-            return ProblemsSender.Post(problemSpec, spec);
+            return ProblemsSender.Post(spec, problemSpec.id);
         }
 
         static void Main(string[] args)

@@ -17,7 +17,7 @@ namespace lib.Api
 			{
 				//var spec = ProjectionSolverRunner.Solve(problemSpec);
 				var spec = new ConstructorSolver(problemSpec).Work(); //TODO pack в 41 строке убран, т.к. работает криво. Убрать комментарий, если нужно
-				res = Post(problemSpec, spec);
+				res = Post(spec, problemSpec.id);
 			})
 			{ IsBackground = true };
 			t.Start();
@@ -27,13 +27,6 @@ namespace lib.Api
 				t.Join();
 			}
 			return res;
-		}
-
-
-			
-		public static double Post(ProblemSpec problemSpec, SolutionSpec solutionSpec)
-		{
-			return Post(solutionSpec, problemSpec.id);
 		}
 
 		public static double Post(SolutionSpec solutionSpec, int problemSpecId)
