@@ -57,13 +57,13 @@ namespace lib
         public double straightness;
         public double metric;
 
+		public IEnumerable<int> NodeNumbers => edges
+			.Select(edge => edge.From.NodeNumber)
+			.Concat(new[] { LastEdge.To.NodeNumber });
+
 		public override string ToString()
 		{
-			return
-				metric + " " +
-				((double) length).ToString() + " : " +
-				edges
-					.Select(z => z.From.NodeNumber).StrJoin(" ") + " " + edges[edges.Count - 1].To.NodeNumber.ToString();
+			return $"{metric} {length} : {string.Join(" ", NodeNumbers)}";
 		}
 	}
 
