@@ -13,18 +13,34 @@ namespace lib.Visualization.ManualSolving
 		{
 			Model = new ManualSolverModel(problem);
 			var copy = new ToolStripMenuItem("Reflect copy", null, (sender, args) => ChangeModel(Model.StartOperation(PendingOperationType.ReflectCopy)));
-			//copy.ShortcutKeys = Keys.Q;
+			copy.ShortcutKeys = Keys.Q | Keys.Control;
 			var move = new ToolStripMenuItem("Reflect move", null, (sender, args) => ChangeModel(Model.StartOperation(PendingOperationType.ReflectMove)));
-			//move.ShortcutKeys = Keys.W;
+			move.ShortcutKeys = Keys.W | Keys.Control;
 			var cancel = new ToolStripMenuItem("Cancel", null, (sender, args) => ChangeModel(Model.CancelPendingOperation()));
-			//cancel.ShortcutKeys = Keys.Escape;
 			var undo = new ToolStripMenuItem("Undo", null, (sender, args) => Undo());
 			undo.ShortcutKeys = Keys.Z | Keys.Control;
 			var redo = new ToolStripMenuItem("Redo", null, (sender, args) => Redo());
 			redo.ShortcutKeys = Keys.Z | Keys.Control | Keys.Shift;
-			var menu = new ToolStrip(copy, move, cancel, undo, redo);
+			var border = new ToolStripMenuItem("MarkAsBorder", null, (sender, args) => ChangeModel(Model.MarkAsBorder()));
+			var noborder = new ToolStripMenuItem("MarkAsNOTBorder", null, (sender, args) => ChangeModel(Model.MarkAsNoBorder()));
+			var solve = new ToolStripMenuItem("Solve", null, SolveClick);
+			var menu = new ToolStrip(copy, move, cancel, undo, redo, border, noborder, solve);
 			WindowState = FormWindowState.Maximized;
 			this.Controls.Add(menu);
+		}
+
+		private void SolveClick(object sender, EventArgs e)
+		{
+			if (!Model.SelectedSegmentIndices.Any())
+				MessageBox.Show("Выдели ребра выпуклого многоугольника, который нужно решить.");
+			else
+			{
+				var sol = Model.SolveConvex();
+				sol.CreateVisualizerForm().ShowDialog();
+				sol.CreateVisualizerForm(true).ShowDialog();
+				Clipboard.SetText(sol.ToString());
+				MessageBox.Show("Решение скопировано в буфер. К решению выпуклого применены все сделанные в редакторе фолды в обратном порядке. Можно пробовать сабмитить.");
+			}
 		}
 
 		private void Undo()
@@ -67,7 +83,7 @@ namespace lib.Visualization.ManualSolving
 			var scaleFactor = GetScaleFactor();
 			var y = new Rational(e.Y - ClientRectangle.Top, 1)/scaleFactor - Margin;
 			var x = new Rational(e.X - ClientRectangle.Left, 1)/scaleFactor - Margin;
-			Model.UpdateHighlightedSegment(new Vector(x, y));
+			Model.UpdateHighlightedSegment(new Vector(x, y) - Model.Shift);
 			Invalidate();
 		}
 

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using lib.Visualization.ManualSolving;
 using NUnit.Framework;
 
 namespace lib
@@ -39,7 +40,7 @@ namespace lib
 			PaintSegments(g, spec2.Segments);
 		}
 
-		public void PaintSkeleton(Graphics g, Segment[] skeleton, int? highlightedIndex, IList<int> selectedIndices, Vector shift)
+		public void PaintSkeleton(Graphics g, SegmentModel[] skeleton, int? highlightedIndex, IList<int> selectedIndices, Vector shift)
 		{
 			for (int index = 0; index < skeleton.Length; index++)
 			{
@@ -50,9 +51,9 @@ namespace lib
 					pen = new Pen(Color.Yellow, defaultWidth * 2);
 				else if (selectedIndices.Contains(index))
 					pen = new Pen(Color.Red, defaultWidth * 2);
-				else if (Arithmetic.IsSquare(segment.QuadratOfLength))
-					pen = new Pen(Color.Cyan, defaultWidth);
-				PaintSegment(g, pen, segment.Move(shift.X, shift.Y));
+				else 
+					pen = new Pen(segment.Color, defaultWidth);
+				PaintSegment(g, pen, segment.Segment.Move(shift.X, shift.Y));
 			}
 		}
 
@@ -78,7 +79,7 @@ namespace lib
 			var fi = 0;
 			foreach (var polygon in poly)
 			{
-				Color color = ColorTranslator.FromHtml("#" + ColourValues[i++]);
+				Color color = ColorTranslator.FromHtml("#" + ColourValues[(i++)%ColourValues.Length]);
 				PaintPolygon(g, color, polygon.Move(-minX, -minY));
 				var vi = 0;
 				foreach (var vertex in polygon.Vertices)
@@ -103,7 +104,7 @@ namespace lib
 			var i = 0;
 			foreach (var polygon in polygons)
 			{
-				Color color = ColorTranslator.FromHtml("#" + ColourValues[i++]);
+				Color color = ColorTranslator.FromHtml("#" + ColourValues[(i++)%ColourValues.Length]);
 				PaintPolygon(g, color, polygon);
 			}
 		}

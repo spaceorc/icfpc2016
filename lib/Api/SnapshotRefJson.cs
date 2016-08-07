@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Newtonsoft.Json;
 
@@ -14,6 +15,11 @@ namespace lib
 	{
 		[JsonProperty("problems")]
 		public ProblemJson[] Problems;
+
+		public int snapshot_time;
+
+		public DateTime Time => new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(snapshot_time);
+	
 	}
 	public class ProblemJson
 	{
@@ -33,6 +39,7 @@ namespace lib
 		}
 
 		[JsonProperty("problem_id")] public int Id;
+		[JsonProperty("owner")] public string Owner;
 	}
 
 	public class RankingJson

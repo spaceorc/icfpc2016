@@ -1,5 +1,6 @@
 ﻿using DataScience;
 using lib;
+using lib.Api;
 using lib.DiofantEquationSolver;
 using lib.Graphs;
 using System;
@@ -35,15 +36,31 @@ namespace Runner
         }
 
 
-        static void NewMain()
+        static void DrawProblem(int task)
         {
-            var task = 42;
+            var spec = new ProblemsRepo().Get(task);
+            var graph = Pathfinder.BuildGraph(spec);
+            var viz = new GraphVisualizer<EdgeInfo, NodeInfo>();
+            viz.GetX = z => z.Data.Location.X;
+            viz.GetY = z => z.Data.Location.Y;
+            viz.NodeCaption = z => z.Data.Location.ToString();
+            viz.Window(600, graph);
+                 
+        }
+
+        static void DrawPathGraph(int task)
+        {
+
+            
             var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt", task);
             var spec = ProblemSpec.Parse(File.ReadAllText(fname));
             var r = Pathfinder.BuildGraph(spec);
+
+            var lens= r.Edges.Select(z => z.Data.length).OrderBy(z => z).ToList();
+
             var matrix = new PathStat[r.NodesCount, r.NodesCount];
 
-            foreach (var e in Pathfinder.FindAllPathes(r, 1))
+            foreach (var e in Pathfinder.FindAllPathes(r, 1, 0.7))
             {
                 var i = e.FirstEdge.From.NodeNumber;
                 var j = e.LastEdge.To.NodeNumber;
@@ -68,23 +85,46 @@ namespace Runner
             Func<PathStat, string> stat = z => z.pathes.Count().ToString(); ;
 
             viz.EdgeCaption = z=>stat(z.Data);
+            viz.NodeCaption = z => z.Data.Location.ToString();
 
 
             viz.Window(500, gr);
         }
 
+        static void SolveAndSend(int id, bool wait=true)
+        {
+            Console.WriteLine(id+":"+ " "+ProblemsSender.SolveAndSend(id));
+            if (wait) Console.ReadKey();
+            return;
+        }
 
 
 
 		static void Main(string[] args)
 		{
-       //     NewMain();return;
+			ConvexPolygonSolver.SolveAll();
+			return;
+			//Arithmetic.RationalTriangulate(
+			//    new Segment(new Vector(0,0), new Vector(3, 3)),
+			//    new Segment(new Vector(3, 3), new Vector(2, 6)),
+			//    new Vector(0, 0),
+			//    new Vector(2, 6));
 
-            var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 38, 39, 40, 41, 42, 46 };
+			//
 
-            SolveTask(13); return;
+			// DrawPathGraph(49);return;
+			//SolveAndSend(1139); return;
 
-            foreach (var e in goodTasks) SolveTask(e);
+			//  SolveAndSend(40);return;
+			// DrawProblem(17);
+
+
+			//что не так с 42?
+			var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
+            foreach (var e in goodTasks) SolveAndSend(e,false);
+           // SolveTask(18);
+
+           // foreach (var e in goodTasks) SolveTask(e);
             //NewMain();return;
 
 		}

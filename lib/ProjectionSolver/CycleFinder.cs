@@ -44,7 +44,7 @@ namespace lib
 		public void VisualiseSolution()
 		{
 			var problemsRepo = new ProblemsRepo();
-			var problemSpec = problemsRepo.Get(15);
+			var problemSpec = problemsRepo.Get(1170);
 			Console.WriteLine("problem");
 			Console.WriteLine(problemSpec);
 			problemSpec.CreateVisualizerForm().ShowDialog();
@@ -57,14 +57,19 @@ namespace lib
 
 	public static class ProjectionSolverRunner
 	{
-		public static SolutionSpec Solve(ProblemSpec problemSpec)
+		public static SolutionSpec Solve(ProblemSpec problemSpec, double originality = 0.3)
 		{
-			var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec));
-			var cycleFinder = new CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(
-				solver.Projection,
-				n => n.Data.Projection);
-			return GetSolution(cycleFinder);
+			var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec), originality);
+            return solver != null ? Solve(solver.Projection) : null;
 		}
+
+        public static SolutionSpec Solve(Graph<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> graph)
+        {
+            var cycleFinder = new CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(
+                graph,
+                n => n.Data.Projection);
+            return GetSolution(cycleFinder);
+        }
 
 		private static SolutionSpec GetSolution(CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> cycleFinder)
 		{
@@ -225,7 +230,7 @@ namespace lib
 		}
 	}
 
-	public class GraphExtensons
+	public static class GraphExtensons
 	{
 		public static Graph<Segment, Vector> CreateGraphFromSegmentsArray(Segment[] segments)
 		{
@@ -264,6 +269,26 @@ namespace lib
 				}
 			}
 			return graph;
+		}
+	}
+
+	[TestFixture]
+	public class GraphExtensions_Should
+	{
+		[Test]
+		public void DoSomething_WhenSomething()
+		{
+			var res = GraphExtensons.CreateGraphFromSegmentsArray(new[]
+			{
+				new Segment(new Vector(0, 0), new Vector(1, 0)),
+				new Segment(new Vector(0, 0), new Vector(0, 1)),
+				new Segment(new Vector(1, new Rational(1, 3)), new Vector(1, 0)),
+				new Segment(new Vector(1, new Rational(1, 3)), new Vector(1, 1)),
+				new Segment(new Vector(1, new Rational(1, 3)), new Vector(new Rational(1, 3), 1)),
+				new Segment(new Vector(0, 1), new Vector(new Rational(1, 3), 1)),
+				new Segment(new Vector(1, 1), new Vector(new Rational(1, 3), 1))
+			});
+			var cycles = new CycleFinder<Segment, Vector>(res, n => n.Data).GetCycles();
 		}
 	}
 }

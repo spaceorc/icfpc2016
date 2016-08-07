@@ -42,7 +42,7 @@ namespace lib
 		}
 
 		public Rational length;
-		public double originality;
+		public double originality => (double) edges.AllNodes().Distinct().Count() / edges.Count;
 
 		public override string ToString()
 		{
@@ -75,6 +75,7 @@ namespace lib
 		public List<Segment> AllSegments;
 		public List<Vector> vectors;
 		public Graph<EdgeInfo, NodeInfo> Graph;
+        public List<SegmentFamily> SegmentFamilies;
 		public Projection ProjectionScheme;
 	}
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -36,6 +37,12 @@ namespace lib
 			Thread.Sleep(1000);
 			return GetBlob<SnapshotJson>(hash);
 		}
+		public string GetLastSnapshotString()
+		{
+			var hash = GetSnapshots().Last().Hash;
+			Thread.Sleep(1000);
+			return GetBlob(hash);
+		}
 
 		public string GetBlob(string hash)
 		{
@@ -54,47 +61,100 @@ namespace lib
 
 		public string PostSolution(int problemId, SolutionSpec solution)
 		{
-			using (var client = CreateClient())
+			return PostSolution(problemId, solution.ToString());
+		}
+
+		private static readonly Stopwatch sw = Stopwatch.StartNew();
+
+		public string PostSolution(int problemId, string solution)
+		{
+			if (sw.Elapsed < TimeSpan.FromSeconds(1))
+				Thread.Sleep(TimeSpan.FromSeconds(1));
+			try
 			{
-				var content = new MultipartFormDataContent();
-				content.Add(new StringContent(problemId.ToString()), "problem_id");
-				content.Add(new StringContent(solution.ToString()), "solution_spec", "solution.txt");
-				//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
-				var res = client.PostAsync($"{baseUrl}solution/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
-				if (!res.IsSuccessStatusCode)
+				using (var client = CreateClient())
 				{
-					Console.WriteLine(res.ToString());
-					Console.WriteLine(res.Content.ReadAsStringAsync().Result);
-					throw new HttpRequestException(res.ReasonPhrase);
+					var content = new MultipartFormDataContent();
+					content.Add(new StringContent(problemId.ToString()), "problem_id");
+					content.Add(new StringContent(solution), "solution_spec", "solution.txt");
+					//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
+					var res = client.PostAsync($"{baseUrl}solution/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
+					if (!res.IsSuccessStatusCode)
+					{
+						Console.WriteLine(res.ToString());
+						Console.WriteLine(res.Content.ReadAsStringAsync().Result);
+						throw new HttpRequestException(res.ReasonPhrase);
+					}
+					return res.Content.ReadAsStringAsync().Result;
 				}
-				return res.Content.ReadAsStringAsync().Result;
+			}
+			finally
+			{
+				sw.Restart();
 			}
 		}
 
 		public string PostProblem(long publishTime, SolutionSpec solution)
 		{
-			using (var client = CreateClient())
+			if (sw.Elapsed < TimeSpan.FromSeconds(1))
+				Thread.Sleep(TimeSpan.FromSeconds(1));
+			try
 			{
-				var content = new MultipartFormDataContent();
-				content.Add(new StringContent(publishTime.ToString()), "publish_time");
-				content.Add(new StringContent(solution.ToString()), "solution_spec", "solution.txt");
-				//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
-				var res = client.PostAsync($"{baseUrl}problem/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
-				if (!res.IsSuccessStatusCode)
+				using (var client = CreateClient())
 				{
-					Console.WriteLine(res.ToString());
-					Console.WriteLine(res.Content.ReadAsStringAsync().Result);
-					throw new HttpRequestException(res.ReasonPhrase);
+					var content = new MultipartFormDataContent();
+					content.Add(new StringContent(publishTime.ToString()), "publish_time");
+					content.Add(new StringContent(solution.ToString()), "solution_spec", "solution.txt");
+					//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
+					var res = client.PostAsync($"{baseUrl}problem/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
+					if (!res.IsSuccessStatusCode)
+					{
+						Console.WriteLine(res.ToString());
+						Console.WriteLine(res.Content.ReadAsStringAsync().Result);
+						throw new HttpRequestException(res.ReasonPhrase);
+					}
+					return res.Content.ReadAsStringAsync().Result;
 				}
-				return res.Content.ReadAsStringAsync().Result;
+			}
+			finally
+			{
+				sw.Restart();
 			}
 		}
 
 
 		private string Query(string query)
 		{
-			using (var client = CreateClient())
-				return client.GetStringAsync($"{baseUrl}{query}").Result;
+			if (sw.Elapsed < TimeSpan.FromSeconds(1))
+				Thread.Sleep(TimeSpan.FromSeconds(1));
+			try
+			{
+				return DoQueryWithAttempts(query);
+			}
+			finally
+			{
+				sw.Restart();
+			}
+		}
+
+		private string DoQueryWithAttempts(string query)
+		{
+			var attempt = 0;
+			while (true)
+			{
+				try
+				{
+					using (var client = CreateClient())
+						return client.GetStringAsync($"{baseUrl}{query}").Result;
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine("Will retry failed query: {0}\r\n{1}", query, e);
+					if (++attempt > 10)
+						throw new InvalidOperationException($"Query failed with attempts: {query}", e);
+					Thread.Sleep(TimeSpan.FromSeconds(1));
+				}
+			}
 		}
 
 		private HttpClient CreateClient()
@@ -135,6 +195,16 @@ namespace lib
 				File.WriteAllText(filepath, spec);
 			}
 		}
+
+		[Test]
+		public void GetOurProblems()
+		{
+			var api = new ApiClient();
+			var snapshot = api.GetLastSnapshot();
+			foreach(var p in snapshot.Problems.Where(p => p.Owner == "89"))
+				Console.WriteLine($"problem {p.Id}, max score {p.Ranking?.Max(rank => rank?.resemblance) ?? 0.0}");
+		}
+
 		[Test]
 		public void ProblemsRating()
 		{
@@ -148,7 +218,7 @@ namespace lib
 				var expectedScore = p.ExpectedScore();
 				var convex = spec == null ? null : (spec.Polygons.Length == 1 && spec.Polygons[0].IsConvex()).ToString();
 				Console.WriteLine($"id={p.Id} size={p.SolutionSize} expected={expectedScore} isconvex={convex ?? "Unknown"}");
-				if(convex != null) totalConvex += expectedScore;
+				if (convex != null) totalConvex += expectedScore;
 			}
 			Console.WriteLine($"Total convex: {totalConvex}");
 		}

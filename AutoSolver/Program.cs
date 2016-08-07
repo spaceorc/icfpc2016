@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading;
 using lib;
-using Newtonsoft.Json.Linq;
+using lib.Api;
+using System.Linq;
 
 namespace AutoSolver
 {
@@ -10,6 +11,11 @@ namespace AutoSolver
 		private static ApiClient client;
 		private static ProblemsRepo repo;
 
+		static void Main2(string[] args)
+		{
+			ConvexPolygonSolver.SolveAll();
+		}
+
 		static void Main(string[] args)
 		{
 			repo = new ProblemsRepo();
@@ -17,47 +23,23 @@ namespace AutoSolver
 
 			while (true)
 			{
-				Console.WriteLine("Downloading new problems...");
-				var snapshot = client.GetLastSnapshot();
-				foreach (var problem in snapshot.Problems)
-				{
-					if (repo.Find(problem.Id) == null)
-					{
-						var problemSpec = client.GetBlob(problem.SpecHash);
-						Thread.Sleep(1000);
-						repo.Put(problem.Id, problemSpec);
-						Console.WriteLine($"Downloaded problem {problem.Id}");
-					}
-				}
+				DownloadNewProblems();
 
 				Console.WriteLine("Solving...");
 				var problemSpecs = repo.GetAll();
 				var imperfectSolver = new ImperfectSolver();
 				foreach (var problemSpec in problemSpecs)
 				{
-					var response = repo.FindResponse(problemSpec.id);
-					if (response == null)
+					var resemblance = repo.GetProblemResemblance(problemSpec.id);
+					if (resemblance < 1.0)
 					{
 						Console.Write($"Solving {problemSpec.id}...");
-						var solutionSpec = imperfectSolver.SolveMovingInitialSquare(problemSpec);
-						var score = Post(problemSpec, solutionSpec);
-						Console.Write($" imperfect score: {score}");
+						var solutionSpec = ConvexPolygonSolver.TrySolve(problemSpec) ?? imperfectSolver.SolveMovingInitialSquare(problemSpec);
+						var score = ProblemsSender.Post(problemSpec, solutionSpec);
+						Console.Write($" imperfect or convex score: {score} ");
 
-						if (score != 1.0)
-						{
-							var t = new Thread(() =>
-							{
-								var spec = ProjectionSolverRunner.Solve(problemSpec);
-								var ps = Post(problemSpec, spec);
-								Console.Write($" perfect score: {ps}");
-							}) { IsBackground = true };
-							t.Start();
-							if (!t.Join(TimeSpan.FromSeconds(30)))
-							{
-								t.Abort();
-								t.Join();
-							}
-						}
+						if (score < 1.0)
+							SolveWithProjectionSolverRunner(problemSpec);
 						Console.WriteLine();
 					}
 				}
@@ -67,25 +49,66 @@ namespace AutoSolver
 			}
 		}
 
-		private static double Post(ProblemSpec problemSpec, SolutionSpec solutionSpec)
+		private static void DownloadNewProblems()
 		{
-			try
+			Console.WriteLine("Downloading new problems...");
+			var snapshot = client.GetLastSnapshot();
+			foreach (var problem in snapshot.Problems)
 			{
-				var response = client.PostSolution(problemSpec.id, solutionSpec);
-				repo.PutResponse(problemSpec.id, response);
-				repo.PutSolution(problemSpec.id, solutionSpec);
-				return JObject.Parse(response)["resemblance"].Value<double>();
+				if (repo.Find(problem.Id) == null)
+				{
+					var problemSpec = client.GetBlob(problem.SpecHash);
+					repo.Put(problem.Id, problemSpec);
+					Console.WriteLine($"Downloaded problem {problem.Id}");
+				}
 			}
-			catch (Exception e)
-			{
-				Console.WriteLine();
-				Console.WriteLine(e);
-				return 0;
-			}
-			finally
-			{
-				Thread.Sleep(1000);
-			}
+		}
+
+		private static void SolveWithProjectionSolverRunner(ProblemSpec problemSpec)
+		{
+			var originalities = new[] { 0, 0.3, 0.95 };
+			var mutex = new object();
+			var solutionFoundEvent = new ManualResetEvent(false);
+			var threads = originalities
+				.Select(coeff =>
+				{
+					var thread = new Thread(() =>
+					{
+						try
+						{
+							var spec = ProjectionSolverRunner.Solve(problemSpec);
+							if (spec == null)
+								return;
+							double ps;
+							lock (mutex)
+							{
+								ps = ProblemsSender.Post(problemSpec, spec);
+								Console.Write($" perfect score: {ps}");
+							}
+							if(ps == 1.0)
+								solutionFoundEvent.Set();
+						}
+						catch (Exception e)
+						{
+							if (e is ThreadAbortException)
+								return;
+							Console.WriteLine($"Exception in ProjectionSolverRunner: {e}");
+						}
+					})
+					{ IsBackground = true };
+					thread.Start();
+					return thread;
+				})
+				.ToArray();
+
+			solutionFoundEvent.WaitOne(TimeSpan.FromSeconds(30));
+
+			foreach(var t in threads)
+				if(t.IsAlive)
+				{
+					t.Abort();
+					t.Join();
+				}
 		}
 	}
 }

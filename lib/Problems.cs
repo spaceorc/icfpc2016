@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using FluentAssertions;
 using NUnit.Framework;
 
 namespace lib
@@ -79,6 +80,115 @@ namespace lib
 
 		#endregion
 
+		//http://2016sv.icfpcontest.org/problem/view/3356
+		public SolutionSpec SkewedTriangleWithHole(Rational a, Rational b)
+		{
+			var src = $"1/2,1/2 0,0 0,{a} 0,1 1,1 1,{1 - a} 1,0 1,{b} {1 - b / 3},{b / 3} {1 - b},0".ToPoints();
+			var dst = src.ToArray();
+			dst[2] = src[2].Reflect(dst[0], dst[1]);
+			dst[3] = src[3].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]);
+			dst[4] = src[4].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]).Reflect(dst[0], dst[3]);
+			dst[5] = src[5].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]).Reflect(dst[0], dst[3]).Reflect(dst[0], dst[4]);
+			dst[7] = src[7].Reflect(dst[0], dst[6]);
+			dst[6] = dst[6].Reflect(dst[8], dst[9]);
+			var facets = new Facet[]
+			{
+				new Facet(0, 2, 1),
+				new Facet(0, 3, 2),
+				new Facet(0, 4, 3),
+				new Facet(0, 5, 4),
+				new Facet(0, 8, 7, 5),
+				new Facet(0, 1, 9, 8),
+				new Facet(8, 9, 6),
+				new Facet(8, 6, 7)
+			};
+			return new SolutionSpec(src, facets, dst);
+		}
+
+		//http://2016sv.icfpcontest.org/problem/view/3156
+		public SolutionSpec SkewedTriangle(Rational a)
+		{
+			var src = $"1/2,1/2 0,0 0,{a} 0,1 1,1 1,{1 - a} 1,0".ToPoints();
+			var dst = src.ToArray();
+			dst[2] = src[2].Reflect(dst[0], dst[1]);
+			dst[3] = src[3].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]);
+			dst[4] = src[4].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]).Reflect(dst[0], dst[3]);
+			dst[5] = src[5].Reflect(dst[0], dst[1]).Reflect(dst[0], dst[2]).Reflect(dst[0], dst[3]).Reflect(dst[0], dst[4]);
+			var facets = new Facet[]
+			{
+				new Facet(0, 2, 1),
+				new Facet(0, 3, 2),
+				new Facet(0, 4, 3),
+				new Facet(0, 5, 4),
+				new Facet(0, 6, 5),
+				new Facet(0, 1, 6),
+			};
+			return new SolutionSpec(src, facets, dst);
+		}
+
+		[Test, Explicit]
+		public void PrintSkewedTriangleWithHole()
+		{
+			var solutionSpec = SkewedTriangleWithHole(new Rational(49, 90), new Rational(1, 10));
+			solutionSpec.CreateVisualizerForm(true).ShowDialog();
+			Console.WriteLine(solutionSpec);
+		}
+
+		[Test, Explicit]
+		public void PrintSkewedTriangle()
+		{
+			var solutionSpec = SkewedTriangle(new Rational(12, 20));
+			solutionSpec.CreateVisualizerForm(true).ShowDialog();
+			Console.WriteLine(solutionSpec);
+		}
+
+		public SolutionSpec D4(Rational a, Rational b, Rational c, Rational d)
+		{
+			var src = $"1/2,1/2 {1 - b},0 1/2,0 0,0 0,1/2 0,1 1/2,1 {1 - a},1 1,1 1,{1 - a} 1,1/2 1,{b} 1,0 {c},{1 - c} {d},{d}".ToPoints();
+			Console.WriteLine(src.Length);
+			var dst = src.ToArray();
+			Console.WriteLine(dst.Length);
+			Action<int, int, int> r = (who, m1, m2) => dst[who] = dst[who].Reflect(dst[m1], dst[m2]);
+			r(3, 2, 14);
+			dst[4] = dst[2];
+			r(13, 0, 14); r(13, 0, 4);
+			r(5, 0, 14); r(5, 0, 4); r(5, 4, 13);
+			dst[6] = dst[2];
+			r(7, 0, 14); r(7, 0, 4); r(7, 0, 13);
+			r(12, 0, 1);
+			r(11, 0, 1); r(11, 0, 12);
+			r(10, 0, 1); r(10, 0, 12); r(10, 0, 11);
+			r(9, 0, 1); r(9, 0, 12); r(9, 0, 11); r(9, 0, 10);
+			r(8, 0, 1); r(8, 0, 12); r(8, 0, 11); r(8, 0, 10); r(8, 0, 9);
+			var facets = new Facet[]
+			{
+				new Facet(0, 1,2,14),
+				new Facet(0, 14,4),
+				new Facet(0, 4,13),
+				new Facet(0, 13,6,7),
+				new Facet(0, 7,8),
+				new Facet(0, 8,9),
+				new Facet(0, 9,10),
+				new Facet(0, 10,11),
+				new Facet(0, 11,12),
+				new Facet(0, 12,1),
+				new Facet(3,4,14),
+				new Facet(3,2,14),
+				new Facet(4,13,5),
+				new Facet(6,13,5),
+			};
+			return new SolutionSpec(src, facets, dst);
+		}
+
+		[Test]
+		public void PrintD4()
+		{
+			var sol = D4(new Rational(9,20), new Rational(19, 40), new Rational(12, 40), new Rational(13, 40));
+			sol.ValidateFacetSquares().Should().BeTrue();
+			Console.WriteLine(sol.Pack());
+			sol.CreateVisualizerForm(true).ShowDialog();
+		}
+
 		public SolutionSpec Triangle(Rational a, Rational b)
 		{
 			var p12 = $"{a},{a}";
@@ -119,16 +229,17 @@ namespace lib
 		public void PrintTriangle()
 		{
 			var api = new ApiClient();
-			var time = 1470441600;
+			var hour = 3600;
+			var time = 1470553200 + hour;
 			for (int i = 1; i <= 4; i++)
 				for (int j = 1; j <= 4; j++)
 				{
-					var solution = Triangle(new Rational(1, 4) - new Rational(i, 17), new Rational(1, 4) - new Rational(j, 19));
-					//solution.CreateVisualizerForm(true).ShowDialog();
+					var solution = Triangle(new Rational(1, 4) - new Rational(i, 19), new Rational(1, 4) - new Rational(j, 21));
+					solution.CreateVisualizerForm(true).ShowDialog();
 					var ans = api.PostProblem(time, solution);
 					Console.WriteLine(ans);
 					File.WriteAllText(Path.Combine(Paths.ProblemsDir(), $"{time}.problem.txt"), solution + "\r\n\r\n" + ans);
-					time += (1470445200 - 1470441600);
+					time += hour;
 					Thread.Sleep(1000);
 				}
 		}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -12,9 +11,9 @@ namespace lib
 		public readonly Vector[] DestPoints;
 		private static readonly Vector[] initialSquare = "0,0 1,0 1,1 0,1".ToPoints();
 
-		public static SolutionSpec CreateTrivial(Func<Vector, Vector> transform)
+		public static SolutionSpec CreateTrivial(Func<Vector, Vector> transform = null)
 		{
-			return new SolutionSpec(initialSquare, new[] { new Facet(0, 1, 2, 3) }, initialSquare.Select(transform).ToArray());
+			return new SolutionSpec(initialSquare, new[] { new Facet(0, 1, 2, 3) }, initialSquare.Select(transform ?? (x => x)).ToArray());
 		}
 		public SolutionSpec(Vector[] sourcePoints, Facet[] facets, Vector[] destPoints)
 		{
@@ -46,6 +45,27 @@ namespace lib
 			sb.AppendLine(Facets.StrJoin(Environment.NewLine));
 			sb.Append(DestPoints.StrJoin(Environment.NewLine));
 			return sb.ToString();
+		}
+
+		public int Size()
+		{
+			return ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
+		}
+
+		public bool ValidateFacetSquares()
+		{
+			Rational totalSquare = 0;
+			foreach (var facet in Facets)
+			{
+				var sourcePolygon = new Polygon(facet.Vertices.Select(index => SourcePoints[index]).ToArray());
+				var destPolygon = new Polygon(facet.Vertices.Select(index => DestPoints[index]).ToArray());
+				var sourceSquare = sourcePolygon.GetUnsignedSquare();
+				if (sourceSquare != destPolygon.GetUnsignedSquare())
+					return false;
+
+				totalSquare += sourceSquare;
+			}
+			return totalSquare == 1;
 		}
 	}
 }

@@ -11,14 +11,14 @@ namespace Runner
     public static class Pathfinder
     {
       
-        public static IEnumerable<PPath> RecursiveDepthSearch(Graph<EdgeInfo, NodeInfo> Graph, PPath path, Rational length)
+        public static IEnumerable<PPath> RecursiveDepthSearch(Graph<EdgeInfo, NodeInfo> Graph, PPath path, Rational length, double originalityBorder)
         {
             if (path.length == length)
             {
                 yield return path;
                 yield break;
             }
-            if (path.length > 1)
+            if (path.length > 1 || path.originality < originalityBorder)
                 yield break;
 
 
@@ -33,32 +33,27 @@ namespace Runner
                 p.edges = path.edges.ToList();
                 p.edges.Add(e);
                 p.length = path.length + e.Data.length;
-                foreach (var c in RecursiveDepthSearch(Graph, p, length))
+                foreach (var c in RecursiveDepthSearch(Graph, p, length, originalityBorder))
                     yield return c;
             }
         }
 
-        public static IEnumerable<PPath> DepthSeatch(Graph<EdgeInfo,NodeInfo> Graph, int startNode, Rational length)
+        public static IEnumerable<PPath> DepthSeatch(Graph<EdgeInfo,NodeInfo> Graph, int startNode, Rational length, double originalityBorder)
         {
             var edges = Graph[startNode].IncidentEdges.ToList();
             foreach (var e in edges)
             {
                 var p = new PPath { edges = new[] { e }.ToList(), length = e.Data.length };
-                foreach (var c in RecursiveDepthSearch(Graph, p, length))
+                foreach (var c in RecursiveDepthSearch(Graph, p, length, originalityBorder))
                     yield return c;
             }
         }
 
-        public static IEnumerable<PPath> FindAllPathes(Graph<EdgeInfo,NodeInfo> Graph, Rational length, double originalityBorder=0)
+        public static IEnumerable<PPath> FindAllPathes(Graph<EdgeInfo,NodeInfo> Graph, Rational length, double originalityBorder)
         {
             for (int i = 0; i < Graph.NodesCount; i++)
-                foreach (var e in DepthSeatch(Graph, i, length))
-                {
-                    var difVertices = e.edges.AllNodes().Distinct().Count();
-                    e.originality = (difVertices) / e.edges.Count;
-                    if (e.originality > originalityBorder)
-                        yield return e;
-                }
+                foreach (var e in DepthSeatch(Graph, i, length, originalityBorder))
+					yield return e;
         }
 
         static IEnumerable<List<PPath>> FindAllCyclesRecursive(List<PPath> cycle, Dictionary<int,List<PPath>> map)
@@ -69,7 +64,10 @@ namespace Runner
                     yield return cycle;
                 yield break;
             }
-            foreach(var e in map[cycle[cycle.Count-1].LastEdge.To.NodeNumber])
+	        var mapKey = cycle[cycle.Count - 1].LastEdge.To.NodeNumber;
+	        if (!map.ContainsKey(mapKey))
+		        yield break;
+			foreach(var e in map[mapKey])
             {
                 var c = cycle.ToList();
                 c.Add(e);
@@ -94,7 +92,7 @@ namespace Runner
         public static Graph<EdgeInfo, NodeInfo> BuildGraph(ProblemSpec spec)
         {
             var r = MakeSegmentsWithIntersections(spec.Segments);
-            return BuildGraph(r.Item1, r.Item2);
+            return BuildGraph(r.Item1.SelectMany(z=>z.Segments).ToList(), r.Item2);
         }
 
         public static Graph<EdgeInfo,NodeInfo> BuildGraph(List<Segment> Segments, List<Vector> vectors)
@@ -120,7 +118,9 @@ namespace Runner
             return Graph;
         }
 
-        public static Tuple<List<Segment>,List<Vector>> MakeSegmentsWithIntersections(IEnumerable<Segment> __segments)
+      
+
+        public static Tuple<List<SegmentFamily>,List<Vector>> MakeSegmentsWithIntersections(IEnumerable<Segment> __segments)
         {
             var Segments = __segments.ToList();
 
@@ -139,27 +139,18 @@ namespace Runner
                         vectors.Add(v);
                 }
 
+            var result = new List<SegmentFamily>();
 
-            while (true)
+            foreach(var e in Segments)
             {
-                var newSegments = new List<Segment>();
-                foreach (var e in Segments)
-                {
-                    var inter = vectors.Where(z => !z.Equals(e.Start) && !z.Equals(e.End) && Arithmetic.PointInSegment(z, e)).ToList();
-                    if (inter.Count == 0)
-                        newSegments.Add(e);
-                    else
-                    {
-                        newSegments.Add(new Segment(e.Start, inter[0]));
-                        newSegments.Add(new Segment(inter[0], e.End));
-                    }
-                }
-                if (newSegments.Count == Segments.Count)
-                    break;
-                Segments = newSegments;
+                var points = vectors
+                    .Where(z => Arithmetic.PointInSegment(z, e))
+                    .OrderBy(z => new Segment(e.Start, z).QuadratOfLength)
+                    .ToArray();
+                result.Add(new SegmentFamily(points));
             }
 
-            return Tuple.Create(Segments,vectors);
+            return Tuple.Create(result, vectors);
 
         }
         #endregion

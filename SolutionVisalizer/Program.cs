@@ -21,7 +21,8 @@ namespace SolutionVisalizer
 		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new VisualizerForm(GetProblemsDir(), Solve));
+			var form = new VisualizerForm();
+			Application.Run(form);
 		}
 
 		private static SolutionSpec Solve(ProblemSpec arg)

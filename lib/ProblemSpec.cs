@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace lib
 {
@@ -9,7 +10,7 @@ namespace lib
 	{
 		public int id;
 		public readonly Polygon[] Polygons;
-		public  Segment[] Segments;
+		public Segment[] Segments;
 
 		public ProblemSpec(Polygon[] polygons, Segment[] segments)
 		{
@@ -27,12 +28,21 @@ namespace lib
 				Segments.Select(s => s.Move(-minX, -minY)).ToArray()
 				);
 		}
+
 		public Vector MinXY()
 		{
 			var vs = Polygons.SelectMany(p => p.Vertices).ToList();
 			var minX = vs.Select(p => p.X).Min();
 			var minY = vs.Select(p => p.Y).Min();
 			return new Vector(minX, minY);
+		}
+
+		public Vector MaxXY()
+		{
+			var vs = Polygons.SelectMany(p => p.Vertices).ToList();
+			var maxX = vs.Select(p => p.X).Max();
+			var maxY = vs.Select(p => p.Y).Max();
+			return new Vector(maxX, maxY);
 		}
 
 		public override string ToString()
@@ -55,7 +65,7 @@ namespace lib
 			var ss = Enumerable.Range(0, sCount)
 				.Select(i => r.ReadLine())
 				.Select(Segment.Parse).ToArray();
-			return new ProblemSpec(ps, ss) {id=id};
+			return new ProblemSpec(ps, ss) { id = id };
 		}
 	}
 }

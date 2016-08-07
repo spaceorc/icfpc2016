@@ -1,12 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
+using NUnit.Framework;
 using SquareConstructor;
 
 namespace lib
 {
 	public static class SolutionSpecExt
 	{
+		public static SolutionSpec Reflect(this SolutionSpec origSpec, Segment segment)
+		{
+			var reflectedDestPoints = origSpec.DestPoints.Select(x => x.Reflect(segment)).ToArray();
+			return new SolutionSpec(origSpec.SourcePoints, origSpec.Facets, reflectedDestPoints);
+		}
+
+		public static SolutionSpec Shift(this SolutionSpec origSpec, Vector vector)
+		{
+			var shiftedDestPoints = origSpec.DestPoints.Select(x => x + vector).ToArray();
+			return new SolutionSpec(origSpec.SourcePoints, origSpec.Facets, shiftedDestPoints);
+		}
+
 		public static SolutionSpec Fold(this SolutionSpec origSpec, Segment segment)
 		{
 			var facetsToFold = new HashSet<Facet>();
@@ -15,6 +29,9 @@ namespace lib
 				if (GetDestPointRelativePosition(origSpec.DestPoints[i], segment) == PointRelativePosition.Outside)
 					facetsToFold.UnionWith(origSpec.GetFacetsWithPoint(i));
 			}
+
+			if (!facetsToFold.Any())
+				return origSpec;
 
 			var newSourcePoints = new List<Vector>(origSpec.SourcePoints);
 			var srcPointsMap = newSourcePoints.Select((x, i) => new { V = x, Index = i }).ToDictionary(x => x.V, x => x.Index);
@@ -43,12 +60,22 @@ namespace lib
 							var relativePos = GetDestPointRelativePosition(origSpec.DestPoints[vertex], segment);
 							if (prevVertex == -1)
 							{
-								if (relativePos != PointRelativePosition.Inside)
-									outerFacetVertices.Add(vertex);
-								if (relativePos != PointRelativePosition.Outside)
-									innerFacetVertices.Add(vertex);
-								prevVertex = vertex;
-								prevRelativePos = relativePos;
+								switch (relativePos)
+								{
+									case PointRelativePosition.Inside:
+										innerFacetVertices.Add(vertex);
+										break;
+									case PointRelativePosition.Outside:
+										outerFacetVertices.Add(vertex);
+										newDestPoints[vertex] = origSpec.DestPoints[vertex].Reflect(segment);
+										break;
+									case PointRelativePosition.Boundary:
+										innerFacetVertices.Add(vertex);
+										outerFacetVertices.Add(vertex);
+										break;
+									default:
+										throw new ArgumentOutOfRangeException();
+								}
 							}
 							else
 							{
@@ -63,18 +90,20 @@ namespace lib
 												innerFacetVertices.Add(vertex);
 												break;
 											case PointRelativePosition.Outside:
-												var destPoint = destEdge.GetIntersectionWithLine(segment).Value;
+												var intersectionDestPoint = destEdge.GetIntersectionWithLine(segment).Value;
 												int intersectionVertex;
-												var srcPoint = GetSrcPoint(srcEdge, destEdge, destPoint);
-												if (!srcPointsMap.TryGetValue(srcPoint, out intersectionVertex))
+												var intersectionSrcPoint = GetSrcPoint(srcEdge, destEdge, intersectionDestPoint);
+												if (!srcPointsMap.TryGetValue(intersectionSrcPoint, out intersectionVertex))
 												{
 													intersectionVertex = newDestPoints.Count;
-													newDestPoints.Add(destPoint);
-													newSourcePoints.Add(srcPoint);
-													srcPointsMap.Add(srcPoint, intersectionVertex);
+													newDestPoints.Add(intersectionDestPoint);
+													newSourcePoints.Add(intersectionSrcPoint);
+													srcPointsMap.Add(intersectionSrcPoint, intersectionVertex);
 												}
 												innerFacetVertices.Add(intersectionVertex);
 												outerFacetVertices.Add(intersectionVertex);
+												outerFacetVertices.Add(vertex);
+												newDestPoints[vertex] = origSpec.DestPoints[vertex].Reflect(segment);
 												break;
 											case PointRelativePosition.Boundary:
 												innerFacetVertices.Add(vertex);
@@ -88,21 +117,23 @@ namespace lib
 										switch (relativePos)
 										{
 											case PointRelativePosition.Inside:
-												var destPoint = destEdge.GetIntersectionWithLine(segment).Value;
+												var intersectionDestPoint = destEdge.GetIntersectionWithLine(segment).Value;
 												int intersectionVertex;
-												var srcPoint = GetSrcPoint(srcEdge, destEdge, destPoint);
-												if (!srcPointsMap.TryGetValue(srcPoint, out intersectionVertex))
+												var intersectionSrcPoint = GetSrcPoint(srcEdge, destEdge, intersectionDestPoint);
+												if (!srcPointsMap.TryGetValue(intersectionSrcPoint, out intersectionVertex))
 												{
 													intersectionVertex = newDestPoints.Count;
-													newDestPoints.Add(destPoint);
-													newSourcePoints.Add(srcPoint);
-													srcPointsMap.Add(srcPoint, intersectionVertex);
+													newDestPoints.Add(intersectionDestPoint);
+													newSourcePoints.Add(intersectionSrcPoint);
+													srcPointsMap.Add(intersectionSrcPoint, intersectionVertex);
 												}
 												innerFacetVertices.Add(intersectionVertex);
+												innerFacetVertices.Add(vertex);
 												outerFacetVertices.Add(intersectionVertex);
 												break;
 											case PointRelativePosition.Outside:
 												outerFacetVertices.Add(vertex);
+												newDestPoints[vertex] = origSpec.DestPoints[vertex].Reflect(segment);
 												break;
 											case PointRelativePosition.Boundary:
 												innerFacetVertices.Add(vertex);
@@ -120,6 +151,7 @@ namespace lib
 												break;
 											case PointRelativePosition.Outside:
 												outerFacetVertices.Add(vertex);
+												newDestPoints[vertex] = origSpec.DestPoints[vertex].Reflect(segment);
 												break;
 											case PointRelativePosition.Boundary:
 												throw new ArgumentOutOfRangeException("WTF! Переход из Boundary в Boundary");
@@ -130,10 +162,78 @@ namespace lib
 									default:
 										throw new ArgumentOutOfRangeException();
 								}
-								newFacets.Add(new Facet(innerFacetVertices.ToArray()));
-								newFacets.Add(new Facet(outerFacetVertices.ToArray()));
+							}
+							prevVertex = vertex;
+							prevRelativePos = relativePos;
+						}
+
+						// last edge
+						{
+							var vertex = facet.Vertices[0];
+							var relativePos = GetDestPointRelativePosition(origSpec.DestPoints[vertex], segment);
+							var destEdge = new Segment(origSpec.DestPoints[prevVertex], origSpec.DestPoints[vertex]);
+							var srcEdge = new Segment(origSpec.SourcePoints[prevVertex], origSpec.SourcePoints[vertex]);
+							switch (prevRelativePos)
+							{
+								case PointRelativePosition.Inside:
+									switch (relativePos)
+									{
+										case PointRelativePosition.Inside:
+											break;
+										case PointRelativePosition.Outside:
+											var intersectionDestPoint = destEdge.GetIntersectionWithLine(segment).Value;
+											int intersectionVertex;
+											var intersectionSrcPoint = GetSrcPoint(srcEdge, destEdge, intersectionDestPoint);
+											if (!srcPointsMap.TryGetValue(intersectionSrcPoint, out intersectionVertex))
+											{
+												intersectionVertex = newDestPoints.Count;
+												newDestPoints.Add(intersectionDestPoint);
+												newSourcePoints.Add(intersectionSrcPoint);
+												srcPointsMap.Add(intersectionSrcPoint, intersectionVertex);
+											}
+											innerFacetVertices.Add(intersectionVertex);
+											outerFacetVertices.Add(intersectionVertex);
+											break;
+										case PointRelativePosition.Boundary:
+											break;
+										default:
+											throw new ArgumentOutOfRangeException();
+									}
+									break;
+								case PointRelativePosition.Outside:
+									switch (relativePos)
+									{
+										case PointRelativePosition.Inside:
+											var intersectionDestPoint = destEdge.GetIntersectionWithLine(segment).Value;
+											int intersectionVertex;
+											var intersectionSrcPoint = GetSrcPoint(srcEdge, destEdge, intersectionDestPoint);
+											if (!srcPointsMap.TryGetValue(intersectionSrcPoint, out intersectionVertex))
+											{
+												intersectionVertex = newDestPoints.Count;
+												newDestPoints.Add(intersectionDestPoint);
+												newSourcePoints.Add(intersectionSrcPoint);
+												srcPointsMap.Add(intersectionSrcPoint, intersectionVertex);
+											}
+											innerFacetVertices.Add(intersectionVertex);
+											outerFacetVertices.Add(intersectionVertex);
+											break;
+										case PointRelativePosition.Outside:
+											break;
+										case PointRelativePosition.Boundary:
+											break;
+										default:
+											throw new ArgumentOutOfRangeException();
+									}
+									break;
+								case PointRelativePosition.Boundary:
+									break;
+								default:
+									throw new ArgumentOutOfRangeException();
 							}
 						}
+						
+						newFacets.Add(new Facet(innerFacetVertices.ToArray()));
+						newFacets.Add(new Facet(outerFacetVertices.ToArray()));
 					}
 				}
 			}
@@ -164,6 +264,76 @@ namespace lib
 			Inside,
 			Outside,
 			Boundary
+		}
+	}
+
+	[TestFixture]
+	public class SolutionSpecExt_Should
+	{
+		[TestCase("0,0 1,0")]
+		[TestCase("0,-1/2 1,-1/2")]
+		[TestCase("1/2,2 -2,1/2")]
+		public void Fold_Nothing(string segment)
+		{
+			var origSolution = SolutionSpec.CreateTrivial(x => x);
+			var result = origSolution.Fold(segment);
+			result.SourcePoints.Should().Equal(origSolution.SourcePoints);
+			result.Facets.Should().Equal(origSolution.Facets);
+			result.DestPoints.Should().Equal(origSolution.DestPoints);
+		}
+
+		[TestCase("1,0 0,0", "0,0|1,0|1,-1|0,-1")]
+		[TestCase("1,1 1,0", "2,0|1,0|1,1|2,1")]
+		[TestCase("0,1 1,1", "0,2|1,2|1,1|0,1")]
+		[TestCase("0,0 0,1", "0,0|-1,0|-1,1|0,1")]
+		public void Fold_ByBoundary(string segment, string expectedDestPoints)
+		{
+			var origSolution = SolutionSpec.CreateTrivial(x => x);
+			var result = origSolution.Fold(segment);
+			result.SourcePoints.Should().Equal(origSolution.SourcePoints);
+			result.Facets.Should().Equal(origSolution.Facets);
+			result.DestPoints.Should().Equal(expectedDestPoints.Split('|').Select(Vector.Parse).ToArray());
+		}
+
+		[TestCase("0,0 1,1", "0,0|0,1|1,1|0,1", "0 1 2|0 2 3")]
+		[TestCase("1,1 0,0", "0,0|1,0|1,1|1,0", "0 1 2|0 2 3")]
+		[TestCase("1,0 0,1", "0,0|1,0|0,0|0,1", "0 1 3|1 2 3")]
+		[TestCase("0,1 1,0", "1,1|1,0|1,1|0,1", "0 1 3|1 2 3")]
+		public void Fold_ByDiagonal(string segment, string expectedDestPoints, string expectedFacets)
+		{
+			var origSolution = SolutionSpec.CreateTrivial(x => x);
+			var result = origSolution.Fold(segment);
+			result.SourcePoints.Should().Equal(origSolution.SourcePoints);
+			result.Facets.Select(FacetToString).ToArray().Should().BeEquivalentTo(expectedFacets.Split('|'));
+			result.DestPoints.Should().Equal(expectedDestPoints.Split('|').Select(Vector.Parse).ToArray());
+		}
+
+		[TestCase("0,1/2 1,1/2", "0,0|1,0|1,1|0,1|1,1/2|0,1/2", "0,1|1,1|1,1|0,1|1,1/2|0,1/2", "0 1 4 5|4 2 3 5")]
+		[TestCase("1,1/2 0,1/2", "0,0|1,0|1,1|0,1|1,1/2|0,1/2", "0,0|1,0|1,0|0,0|1,1/2|0,1/2", "0 1 4 5|4 2 3 5")]
+		[TestCase("1/2,0 1/2,1", "0,0|1,0|1,1|0,1|1/2,0|1/2,1", "0,0|0,0|0,1|0,1|1/2,0|1/2,1", "0 4 5 3|4 1 2 5")]
+		[TestCase("1/2,1 1/2,0", "0,0|1,0|1,1|0,1|1/2,0|1/2,1", "1,0|1,0|1,1|1,1|1/2,0|1/2,1", "0 4 5 3|4 1 2 5")]
+		public void Fold_ByMiddleLine(string segment, string expectedSrcPoints, string expectedDestPoints, string expectedFacets)
+		{
+			var origSolution = SolutionSpec.CreateTrivial(x => x);
+			var result = origSolution.Fold(segment);
+			result.SourcePoints.Should().Equal(expectedSrcPoints.Split('|').Select(Vector.Parse).ToArray());
+			result.Facets.Select(FacetToString).ToArray().Should().BeEquivalentTo(expectedFacets.Split('|'));
+			result.DestPoints.Should().Equal(expectedDestPoints.Split('|').Select(Vector.Parse).ToArray());
+		}
+
+		[Test]
+		[Explicit]
+		public void Fold_Demo()
+		{
+			var origSolution = SolutionSpec.CreateTrivial(x => x);
+			var result = origSolution.Fold("1,3/4 0,1/4");
+			result = result.Fold("1,1 1/4,0");
+			result.CreateVisualizerForm(true).ShowDialog();
+		}
+
+		private object FacetToString(Facet arg)
+		{
+			return string.Join(" ", arg.Vertices);
 		}
 	}
 }
