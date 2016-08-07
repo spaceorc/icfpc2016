@@ -14,34 +14,36 @@ namespace AutoSolver
 
 		static void Main(string[] args)
 		{
-			ShowIntro("ConvexPolygonSolver");
-
-			var newProblems = DownloadNewProblems();
-			ConvexPolygonSolver.SolveAll(newProblems);
-			ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
-		}
-
-		static void Main2(string[] args)
-		{
-			ShowIntro("SolveWithProjectionSolverRunner");
-
-			for (var iteration = 0; ; iteration++)
+			if (args.Contains("--yura"))
 			{
-				if (iteration > 0 || (args.Length > 0 && args[0] == "-d"))
-					DownloadNewProblems();
+				ShowIntro("SolveWithProjectionSolverRunner");
 
-				Console.WriteLine("Solving...");
-				repo.GetAllNotSolvedPerfectly()
-					.OrderBy(EstimateDifficulty)
-					.AsParallel()
-					.ForAll(problemSpec =>
-					{
-						Console.WriteLine($"Solving {problemSpec.id}...");
-						SolveWithProjectionSolverRunner(problemSpec);
-					});
+				for (var iteration = 0;; iteration++)
+				{
+					if (iteration > 0 || args.Contains("-d"))
+						DownloadNewProblems();
 
-				Console.WriteLine("Waiting 1 minute...");
-				Thread.Sleep(TimeSpan.FromMinutes(1));
+					Console.WriteLine("Solving...");
+					repo.GetAllNotSolvedPerfectly()
+						.OrderBy(EstimateDifficulty)
+						.AsParallel().WithDegreeOfParallelism(8)
+						.ForAll(problemSpec =>
+						{
+							Console.WriteLine($"Solving {problemSpec.id}...");
+							SolveWithProjectionSolverRunner(problemSpec);
+						});
+
+					Console.WriteLine("Waiting 1 minute...");
+					Thread.Sleep(TimeSpan.FromMinutes(1));
+				}
+			}
+			else
+			{
+				ShowIntro("ConvexPolygonSolver");
+
+				var newProblems = DownloadNewProblems();
+				ConvexPolygonSolver.SolveAll(newProblems);
+				ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
 			}
 		}
 
@@ -81,50 +83,34 @@ namespace AutoSolver
 
 		private static void SolveWithProjectionSolverRunner(ProblemSpec problemSpec)
 		{
-			var originalities = new[] { 0.5 };
-			var mutex = new object();
-			var solutionFoundEvent = new ManualResetEvent(false);
-			var threads = originalities
-				.Select(coeff =>
+			var thread = new Thread(() =>
+			{
+				try
 				{
-					var thread = new Thread(() =>
+					var solution = UltraSolver.AutoSolve(problemSpec);
+					if (solution == null || solution.Size() > 5000 || !solution.AreFacetsValid())
 					{
-						try
-						{
-							var solution = UltraSolver.AutoSolve(problemSpec);
-							if (solution == null || solution.Size() > 5000 || !solution.AreFacetsValid())
-								return;
-							double ps;
-							lock (mutex)
-							{
-								Console.WriteLine(" posting... ");
-								ps = ProblemsSender.Post(solution, problemSpec.id);
-								Console.Write($" perfect score: {ps}");
-							}
-							if (ps == 1.0)
-								solutionFoundEvent.Set();
-						}
-						catch (Exception e)
-						{
-							if (e is ThreadAbortException)
-								return;
-							Console.WriteLine($"Exception in ProjectionSolverRunner: {e}");
-						}
-					})
-					{ IsBackground = true };
-					thread.Start();
-					return thread;
-				})
-				.ToArray();
-
-			solutionFoundEvent.WaitOne(TimeSpan.FromSeconds(15));
-
-			foreach (var t in threads)
-				if (t.IsAlive)
-				{
-					t.Abort();
-					t.Join();
+						return;
+					}
+					Console.WriteLine(" posting... ");
+					var ps = ProblemsSender.Post(solution, problemSpec.id);
+					Console.Write($" perfect score: {ps}");
 				}
+				catch(Exception e)
+				{
+					if(e is ThreadAbortException)
+						return;
+					Console.WriteLine($"Exception in ProjectionSolverRunner: {e}");
+				}
+			})
+			{ IsBackground = true };
+			thread.Start();
+
+			if (!thread.Join(TimeSpan.FromSeconds(15)))
+			{
+				thread.Abort();
+				thread.Join();
+			}
 		}
 	}
 }
