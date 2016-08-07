@@ -10,7 +10,7 @@ namespace lib
 	{
 		public static SolutionSpec Pack(this SolutionSpec source)
 		{
-			return source.RemoveBadFacetsVertices().PackFacetNumbers();
+			return source.DoNormalize().RemoveBadFacetsVertices().PackFacetNumbers();
 		}
 
 		private class Node
@@ -442,6 +442,26 @@ namespace lib
 			result.SourcePoints.Should().Equal(expectedSolution.SourcePoints);
 			result.Facets.Select(FacetToString).ToArray().Should().BeEquivalentTo(expectedSolution.Facets.Select(FacetToString));
 			result.DestPoints.Should().Equal(expectedSolution.DestPoints);
+		}
+
+		[Test]
+		[Explicit]
+		public void DoSomething_WhenSomething()
+		{
+			var repo = new ProblemsRepo();
+			var apiClient = new ApiClient();
+			foreach (var problemSpec in repo.GetAll()
+				.Where(x => repo.GetProblemResemblance(x.id) == 1.0)
+				.Reverse().Take(3))
+			{
+				Console.Out.WriteLine(problemSpec.id);
+				var solutionSpec = ConvexPolygonSolver.TrySolveSingleProblem(problemSpec);
+				if (solutionSpec != null)
+				{
+					var response = apiClient.PostSolution(problemSpec.id, solutionSpec.Normalize().Pack());
+					Console.Out.WriteLine(response);
+				}
+			}
 		}
 
 		private object FacetToString(Facet arg)

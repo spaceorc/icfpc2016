@@ -25,7 +25,7 @@ namespace lib
 			}
 		}
 
-		private static SolutionSpec TrySolveSingleProblem(ProblemSpec problem)
+		public static SolutionSpec TrySolveSingleProblem(ProblemSpec problem)
 		{
 			Polygon convexPolygon;
 			var positivePolygon = problem.Polygons.Single(x => x.GetSignedSquare() > 0);
