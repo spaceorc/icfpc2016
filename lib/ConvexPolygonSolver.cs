@@ -51,7 +51,7 @@ namespace lib
 			else
 			{
 				convexPolygon = positivePolygon.GetConvexBoundary();
-				Console.Write("NOT_CONVEX using boundary ");
+				Console.Write("NOT_CONVEX ");
 			}
 			return TrySolveInOneShot(problem, convexPolygon);
 		}

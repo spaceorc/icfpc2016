@@ -14,9 +14,12 @@ namespace AutoSolver
 
 		static void Main(string[] args)
 		{
-			var newProblems = DownloadNewProblems();
-			ConvexPolygonSolver.SolveAll(newProblems);
-			ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
+			while (true)
+			{
+				var newProblems = DownloadNewProblems();
+				ConvexPolygonSolver.SolveAll(newProblems);
+				ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
+			}
 		}
 
 		static void Main2(string[] args)
