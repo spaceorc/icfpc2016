@@ -231,8 +231,16 @@ namespace lib
 		{
 			var snapshotJson = new ProblemsRepo().GetSnapshot(new ApiClient());
 			var v = snapshotJson.Problems.Where(p => p.Ranking.All(r => r.resemblance != 1.0))
-				.Sum(p => p.SolutionSize / (1+p.Ranking.Length));
+				.Sum(p => p.SolutionSize / (1 + p.Ranking.Length));
 			Console.WriteLine(v);
+		}
+		[Test]
+		public void CalcImperfectScore2()
+		{
+			var repo = new ProblemsRepo();
+			var c = repo.GetAllNotSolvedPerfectly().Count();
+			Console.WriteLine(c);
+			Console.WriteLine(repo.GetAll().Count());
 		}
 
 		[Test]

@@ -52,7 +52,7 @@ namespace lib
 		{
 			var sol = D4(new Rational(9, 20), new Rational(19, 40), new Rational(12, 40), new Rational(13, 40));
 
-			sol.ValidateFacetSquares().Should().BeTrue();
+			sol.AreFacetsValid().Should().BeTrue();
 
 			Console.WriteLine(sol.Pack());
 			sol.CreateVisualizerForm(true).ShowDialog();
@@ -142,9 +142,9 @@ namespace lib
 			double time = (new DateTime(2016, 08, 07, hour, 0, 0) - new DateTime(1970, 1, 1)).TotalSeconds;
 			Console.WriteLine();
 			Console.WriteLine(sol);
-			//var ans = new ApiClient().PostProblem((int)time, sol);
-			//File.WriteAllText(Path.Combine(Paths.ProblemsDir(), $"{time}.problem.txt"), sol + "\r\n\r\n" + ans);
-			//Console.WriteLine(ans);
+			var ans = new ApiClient().PostProblem((int)time, sol);
+			File.WriteAllText(Path.Combine(Paths.ProblemsDir(), $"{time}.problem.txt"), sol + "\r\n\r\n" + ans);
+			Console.WriteLine(ans);
 		}
 	}
 }

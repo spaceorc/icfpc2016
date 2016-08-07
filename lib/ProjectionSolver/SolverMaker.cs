@@ -76,7 +76,7 @@ namespace Runner
             solver.ProjectionScheme = pr;
             solver.Projection = GenerateOutGraph(solver.ProjectionScheme, false);
             var solution = ProjectionSolverRunner.Solve(solver.Projection);
-            if (solution.ValidateFacetSquares()) return true;
+            if (solution.AreFacetsValid()) return true;
             return false;
         }
 

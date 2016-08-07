@@ -14,6 +14,11 @@ namespace lib
             End = end;
         }
 
+		public bool IsEndpoint(Vector p)
+		{
+			return p.Equals(Start) || p.Equals(End);
+		}
+
 		public Rational Distance2To(Vector p)
 		{
 			return Arithmetic.Distance2(p, this);

@@ -58,7 +58,7 @@ namespace lib
 			return ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
 		}
 
-		public bool ValidateFacetSquares()
+		public bool AreFacetsValid()
 		{
 			Rational totalSquare = 0;
 			foreach (var facet in Facets)

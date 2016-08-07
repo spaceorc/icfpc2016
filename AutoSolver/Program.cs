@@ -11,37 +11,40 @@ namespace AutoSolver
 		private static ApiClient client;
 		private static ProblemsRepo repo;
 
-		static void Main(string[] args)
+		static void Main2(string[] args)
 		{
 			ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
 		}
 
-		static void Main2(string[] args)
+		static void Main(string[] args)
 		{
 			repo = new ProblemsRepo();
 			client = new ApiClient();
 
 			while (true)
 			{
-				DownloadNewProblems();
+				//DownloadNewProblems();
 
 				Console.WriteLine("Solving...");
-				var imperfectSolver = new ImperfectSolver();
-				foreach (var problemSpec in repo.GetAllNotSolvedPerfectly())
+				foreach (var problemSpec in repo.GetAllNotSolvedPerfectly().OrderBy(EstimateDifficulty))
 				{
 					Console.Write($"Solving {problemSpec.id}...");
-					var solutionSpec = ConvexPolygonSolver.TrySolve(problemSpec) ?? imperfectSolver.SolveMovingInitialSquare(problemSpec);
-					var score = ProblemsSender.Post(problemSpec, solutionSpec);
-					Console.Write($" imperfect or convex score: {score} ");
-
-					if (score < 1.0)
-						SolveWithProjectionSolverRunner(problemSpec);
+					SolveWithProjectionSolverRunner(problemSpec);
 					Console.WriteLine();
 				}
 
 				Console.WriteLine("Waiting 1 minute...");
 				Thread.Sleep(TimeSpan.FromMinutes(1));
 			}
+		}
+
+		private static double EstimateDifficulty(ProblemSpec problem)
+		{
+			var ratSegments = problem.Segments.Where(s => Arithmetic.IsSquare(s.QuadratOfLength)).ToList();
+			double ratSegCount = ratSegments.Count;
+			double smallSegCount = problem.Segments.Count(s => s.IrrationalLength < 1d/8);
+			double blackPoints = problem.Points.Count(p => !ratSegments.Any(s => s.IsEndpoint(p)));
+			return ratSegCount /10 + smallSegCount / 3 + blackPoints;
 		}
 
 		private static void DownloadNewProblems()
@@ -71,16 +74,17 @@ namespace AutoSolver
 					{
 						try
 						{
-							var spec = ProjectionSolverRunner.Solve(problemSpec);
-							if (spec == null)
+							var solution = ProjectionSolverRunner.Solve(problemSpec);
+							if (solution == null || solution.Size() > 5000 || !solution.AreFacetsValid())
 								return;
 							double ps;
 							lock (mutex)
 							{
-								ps = ProblemsSender.Post(problemSpec, spec);
+								Console.WriteLine(" posting... ");
+								ps = ProblemsSender.Post(problemSpec, solution);
 								Console.Write($" perfect score: {ps}");
 							}
-							if(ps == 1.0)
+							if (ps == 1.0)
 								solutionFoundEvent.Set();
 						}
 						catch (Exception e)
@@ -96,10 +100,10 @@ namespace AutoSolver
 				})
 				.ToArray();
 
-			solutionFoundEvent.WaitOne(TimeSpan.FromSeconds(30));
+			solutionFoundEvent.WaitOne(TimeSpan.FromSeconds(10));
 
-			foreach(var t in threads)
-				if(t.IsAlive)
+			foreach (var t in threads)
+				if (t.IsAlive)
 				{
 					t.Abort();
 					t.Join();
