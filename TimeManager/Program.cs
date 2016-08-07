@@ -10,7 +10,7 @@ namespace TimeManager
 	{
 		static void Main(string[] args)
 		{
-			var allowedRate = TimeSpan.FromSeconds(1.1);
+			var allowedRate = TimeSpan.FromSeconds(1.5);
 			var httpListener = new HttpListener();
 			httpListener.Prefixes.Add("http://+:666/");
 			var nextAllowedTimestamp = DateTime.UtcNow.Add(allowedRate);

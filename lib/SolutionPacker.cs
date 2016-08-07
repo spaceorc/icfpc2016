@@ -8,9 +8,41 @@ namespace lib
 {
 	public static class SolutionPacker
 	{
-		public static SolutionSpec Pack(this SolutionSpec source)
+		public static SolutionSpec Pack(this SolutionSpec source, bool deep = false)
 		{
-			return source.DoNormalize().RemoveBadFacetsVertices().PackFacetNumbers();
+			var packed = source.DoNormalize().RemoveBadFacetsVertices().PackFacetNumbers();
+			if (packed.Size() < 5000 && !deep)
+				return packed;
+			return packed.PackWithRotations();
+		}
+
+		public static SolutionSpec PackWithRotations(this SolutionSpec source)
+		{
+			var best = source;
+			for (int i = 0; i < 3; i++)
+			{
+				source = source.Rotate90();
+				if (source.Size() < best.Size())
+					best = source;
+			}
+			source = source.ReflectSourcePoints("0,0 1,1");
+			for (int i = 0; i < 4; i++)
+			{
+				source = source.Rotate90();
+				if (source.Size() < best.Size())
+					best = source;
+			}
+			return best;
+		}
+
+		private static SolutionSpec Rotate90(this SolutionSpec source)
+		{
+			return source.ReflectSourcePoints("1/2,0 1/2,1").ReflectSourcePoints("0,0 1,1");
+		}
+
+		private static SolutionSpec ReflectSourcePoints(this SolutionSpec source, Segment segment)
+		{
+			return new SolutionSpec(source.SourcePoints.Select(v => v.Reflect(segment)).ToArray(), source.Facets, source.DestPoints);
 		}
 
 		private class Node
@@ -462,6 +494,35 @@ namespace lib
 					Console.Out.WriteLine(response);
 				}
 			}
+		}
+
+		[Test]
+		public void PackWithRotations_EmptySolution()
+		{
+			var origSolution = SolutionSpec.CreateTrivial();
+			var result = origSolution.PackWithRotations();
+			result.SourcePoints.Should().Equal(origSolution.SourcePoints);
+			result.Facets.Select(FacetToString).ToArray().Should().BeEquivalentTo(origSolution.Facets.Select(FacetToString));
+			result.DestPoints.Should().Equal(origSolution.DestPoints);
+		}
+
+		[TestCase(
+				"0,0|1,0|1,1|0,1|99/100,99/100", "0,0|1,0|1,1|0,1|99/100,99/100", "0 1 2 3",
+				"1,1|0,1|0,0|1,0|1/100,1/100", "0,0|1,0|1,1|0,1|99/100,99/100", "0 1 2 3")]
+		public void PackWithRotations_Packs(string sourcePoints, string destPoints, string facets, string expectedSourcePoints, string expectedDestPoints, string expectedFacets)
+		{
+			var origSolution = new SolutionSpec(
+				sourcePoints.Split('|').Select(Vector.Parse).ToArray(),
+				facets.Split('|').Select(f => new Facet(f.Split(' ').Select(int.Parse).ToArray())).ToArray(),
+				destPoints.Split('|').Select(Vector.Parse).ToArray());
+			var expectedSolution = new SolutionSpec(
+				expectedSourcePoints.Split('|').Select(Vector.Parse).ToArray(),
+				expectedFacets.Split('|').Select(f => new Facet(f.Split(' ').Select(int.Parse).ToArray())).ToArray(),
+				expectedDestPoints.Split('|').Select(Vector.Parse).ToArray());
+			var result = origSolution.PackWithRotations();
+			result.SourcePoints.Should().Equal(expectedSolution.SourcePoints);
+			result.Facets.Select(FacetToString).ToArray().Should().BeEquivalentTo(expectedSolution.Facets.Select(FacetToString));
+			result.DestPoints.Should().Equal(expectedSolution.DestPoints);
 		}
 
 		private object FacetToString(Facet arg)
