@@ -28,11 +28,13 @@ namespace lib.ProjectionSolver
 
         static void Main(string[] args)
 		{
-            var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131, 1903 };
+            var goodTasks = new[] {  15, 16, 17, 38, 39, 40, 41, 46, 1131, 1903 };
 
             var nonRibbons = new[] { 4248 , 4008, 4033, 1490, 4206};
 
             var ribbons = new[] { 5157, 5208, 5161 };
+
+          //  foreach (var e in goodTasks) UltraSolver.SolveAndSend(e);
 
             //Arithmetic.RationalTriangulate(
             //    new Segment(new Vector(0,0), new Vector(3, 3)),
@@ -45,7 +47,7 @@ namespace lib.ProjectionSolver
             //foreach (var e in goodTasks)
 
            // DrawProblem(5161);
-            UltraSolver.SolveAndShow(5161);
+            UltraSolver.SolveAndShow(5168);
 //UltraSolver.SolveAndSend(41);
 
             
