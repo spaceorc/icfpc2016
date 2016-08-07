@@ -17,39 +17,34 @@ namespace lib
 			var problemsRepo = new ProblemsRepo();
 			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly().Reverse())
 			{
+				Console.Write($"Problem {problem.id} ");
 				var solution = TrySolveSingleProblem(problem);
 				if (solution != null)
 					ProblemsSender.Post(problem.id, solution);
-				Console.WriteLine($"Elapsed: {sw.Elapsed}");
+				Console.WriteLine($" Elapsed: {sw.Elapsed}");
 			}
 		}
 
 		private static SolutionSpec TrySolveSingleProblem(ProblemSpec problem)
 		{
-			SolutionSpec solution = null;
-
-			if (problem.Polygons.Length > 1)
-				Console.Write($"Problem {problem.id} has MANY POLYGONS! Skipping...");
+			Polygon convexPolygon;
+			var positivePolygon = problem.Polygons.Single(x => x.GetSignedSquare() > 0);
+			if (positivePolygon.IsConvex())
+			{
+				convexPolygon = positivePolygon;
+				Console.Write("CONVEX ");
+			}
 			else
 			{
-				var theProblem = problem;
-				if (problem.Polygons.Single().IsConvex())
-				{
-					Console.Write($"Problem {problem.id} is convex! Solvnig...");
-				}
-				else
-				{
-					Console.Write($"Problem {problem.id} is not convex! Solvnig using convex boundary...");
-					theProblem = new ProblemSpec(new[] { problem.Polygons.Single().GetConvexBoundary() }, problem.Segments);
-				}
-
-				var convexPolygon = theProblem.Polygons.Single();
-				var initialSolution = TryGetInitialSolution(theProblem, convexPolygon);
-				if (initialSolution != null)
-					solution = TrySolve(convexPolygon, initialSolution);
-				
+				convexPolygon = positivePolygon.GetConvexBoundary();
+				Console.Write("NOT_CONVEX using boundary ");
 			}
-			return solution;
+
+			var initialSolution = TryGetInitialSolution(problem, convexPolygon);
+			if (initialSolution == null)
+				return null;
+
+			return TrySolve(convexPolygon, initialSolution);
 		}
 
 		public static SolutionSpec TrySolve(Polygon poly, SolutionSpec initialSolution, TimeSpan? timeout = null)
