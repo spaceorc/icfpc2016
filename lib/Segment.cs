@@ -16,7 +16,11 @@ namespace lib
             Start = start;
             End = end;
         }
-
+		public Segment Invert() => new Segment(End, Start);
+		public Vector[] Ends()
+		{
+			return new[] { Start, End };
+		}
 		public bool IsEndpoint(Vector p)
 		{
 			return p.Equals(Start) || p.Equals(End);
