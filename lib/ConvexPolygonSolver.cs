@@ -121,7 +121,7 @@ namespace lib
 		}
 	}
 
-	[TestFixture, Explicit]
+	[TestFixture]
 	public class ConvexPolygonSolver_Should
 	{
 		//[TestCase(2414)]
@@ -132,6 +132,8 @@ namespace lib
 		//[TestCase(2777)]
 		//[TestCase(2966)]
 		//[TestCase(3180)]
+
+		[Explicit]
 		public void Solve(int problemId)
 		{
 			var problemsRepo = new ProblemsRepo();
