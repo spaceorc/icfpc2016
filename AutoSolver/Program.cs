@@ -106,7 +106,7 @@ namespace AutoSolver
 			{ IsBackground = true };
 			thread.Start();
 
-			if (!thread.Join(TimeSpan.FromSeconds(15)))
+			if (!thread.Join(TimeSpan.FromSeconds(25)))
 			{
 				thread.Abort();
 				thread.Join();
