@@ -4,7 +4,9 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using lib;
 using lib.Api;
+using lib.ProjectionSolver;
 using lib.Visualization.ManualSolving;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -38,6 +40,7 @@ namespace lib
 		private Panel problemPanel;
 		private SnapshotJson snapshotJson;
 		private Dictionary<int, ProblemJson> problemsJson;
+	    private ListBox output;
 
 
 
@@ -155,8 +158,16 @@ namespace lib
 			{
 				try
 				{
+                    
 					painter.Paint(graphics, Math.Min(clientSize.Height, clientSize.Width), problem);
 					Text = problem.id.ToString();
+
+				    var gist = RibbonGist(problem);
+                    output.Items.Clear();
+                    foreach (var g in gist)
+                    {
+                        output.Items.Add(string.Format("{0}\t{1}", g.Key, g.Value));
+                    }
 				}
 				catch
 				{
@@ -164,9 +175,41 @@ namespace lib
 				}
 			}
 		}
-	}
 
-	[TestFixture]
+        public static KeyValuePair<Rational, long>[] RibbonGist(ProblemSpec spec)
+        {
+            var result = new Dictionary<Rational, long>();
+            var solver = SolverMaker.CreateSolver(spec);
+            var rationalSegments = solver.AllSegments
+                .Where(s => Arithmetic.IsSquare(s.QuadratOfLength))
+                .ToArray();
+            var rationalVectors = new HashSet<Vector>();
+            foreach (var segment in rationalSegments)
+            {
+                rationalVectors.Add(segment.Start);
+                rationalVectors.Add(segment.End);
+            }
+            foreach (var vector in rationalVectors)
+            {
+                foreach (var segment in rationalSegments)
+                {
+                    var d = segment.Distance2To(vector);
+                    if (d == 0)
+                        continue;
+                    d = d.Reduce();
+                    //if (d.Numerator != 1)
+                    //    continue;
+
+                    if (!result.ContainsKey(d))
+                        result[d] = 0;
+                    result[d]++;
+                }
+            }
+            return result.OrderByDescending(p => p.Value).Take(10).ToArray();
+        }
+    }
+
+    [TestFixture]
 	public class VisualizerForm_Should
 	{
 		[Test]
