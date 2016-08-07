@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using FluentAssertions;
 using lib.Api;
@@ -11,6 +12,111 @@ namespace lib
 	[Explicit]
 	public class Bashkort_Solver
 	{
+		[Test]
+		public void PostSolutionsForSameProblems3()
+		{
+			var repo = new ProblemsRepo();
+			var solutions = new Dictionary<int, Tuple<string, double, int>>();
+			Console.Out.WriteLine($"calculating");
+			foreach (var problemSpec in repo.GetAll().Where(p => repo.FindSolution(p.id) != null))
+			{
+				var perms = GetAllPerms(problemSpec);
+				var polygonsHashCode = perms.Select(p => p.MoveToOrigin().GetPolygonsHashCode()).ToList().Min();
+				Tuple<string, double, int> prev;
+				if (!solutions.TryGetValue(polygonsHashCode, out prev) || prev.Item2 < repo.GetProblemResemblance(problemSpec.id))
+					solutions[polygonsHashCode] = Tuple.Create(repo.FindSolution(problemSpec.id), repo.GetProblemResemblance(problemSpec.id), problemSpec.id);
+			}
+			foreach (var problemSpec in repo.GetAll())
+			{
+				var perms = GetAllPerms(problemSpec);
+				var polygonsHashCode = perms.Select(p => p.MoveToOrigin().GetPolygonsHashCode()).ToList().Min();
+				Tuple<string, double, int> best;
+				if (solutions.TryGetValue(polygonsHashCode, out best))
+				{
+					if (repo.GetProblemResemblance(problemSpec.id) < best.Item2)
+					{
+						Console.Out.Write($"{problemSpec.id} -> {best.Item3}: ");
+						Console.Out.Write($"{repo.GetProblemResemblance(problemSpec.id)} -> {best.Item2}");
+						Console.Out.WriteLine();
+					}
+				}
+//					ProblemsSender.Post(new SolutionSpec(best.Item1), problemSpec.id, pack: false);
+			}
+		}
+
+		private List<ProblemSpec> GetAllPerms(ProblemSpec source)
+		{
+			var result = new List<ProblemSpec>();
+			result.Add(source);
+			for (int i = 0; i < 3; i++)
+			{
+				source = Rotate90(source);
+				result.Add(source);
+			}
+			source = ReflectProblem(source, "0,0 1,1");
+			for (int i = 0; i < 4; i++)
+			{
+				source = Rotate90(source);
+				result.Add(source);
+			}
+			return result;
+
+		}
+
+		private static ProblemSpec Rotate90(ProblemSpec source)
+		{
+			return ReflectProblem(ReflectProblem(source, "1/2,0 1/2,1"), "0,0 1,1");
+		}
+
+		private static ProblemSpec ReflectProblem(ProblemSpec source, Segment segment)
+		{
+			return new ProblemSpec(source.Polygons.Select(v => v.Reflect(segment)).ToArray(), new Segment[0]);
+		}
+
+		[Test]
+		public void PostSolutionsForSameProblems2()
+		{
+			var repo = new ProblemsRepo();
+			var directories = Directory.GetDirectories(@"c:\Work\icfpc\other\icfp-2016\data\problems\", "*");
+			var otherProblems = directories.Select(x =>
+			{
+				int result;
+				if (int.TryParse(Path.GetFileName(x), out result))
+					return result;
+				return -1;
+			}).Where(x => x != -1);
+			foreach (var otherProblem in otherProblems)
+			{
+				if (repo.FindResponse(otherProblem) == null)
+					Console.Out.WriteLine(otherProblem);
+			}
+		}
+
+		[Test]
+		public void PostSolutionsForSameProblems()
+		{
+			var repo = new ProblemsRepo();
+			var solutions = new Dictionary<int, Tuple<string, double, int>>();
+			foreach (var problemSpec in repo.GetAll().Where(p => repo.FindSolution(p.id) != null))
+			{
+				var polygonsHashCode = problemSpec.GetPolygonsHashCode();
+				Tuple<string, double, int> prev;
+				if (!solutions.TryGetValue(polygonsHashCode, out prev) || prev.Item2 < repo.GetProblemResemblance(problemSpec.id))
+					solutions[polygonsHashCode] = Tuple.Create(repo.FindSolution(problemSpec.id), repo.GetProblemResemblance(problemSpec.id), problemSpec.id);
+			}
+			foreach (var problemSpec in repo.GetAll())
+			{
+				var polygonsHashCode = problemSpec.GetPolygonsHashCode();
+				Tuple<string, double, int> best;
+				if (solutions.TryGetValue(polygonsHashCode, out best) && repo.GetProblemResemblance(problemSpec.id) < best.Item2)
+				{
+					Console.Write($"{problemSpec.id}->{best.Item3}: ");
+					ProblemsSender.Post(new SolutionSpec(best.Item1), problemSpec.id, pack: false);
+					Console.WriteLine();
+				}
+			}
+		}
+
 		[Test]
 		[TestCase(3852, "9999077/69994655", "1116/69994655", false)]
 		[TestCase(3965, "997/9981", "11/9981", true)]

@@ -136,5 +136,16 @@ namespace lib
 		    var pb = segment.Start + b*v;
 		    return Distance2(point, pb);
 	    }
+
+        public static Rational? InDistance2(Vector point, Segment segment)
+        {
+            var v = segment.End - segment.Start;
+            var w = point - segment.Start;
+            var c1 = w.ScalarProd(v);
+            var c2 = v.ScalarProd(v);
+            var b = c1 / c2;
+            var pb = segment.Start + b * v;
+            return Distance2(point, pb);
+        }
     }
 }

@@ -7,6 +7,7 @@ namespace lib
 {
 	public class SolutionSpec
 	{
+		public readonly string Raw;
 		public readonly Vector[] SourcePoints;
 		public readonly Facet[] Facets;
 		public readonly Vector[] DestPoints;
@@ -16,6 +17,12 @@ namespace lib
 		{
 			return new SolutionSpec(initialSquare, new[] { new Facet(0, 1, 2, 3) }, initialSquare.Select(transform ?? (x => x)).ToArray());
 		}
+
+		public SolutionSpec(string raw)
+		{
+			Raw = raw;
+		}
+
 		public SolutionSpec(Vector[] sourcePoints, Facet[] facets, Vector[] destPoints)
 		{
 			if (sourcePoints.Length != destPoints.Length)
@@ -44,6 +51,8 @@ namespace lib
 
 		public override string ToString()
 		{
+			if (Raw != null)
+				return Raw;
 			var sb = new StringBuilder();
 			sb.AppendLine(SourcePoints.Length.ToString());
 			sb.AppendLine(SourcePoints.StrJoin(Environment.NewLine));
@@ -64,8 +73,10 @@ namespace lib
             return AreFacetsValid(1);
         }
 
-	public bool AreFacetsValid(Rational requiredSize)
+		public bool AreFacetsValid(Rational requiredSize)
 		{
+			if (Raw != null)
+				return true;
 			Rational totalSquare = 0;
 			foreach (var facet in Facets)
 			{

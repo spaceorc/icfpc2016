@@ -10,6 +10,8 @@ namespace lib
 	{
 		public static SolutionSpec Pack(this SolutionSpec source, bool deep = false)
 		{
+			if (source.Raw != null)
+				return source;
 			var packed = source.DoNormalize().RemoveBadFacetsVertices().PackFacetNumbers();
 			if (packed.Size() < 5000 && !deep)
 				return packed;

@@ -75,7 +75,7 @@ namespace lib
 			}
 		}
 
-		private static SolutionSpec TrySolveInOneShot(ProblemSpec problem, Polygon convexPolygon)
+		public static SolutionSpec TrySolveInOneShot(ProblemSpec problem, Polygon convexPolygon)
 		{
 			SolutionSpec solution = null;
 			var initialSolution = TryGetInitialSolution(problem, convexPolygon);

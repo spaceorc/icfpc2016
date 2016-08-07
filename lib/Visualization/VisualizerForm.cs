@@ -195,22 +195,29 @@ namespace lib
 			}
 		}
 
-		private void PaintRibbonGistToOutput()
-		{
-			var solver = SolverMaker.CreateSolver(problem);
-			KeyValuePair<Rational, double>[] gist = RibbonIndicator.RibbonGist(solver);
-			var r = RibbonIndicator.Indicate(gist);
-			output.Items.Clear();
-			if (r.HasValue)
-			{
-				output.Items.Add("RIBBON!");
-			}
-			foreach (var g in gist)
-			{
-				output.Items.Add(string.Format("{0}\t{1}", g.Key, g.Value));
-			}
-		}
-	}
+	    private void PaintRibbonGistToOutput()
+	    {
+            var solver = SolverMaker.CreateSolver(problem);
+	        double percent;
+	        var parallelGist = RibbonIndicator.ParallelGist(solver, out percent);
+	        var pointGist = RibbonIndicator.PointGist(solver);
+	        var r = RibbonIndicator.Indicate(pointGist, parallelGist, percent);
+	        output.Items.Clear();
+            output.Items.Add(string.Format("{2}Strength: {0}, Percent: {1}",
+                RibbonIndicator.GetStrength(pointGist, parallelGist, percent), percent,
+                r.HasValue ? "RIBBON! " : ""));
+            
+	        foreach (var g in parallelGist)
+	        {
+	            output.Items.Add(string.Format("{0}\t{1}", g.Key, g.Value));
+	        }
+	        output.Items.Add("");
+            foreach (var g in pointGist)
+            {
+                output.Items.Add(string.Format("{0}\t{1}", g.Key, g.Value));
+            }
+        }
+    }
 
 	[TestFixture]
 	public class VisualizerForm_Should

@@ -263,7 +263,40 @@ namespace lib
 			Console.WriteLine(v);
 		}
 
-		
+		[Test, Explicit]
+		public void FindRects()
+		{
+			var repo = new ProblemsRepo();
+			var sq = repo.GetAllNotSolvedPerfectly().Where(p => p.Segments.Length == 4);
+			foreach (var p in sq)
+			{
+				Console.WriteLine(p.id);
+			}
+		}
+		[Test, Explicit]
+		public void SolveRibbons()
+		{
+			var repo = new ProblemsRepo();
+			var snapshotJson = repo.GetSnapshot(new ApiClient());
+			var ribbons = repo.GetAllNotSolvedPerfectly().Where(IsRibbon);
+			var sum = 0d;
+			foreach (var ribbon in ribbons)
+			{
+				var desc = snapshotJson.Problems.First(p => p.Id == ribbon.id);
+				sum += desc.ExpectedScore();
+				Console.WriteLine(ribbon.id + " Owner = " + desc.Owner + " Exp = " + desc.ExpectedScore());
+			}
+			Console.WriteLine(sum);
+		}
+
+		private bool IsRibbon(ProblemSpec prob)
+		{
+			var ds = prob.Segments.Select(s => s.Direction).ToList();
+			var diagCount = ds.Count(d => d.X == d.Y || d.X == -d.Y);
+			return diagCount== 2 && ds.All(d => d.X == 0 || d.Y == 0 || d.X == d.Y || d.X == -d.Y);
+		}
+
+
 		[Test, Explicit]
 		public void GetTriangles()
 		{
