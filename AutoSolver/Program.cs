@@ -12,6 +12,11 @@ namespace AutoSolver
 		private static readonly ApiClient client = new ApiClient();
 		private static readonly ProblemsRepo repo = new ProblemsRepo();
 
+		static void Main2(string[] args)
+		{
+			new Bashkort_Solver().PostSolutionsForSameProblems();
+		}
+
 		static void Main(string[] args)
 		{
 			if (args.Contains("--yura"))
