@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using FluentAssertions;
+using lib.ProjectionSolver;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
@@ -260,6 +261,47 @@ namespace lib
 			var v = snapshotJson.Problems.Where(p => p.Ranking.All(r => r.resemblance != 1.0))
 				.Sum(p => p.SolutionSize / (1 + p.Ranking.Length));
 			Console.WriteLine(v);
+		}
+
+		
+		[Test, Explicit]
+		public void GetTriangles()
+		{
+			/*
+			 5987
+			 5988
+			 5990
+			 6100
+
+			16/9709 по X и по Y
+			1077/9709 Ч ширина и высота треугольника
+			точка 1,1 Ч это вершина с пр€мым углом
+			 
+			 */
+
+			var repo = new ProblemsRepo();
+			var snapshotJson = repo.GetSnapshot(new ApiClient());
+			var ps = snapshotJson.Problems.Where(p => p.Owner == "149");
+			foreach (var problem in ps)
+			{
+				var pr = repo.Get(problem.Id);
+				var points = pr.Points.Distinct().ToList();
+				if (points.Count == 7)
+				{
+					var w = points.Max(p => p.X);
+					var h = points.Max(p => p.Y);
+					var minW1 = points.Select(p => p.X).Where(ww => ww > 0).Min();
+					var minW2 = points.Select(p => w - p.X).Where(ww => ww > 0).Min();
+					var minH1 = points.Select(p => p.Y).Where(hh => hh > 0).Min();
+					var minH2 = points.Select(p => h - p.Y).Where(hh => hh > 0).Min();
+					var minW = minW1 > minW2 ? minW2 : minW1;
+					var minH = minH1 > minH2 ? minH2 : minH1;
+
+					Console.WriteLine($"{problem.Id}, \"{w}\", \"{h}\", \"{minW}\", \"{minH}\", {minW1 < minW2}");
+				}
+			}
+
+
 		}
 		[Test]
 		public void CalcImperfectScore2()
