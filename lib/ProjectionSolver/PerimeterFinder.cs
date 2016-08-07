@@ -8,7 +8,7 @@ namespace lib.ProjectionSolver
 {
     public class PerimeterFinder
     {
-	    private const bool ShowDebug = true;
+	    private const bool ShowDebug = false;
 
 	    public PerimeterFinder(WayFinder wayFinder, Rational[] pathLengths)
 	    {
