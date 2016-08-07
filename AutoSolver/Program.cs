@@ -14,6 +14,8 @@ namespace AutoSolver
 
 		static void Main(string[] args)
 		{
+			ShowIntro("ConvexPolygonSolver");
+
 			while (true)
 			{
 				var newProblems = DownloadNewProblems();
@@ -24,9 +26,11 @@ namespace AutoSolver
 
 		static void Main2(string[] args)
 		{
-			while (true)
+			ShowIntro("SolveWithProjectionSolverRunner");
+
+			for (var iteration = 0; ; iteration++)
 			{
-				if (args.Length > 0 && args[0] == "-d")
+				if (iteration > 0 || (args.Length > 0 && args[0] == "-d"))
 					DownloadNewProblems();
 
 				Console.WriteLine("Solving...");
@@ -42,6 +46,13 @@ namespace AutoSolver
 				Console.WriteLine("Waiting 1 minute...");
 				Thread.Sleep(TimeSpan.FromMinutes(1));
 			}
+		}
+
+		private static void ShowIntro(string algorithmName)
+		{
+			Console.ForegroundColor = ConsoleColor.Yellow;
+			Console.Out.WriteLine($"Running Autosolver using {algorithmName}");
+			Console.ResetColor();
 		}
 
 		private static double EstimateDifficulty(ProblemSpec problem)

@@ -66,11 +66,11 @@ namespace lib.Api
 					if (resemblance > oldResemblance)
 					{
 						Console.ForegroundColor = resemblance >= 1.0 ? ConsoleColor.Green : ConsoleColor.White;
-						Console.Out.Write($" solution improved! new score: {resemblance} ");
+						Console.Out.Write($" solution for problem {problemSpecId} improved! new score: {resemblance} ");
 						Console.ResetColor();
 					}
 					else
-						Console.Out.Write($" just solution changed! old = new score: {resemblance} ");
+						Console.Out.Write($" just solution for problem {problemSpecId} changed! old = new score: {resemblance} ");
 				}
 				return resemblance;
 			}
