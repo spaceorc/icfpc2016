@@ -118,6 +118,44 @@ namespace lib
 		}
 
 		[Test]
+		[TestCase(2146)]
+		public void DoSomething_WhenSomething2(int problemId)
+		{
+			var repo = new ProblemsRepo();
+			var problemSpec = repo.Get(problemId);
+			var sourcePoints = new List<Vector>();
+			var destPoints = new List<Vector>();
+			var facets = new List<Facet>();
+			for (int iX = 0; iX <= 31; iX++)
+				for (int iY = 0; iY <= 6; iY++)
+				{
+					sourcePoints.Add(new Vector(iX/(Rational)31, iY / (Rational)6));
+					if (iY%2 == 0)
+						if (iX%2 == 0)
+							destPoints.Add("0,0");
+						else
+							destPoints.Add("1/31,0");
+					else
+						if (iX % 2 == 0)
+							destPoints.Add("0,1/6");
+						else
+							destPoints.Add("1/31,1/6");
+				}
+			for (int iX = 0; iX < 31; iX++)
+				for (int iY = 0; iY < 6; iY++)
+					facets.Add(new Facet(iX * 7 + iY, iX * 7 + 1 + iY, (iX+1) * 7 + iY + 1, (iX+1) * 7 + iY));
+			var solution = new SolutionSpec(sourcePoints.ToArray(), facets.ToArray(), destPoints.ToArray());
+
+			Console.Out.WriteLine($"size: {solution.Size()}; packed: {solution.Pack().Size()}");
+			Console.Out.WriteLine($"facets: {solution.Facets.Length}; sourcePoints: {solution.SourcePoints.Length}; destPoints: {solution.DestPoints.Length}");
+
+			//solution.CreateVisualizerForm().ShowDialog();
+
+			var post = ProblemsSender.Post(solution, problemSpec.id);
+			Console.Out.WriteLine(post);
+		}
+
+		[Test]
 		[TestCase(3852, "9999077/69994655", "1116/69994655", false)]
 		[TestCase(3965, "997/9981", "11/9981", true)]
 		[TestCase(4008, "11173797/89390393", "17/89390393", true)]
