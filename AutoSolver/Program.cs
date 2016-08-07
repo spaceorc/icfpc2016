@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using lib;
 using lib.Api;
@@ -13,7 +14,8 @@ namespace AutoSolver
 
 		static void Main2(string[] args)
 		{
-			DownloadNewProblems();
+			var newProblems = DownloadNewProblems();
+			ConvexPolygonSolver.SolveAll(newProblems);
 			ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
 		}
 
@@ -46,19 +48,22 @@ namespace AutoSolver
 			return ratSegCount /10 + smallSegCount / 3 + blackPoints;
 		}
 
-		private static void DownloadNewProblems()
+		private static List<ProblemSpec> DownloadNewProblems()
 		{
 			Console.WriteLine("Downloading new problems...");
 			var snapshot = client.GetLastSnapshot();
+			var newProblems = new List<ProblemSpec>();
 			foreach (var problem in snapshot.Problems)
 			{
 				if (repo.Find(problem.Id) == null)
 				{
 					var problemSpec = client.GetBlob(problem.SpecHash);
 					repo.Put(problem.Id, problemSpec);
+					newProblems.Add(repo.Get(problem.Id));
 					Console.WriteLine($"Downloaded problem {problem.Id}");
 				}
 			}
+			return newProblems;
 		}
 
 		private static void SolveWithProjectionSolverRunner(ProblemSpec problemSpec)

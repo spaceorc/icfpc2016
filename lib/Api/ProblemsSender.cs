@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading;
-using SquareConstructor;
 
 namespace lib.Api
 {
@@ -43,7 +42,9 @@ namespace lib.Api
 			var solutionSize = solutionSpec.Size();
 			if (solutionSize > 5000)
 			{
+				Console.ForegroundColor = ConsoleColor.Red;
 				Console.Out.Write($" solution size limit exceeded {solutionSize} ");
+				Console.ResetColor();
 				return 0;
 			}
 

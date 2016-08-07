@@ -100,7 +100,9 @@ namespace lib
 						{
 							if (result.Contains("\"ok\":false"))
 							{
+								Console.ForegroundColor = ConsoleColor.Red;
 								Console.Write(result);
+								Console.ResetColor();
 								isRetriableError = false;
 							}
 							else

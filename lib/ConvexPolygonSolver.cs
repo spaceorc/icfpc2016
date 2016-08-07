@@ -12,17 +12,30 @@ namespace lib
 {
 	public static class ConvexPolygonSolver
 	{
+		private static readonly ProblemsRepo problemsRepo = new ProblemsRepo();
+
 		public static void SolveAllNotSolvedPerfectly()
 		{
+			SolveAll(problemsRepo.GetAllNotSolvedPerfectly().Reverse().ToList());
+		}
+
+		public static void SolveAll(List<ProblemSpec> problems)
+		{
 			var sw = Stopwatch.StartNew();
-			var problemsRepo = new ProblemsRepo();
-			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly().Reverse())
+			for (var i = 0; i < problems.Count; i++)
 			{
-				Console.Write($"Problem {problem.id} ");
+				var problem = problems[i];
+				Console.Write($"{sw.Elapsed:g} Problem {problem.id:0000} ({i:0000}/{problems.Count:0000}) ");
 				var solution = TrySolveSingleProblem(problem);
 				if (solution != null)
 					ProblemsSender.Post(solution, problem.id);
-				Console.WriteLine($" Elapsed: {sw.Elapsed}");
+				else
+				{
+					Console.ForegroundColor = ConsoleColor.Yellow;
+					Console.Out.Write($" no solution found ");
+					Console.ResetColor();
+				}
+				Console.WriteLine();
 			}
 		}
 
