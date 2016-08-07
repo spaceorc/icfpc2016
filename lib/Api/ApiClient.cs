@@ -117,12 +117,12 @@ namespace lib
 				}
 				catch (Exception e)
 				{
+					Thread.Sleep(TimeSpan.FromSeconds(1));
 					if (!isRetriableError)
 						throw;
 					Console.WriteLine("Will retry failed solution post for problem: {0}\r\n{1}", problemId, e);
 					if (++attempt > 10)
 						throw new InvalidOperationException($"Failed to post solution for {problemId} with attempts", e);
-					Thread.Sleep(TimeSpan.FromSeconds(1));
 				}
 			}
 		}
