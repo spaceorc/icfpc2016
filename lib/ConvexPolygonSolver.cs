@@ -126,12 +126,13 @@ namespace lib
 	{
 		//[TestCase(2414)]
 		//[TestCase(2225)]
-		[TestCase(2267)]
+		//[TestCase(2267)]
 
-		//[TestCase(2668)]
-		//[TestCase(2777)]
-		//[TestCase(2966)]
-		//[TestCase(3180)]
+		[TestCase(2668)]
+		[TestCase(2777)]
+		[TestCase(2966)]
+		[TestCase(3180)]
+		[TestCase(3404)]
 
 		[Explicit]
 		public void Solve(int problemId)
@@ -139,14 +140,13 @@ namespace lib
 			var problemsRepo = new ProblemsRepo();
 			var problem = problemsRepo.Get(problemId);
 			var poly = problem.Polygons.Single();
-			var apiClient = new ApiClient();
 			var dx = (int) problem.Polygons.SelectMany(p => p.Vertices).Select(x => x.X.Denomerator).Max();
 			var dy = (int) problem.Polygons.SelectMany(p => p.Vertices).Select(x => x.Y.Denomerator).Max();
 			foreach (var x in Enumerable.Range(0, dx).Select(x => new Rational(x, dx)))
 				foreach (var y in Enumerable.Range(0, dy).Select(y => new Rational(y, dy)))
 				{
 					var shift = new Vector(x, y);
-					//var shift = new Vector(0, 0);
+//					var shift = new Vector(0, 0);
 					var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
 					var solution = ConvexPolygonSolver.TrySolve(poly, initialSolution);
 					var packedSolution = solution.Pack();
@@ -155,24 +155,8 @@ namespace lib
 					if (packedSolutionSize <= 5000)
 					{
 						Console.WriteLine($"{shift}: {solutionSize}; packed: {packedSolutionSize}");
-
-						try
-						{
-							var response = apiClient.PostSolution(problem.id, packedSolution);
-							var resemblance = problemsRepo.GetResemblance(response);
-							if (resemblance > problemsRepo.GetProblemResemblance(problem.id))
-							{
-								problemsRepo.PutSolution(problem.id, packedSolution);
-								problemsRepo.PutResponse(problem.id, response);
-								Console.Write("Solution improved! ");
-								return;
-							}
-							Console.WriteLine(resemblance);
-						}
-						catch (Exception e)
-						{
-							Console.WriteLine(e);
-						}
+						ProblemsSender.Post(packedSolution, problemId, false);
+						return;
 					}
 				}
 		}
