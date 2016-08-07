@@ -59,6 +59,11 @@ namespace lib
 			return ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
 		}
 
+        public bool AreFacetsValid()
+        {
+            return AreFacetsValid(1);
+        }
+
 	public bool AreFacetsValid(Rational requiredSize)
 		{
 			Rational totalSquare = 0;

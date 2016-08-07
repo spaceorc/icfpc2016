@@ -52,7 +52,7 @@ namespace lib
 		{
 			var sol = D4(new Rational(9, 20), new Rational(19, 40), new Rational(12, 40), new Rational(13, 40));
 
-			sol.AreFacetsValid().Should().BeTrue();
+			sol.AreFacetsValid(1).Should().BeTrue();
 
 			Console.WriteLine(sol.Pack());
 			sol.CreateVisualizerForm(true).ShowDialog();
