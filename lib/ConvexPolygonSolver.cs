@@ -41,6 +41,7 @@ namespace lib
 					var solution = TrySolve(problem);
 					if (solution != null)
 						ProblemsSender.Post(problem, solution);
+					Console.WriteLine();
 				}
 			}
 		}
