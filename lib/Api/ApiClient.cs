@@ -122,7 +122,6 @@ namespace lib
 			}
 		}
 
-
 		private string Query(string query)
 		{
 			if (sw.Elapsed < TimeSpan.FromSeconds(1))
