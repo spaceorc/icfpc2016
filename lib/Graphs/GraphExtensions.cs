@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Runner
+namespace lib.ProjectionSolver
 {
     public static class GraphExtensions
     {

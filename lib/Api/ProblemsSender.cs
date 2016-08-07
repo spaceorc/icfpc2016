@@ -1,13 +1,17 @@
-﻿using System;
+﻿using lib.ProjectionSolver;
+using System;
+using System.Net.Http;
 using System.Threading;
 
 namespace lib.Api
 {
 	public class ProblemsSender
 	{
+		private static readonly ProblemsRepo repo = new ProblemsRepo();
+
 		public static double TrySolveAndSend(ProblemSpec problemSpec)
 		{
-			double res = 0.0;
+			var res = 0.0;
 			var t = new Thread(() =>
 			{
 				var spec = ProjectionSolverRunner.Solve(problemSpec);
@@ -23,26 +27,39 @@ namespace lib.Api
 			return res;
 		}
 
-		public static double SolveAndSend(int id)
-		{
-			var repo = new ProblemsRepo();
-			var problemSpec = repo.Get(id);
-			var spec = ProjectionSolverRunner.Solve(problemSpec);
-			if (spec == null) return 0;
-			return Post(problemSpec, spec);
-		}
 
+			
 		public static double Post(ProblemSpec problemSpec, SolutionSpec solutionSpec)
 		{
 			solutionSpec = solutionSpec.Pack();
+
+			var existingSolution = repo.FindSolution(problemSpec.id);
+			if (existingSolution == solutionSpec.ToString())
+			{
+				var resemblance = repo.GetProblemResemblance(problemSpec.id);
+				Console.Out.Write($" solution is the same! current score: {resemblance} ");
+				return resemblance;
+			}
+
+			var solutionSize = solutionSpec.Size();
+			if (solutionSize > 5000)
+			{
+				Console.Out.Write($" solution size limit exceeded {solutionSize} ");
+				return 0;
+			}
+
+			return DoPost(problemSpec, solutionSpec);
+		}
+
+		private static double DoPost(ProblemSpec problemSpec, SolutionSpec solutionSpec)
+		{
 			var client = new ApiClient();
-			var repo = new ProblemsRepo();
 			try
 			{
 				var oldResemblance = repo.GetProblemResemblance(problemSpec.id);
 				var response = client.PostSolution(problemSpec.id, solutionSpec);
 				var resemblance = repo.GetResemblance(response);
-				if (resemblance > oldResemblance)
+				if (resemblance >= oldResemblance)
 				{
 					repo.PutResponse(problemSpec.id, response);
 					repo.PutSolution(problemSpec.id, solutionSpec);
@@ -53,6 +70,8 @@ namespace lib.Api
 			catch (Exception e)
 			{
 				if (e is ThreadAbortException)
+					return 0;
+				if (e is HttpRequestException)
 					return 0;
 				Console.WriteLine(e);
 				return 0;

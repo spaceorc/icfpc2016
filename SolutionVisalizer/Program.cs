@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using lib;
-using Runner;
+using lib.ProjectionSolver;
 using SquareConstructor;
 using Path = System.IO.Path;
 
@@ -24,25 +24,6 @@ namespace SolutionVisalizer
 			var form = new VisualizerForm();
 			Application.Run(form);
 		}
-
-		private static SolutionSpec Solve(ProblemSpec arg)
-		{
-			//return GraphExt.Solve(arg);
-			//return new ImperfectSolver().SolveMovingInitialSquare(arg);
-			try
-			{
-				return new ConstructorSolver(arg).Work();
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e);
-				throw;
-			}
-		}
-
-		private static string GetProblemsDir()
-		{
-			return Path.GetFullPath("problems");
-		}
+		
 	}
 }

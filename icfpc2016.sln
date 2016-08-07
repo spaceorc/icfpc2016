@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolutionVisalizer", "Soluti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoSolver", "AutoSolver\AutoSolver.csproj", "{55BD9244-4509-40E1-93B8-FE058FAB566C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeManager", "TimeManager\TimeManager.csproj", "{1E60E427-E877-46C2-8AD5-4F6965DF87E2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{55BD9244-4509-40E1-93B8-FE058FAB566C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55BD9244-4509-40E1-93B8-FE058FAB566C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55BD9244-4509-40E1-93B8-FE058FAB566C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E60E427-E877-46C2-8AD5-4F6965DF87E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E60E427-E877-46C2-8AD5-4F6965DF87E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E60E427-E877-46C2-8AD5-4F6965DF87E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E60E427-E877-46C2-8AD5-4F6965DF87E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

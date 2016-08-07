@@ -1,6 +1,6 @@
 ﻿using lib;
 using lib.Graphs;
-using Runner;
+using lib.ProjectionSolver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,101 +8,23 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Runner
+namespace lib.ProjectionSolver
 {
 
-    public class NodeProjection
-    {
-        public Node<EdgeInfo, NodeInfo> Original;
-        public Vector Projection;
-    }
-
-    public class EdgeProjection
-    {
-        public NodeProjection begin;
-        public NodeProjection end;
-        public List<Segment> Segments;
-    }
-
-    public class ProjectionStage
-    {
-        public List<NodeProjection> Nodes = new List<NodeProjection>();
-        public List<EdgeProjection> Edges = new List<EdgeProjection>();
-    }
-
-     public partial class Projection
-     {
-        public Graph<EdgeInfo, NodeInfo> Graph;
-        public List<Segment> AllSegments;
-        public Stack<ProjectionStage> Stages = new Stack<ProjectionStage>();
-        internal List<SegmentFamily> SegmentsFamily;
-
-        public IEnumerable<NodeProjection> AllNodeProjections
-        {
-            get
-            {
-
-                return Stages.SelectMany(z => z.Nodes);
-            }
-        }
-
-        public IEnumerable<EdgeProjection> AllEdgeProjections
-        {
-            get
-            {
-                return Stages.SelectMany(z => z.Edges);
-            }
-        }
-
-        public Dictionary<Node<EdgeInfo, NodeInfo>, List<NodeProjection>> GetNodeFunction()
-        {
-            var dict = Graph.Nodes.ToDictionary(z => z, z => new List<NodeProjection>());
-            foreach (var e in AllNodeProjections)
-                dict[e.Original].Add(e);
-            return dict;
-        }
-
-        public Dictionary<Segment, List<EdgeProjection>> GetEdgeFunction()
-        {
-            var dict = AllSegments.ToDictionary(z => z, z => new List<EdgeProjection>());
-            foreach (var e in AllEdgeProjections)
-                foreach (var ee in e.Segments)
-                    dict[ee].Add(e);
-            return dict;
-        }
-
-
-
-        public bool IsCompleteProjection()
-        {
-            var goodNodes = AllNodeProjections.Select(z => z.Original).Distinct().Count();
-            if (goodNodes != Graph.NodesCount) return false;
-            var goodEdges = AllEdgeProjections.SelectMany(z => z.Segments).Distinct().Count();
-            if (goodEdges != AllSegments.Count) return false;
-            return true;
-        }
-    }
-
+  
 
 
     public static class Projector
     {
-        public static Projection CreateProjection(List<SegmentFamily> families, List<Segment> allSegments, Graph<EdgeInfo, NodeInfo> graph)
-        {
-            var p = new Projection();
-            p.AllSegments = allSegments.ToList();
-            p.Graph = graph;
-            p.SegmentsFamily = families.ToList();
-            return p;
-        }
+
 
 
         public static ProjectionStage CreateInitialProjection(List<PPath> square, Projection p)
         {
             ProjectionStage stage = new ProjectionStage();
 
-            var corners = new[] { new Vector(0, 0), new Vector(0, 1), new Vector(1, 1), new Vector(1, 0) };
-            var direction = new[] { new Vector(0, 1), new Vector(1, 0), new Vector(0, -1), new Vector(-1, 0) };
+            var corners = new[] { new Vector(0, 0), new Vector(p.SideX, 0), new Vector(p.SideX, p.SideY), new Vector(0, p.SideY) };
+            var direction = new[] { new Vector(1, 0), new Vector(0, 1), new Vector(-1, 0), new Vector(0, -1) };
 
 
             for (int i = 0; i < 4; i++)
@@ -139,75 +61,17 @@ namespace Runner
             return stage;
         }
 
-        public class SegmentFamilySubset
+
+
+
+
+
+
+        
+        public static List<EdgeProjection> TryInsertFamily(SegmentFamilySubset subset, ProjectionCurrentState state)
         {
-            public SegmentFamily family;
-            public int start;
-            public int count;
-            public Segment[] Insides { get; private set; }
-            public Rational QuadratLength { get; private set; }
-
-            public SegmentFamilySubset(SegmentFamily family, int start, int count)
-            {
-                this.family = family;
-                this.start = start;
-                this.count = count;
-                Insides = family.Segments.Skip(start).Take(count).ToArray();
-                QuadratLength = new Segment(Begin, End).QuadratOfLength;
-                Segment = new Segment(Begin, End);
-            }
 
 
-
-            public Vector Begin
-            {
-                get { return family.Points[start]; }
-            }
-
-            public Vector End
-            {
-                get { return family.Points[start+count]; }
-            }
-
-            public Segment Segment { get; internal set; }
-        }
-
-        public class CurrentState
-        {
-            public Dictionary<Node<EdgeInfo, NodeInfo>, List<NodeProjection>> nodesMap;
-            public Dictionary<Segment, List<EdgeProjection>> edgesMap;
-
-
-            public Node<EdgeInfo, NodeInfo> GetNode(Vector p)
-            {
-                return nodesMap.Keys.Where(z => z.Data.Location.Equals(p)).FirstOrDefault();
-            }
-
-            public bool SegmentIsCovered(SegmentFamilySubset subs)
-            {
-                return subs.Insides.All(z => edgesMap[z].Count != 0);
-            }
-
-            public bool IsMapped(Node<EdgeInfo,NodeInfo> node)
-            {
-                return node != null && nodesMap[node].Count != 0;
-            }
-        }
-
-
-
-        public static CurrentState GetCurrentState(Projection p)
-        {
-            var ep = new CurrentState();
-            ep.edgesMap = p.GetEdgeFunction();
-            ep.nodesMap = p.GetNodeFunction();
-            return ep;
-        }
-
-
-
-        public static EdgeProjection TryInsertFamily(SegmentFamilySubset subset, CurrentState state)
-        {
 
             if (state.SegmentIsCovered(subset)) return null;
             var start = state.GetNode(subset.Begin);
@@ -215,15 +79,17 @@ namespace Runner
             var end = state.GetNode(subset.End);
             if (end == null) return null;
 
+            var result = new List<EdgeProjection>();
+
             foreach (var s in state.nodesMap[start])
                 foreach (var f in state.nodesMap[end])
                 {
                     var length = new Segment(s.Projection, f.Projection).QuadratOfLength;
                     if (length != new Segment(subset.Begin, subset.End).QuadratOfLength) continue;
-                    var result = new EdgeProjection { begin = s, end = f, Segments = subset.Insides.ToList() };
-                    return result;
+                    result.Add(new EdgeProjection { begin = s, end = f, Segments = subset.Insides.ToList() });
+                    
                 }
-            return null;
+            return result;
         }
 
 
@@ -231,8 +97,10 @@ namespace Runner
 
         public static IEnumerable<SegmentFamilySubset> GetAllPossibleSegments(List<SegmentFamily> family)
         {
-            foreach (var f in family)
-                for (int size = 1; size < f.Segments.Length + 1; size++)
+            var maxLength = family.Max(z => z.Segments.Length) + 1;
+
+            for (int size=1;size<maxLength;size++)
+                foreach (var f in family)
                     for (int start = 0; start <= f.Segments.Length - size; start++)
                         yield return new SegmentFamilySubset(f, start, size);
         }
@@ -242,14 +110,14 @@ namespace Runner
 
             var stage = new ProjectionStage();
 
-            var ep = GetCurrentState(p);
+            var ep = p.GetCurrentState();
 
             foreach (var subs in GetAllPossibleSegments(p.SegmentsFamily))
             {
                 var res = TryInsertFamily(subs, ep);
-                if (res != null)
+                if (res != null && res.Count!=0)
                 {
-                    stage.Edges.Add(res);
+                    stage.Edges.AddRange(res);
                     return stage;
                 }
             }
@@ -291,7 +159,7 @@ namespace Runner
         }
 
 
-        public static IEnumerable<ProjectionStage> TrySquashPoint(CurrentState state, List<AdjoinedSegmentFamilySubset> edges)
+        public static IEnumerable<ProjectionStage> TrySquashPoint(ProjectionCurrentState state, List<AdjoinedSegmentFamilySubset> edges)
         {
             var sizes = edges.Select(z => state.nodesMap[z.ProjectedNode].Count).ToArray();
             foreach (var p in GetCounting(sizes))
@@ -327,7 +195,7 @@ namespace Runner
 
         public static IEnumerable<ProjectionStage> FindSquashPoint(Projection p)
         {
-            var state = GetCurrentState(p);
+            var state = p.GetCurrentState();
             var store = new Dictionary<Node<EdgeInfo,NodeInfo>, List<AdjoinedSegmentFamilySubset>>();
             foreach(var e in GetAllPossibleSegments(p.SegmentsFamily))
             {

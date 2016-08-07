@@ -79,13 +79,19 @@ namespace lib
 					content.Add(new StringContent(solution), "solution_spec", "solution.txt");
 					//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
 					var res = client.PostAsync($"{baseUrl}solution/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
+					var result = res.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 					if (!res.IsSuccessStatusCode)
 					{
-						Console.WriteLine(res.ToString());
-						Console.WriteLine(res.Content.ReadAsStringAsync().Result);
+						if (result.Contains("\"ok\":false"))
+							Console.Write(result);
+						else
+						{
+							Console.WriteLine(res.ToString());
+							Console.WriteLine(result);
+						}
 						throw new HttpRequestException(res.ReasonPhrase);
 					}
-					return res.Content.ReadAsStringAsync().Result;
+					return result;
 				}
 			}
 			finally
@@ -121,7 +127,6 @@ namespace lib
 				sw.Restart();
 			}
 		}
-
 
 		private string Query(string query)
 		{
@@ -159,6 +164,7 @@ namespace lib
 
 		private HttpClient CreateClient()
 		{
+			AskTimeSlot();
 			var handler = new HttpClientHandler()
 			{
 				AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
@@ -169,6 +175,29 @@ namespace lib
 			client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
 			client.DefaultRequestHeaders.ExpectContinue = false;
 			return client;
+		}
+
+		private void AskTimeSlot()
+		{
+			try
+			{
+				using (var client = new HttpClient())
+				{
+					client.BaseAddress = new Uri("http://spaceorc-t430:666/");
+					var message = client.GetAsync("/ask").GetAwaiter().GetResult();
+					if (!message.IsSuccessStatusCode)
+					{
+						Console.WriteLine("Bad response from TimeManager. Just waiting 1 seconds...");
+						Thread.Sleep(1000);
+						return;
+					}
+					message.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+				}
+			}
+			catch (Exception)
+			{
+				Console.WriteLine("TimeManager is unavailable");
+			}
 		}
 	}
 
@@ -194,6 +223,24 @@ namespace lib
 				Console.WriteLine($"writing {filepath}");
 				File.WriteAllText(filepath, spec);
 			}
+			//1763
+		}
+
+		[Test]
+		public void CalcImperfectScore()
+		{
+			var snapshotJson = new ProblemsRepo().GetSnapshot(new ApiClient());
+			var v = snapshotJson.Problems.Where(p => p.Ranking.All(r => r.resemblance != 1.0))
+				.Sum(p => p.SolutionSize / (1 + p.Ranking.Length));
+			Console.WriteLine(v);
+		}
+		[Test]
+		public void CalcImperfectScore2()
+		{
+			var repo = new ProblemsRepo();
+			var c = repo.GetAllNotSolvedPerfectly().Count();
+			Console.WriteLine(c);
+			Console.WriteLine(repo.GetAll().Count());
 		}
 
 		[Test]

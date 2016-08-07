@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using FluentAssertions;
@@ -10,12 +11,14 @@ namespace lib
 {
 	public static class ConvexPolygonSolver
 	{
-		public static SolutionSpec Solve(Polygon poly, SolutionSpec initialSolution)
+		public static SolutionSpec TrySolve(Polygon poly, SolutionSpec initialSolution, TimeSpan? timeout = null)
 		{
 			if (poly.GetSignedSquare() < 0)
 				throw new InvalidOperationException("poly.GetSignedSquare() < 0");
+			timeout = timeout ?? TimeSpan.FromSeconds(20);
+			var sw = Stopwatch.StartNew();
 			var solution = initialSolution ?? SolutionSpec.CreateTrivial(x => x);
-			while (true)
+			do
 			{
 				var foldsCount = 0;
 				foreach (var segment in poly.Segments)
@@ -27,15 +30,20 @@ namespace lib
 				}
 				if (foldsCount == 0)
 					return solution;
-			}
+			} while (sw.Elapsed < timeout);
+			Console.Write($"Solution folding failed to complete in: {timeout.Value} ");
+			return solution;
 		}
 
 		public static void SolveAllNotSolvedPerfectly()
 		{
+			var sw = Stopwatch.StartNew();
 			var problemsRepo = new ProblemsRepo();
-			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly())
+			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly().Reverse())
 			{
-				if (problem.Polygons.Length == 1)
+				if (problem.Polygons.Length > 1)
+					Console.Write($"Problem {problem.id} has MANY POLYGONS! Skipping...");
+				else
 				{
 					SolutionSpec solution;
 					if (problem.Polygons.Single().IsConvex())
@@ -50,8 +58,8 @@ namespace lib
 					}
 					if (solution != null)
 						ProblemsSender.Post(problem, solution);
-					Console.WriteLine();
 				}
+				Console.WriteLine($"Elapsed: {sw.Elapsed}");
 			}
 		}
 
@@ -68,8 +76,17 @@ namespace lib
 			if (problem.Polygons.Length > 1 || !problem.Polygons.Single().IsConvex())
 				return null;
 
-			SolutionSpec initialSolution = null;
 			var problemPolygon = problem.Polygons[0];
+			var initialSolution = TryGetInitialSolution(problem, problemPolygon);
+			if (initialSolution == null)
+				return null;
+
+			return TrySolve(problemPolygon, initialSolution);
+		}
+
+		private static SolutionSpec TryGetInitialSolution(ProblemSpec problem, Polygon problemPolygon)
+		{
+			SolutionSpec initialSolution = null;
 			var t = new Thread(() =>
 			{
 				initialSolution = GetInitialSolutionAlongRationalEdge(problemPolygon) ?? new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem);
@@ -80,10 +97,9 @@ namespace lib
 			{
 				t.Abort();
 				t.Join();
-				Console.WriteLine("ImperfectSolver sucks! Skipping");
-				return null;
+				Console.WriteLine("Failed to get initial solution in 10 sec! Skipping");
 			}
-			return Solve(problemPolygon, initialSolution);
+			return initialSolution;
 		}
 
 		private static SolutionSpec GetInitialSolutionAlongRationalEdge(Polygon problemPolygon)
@@ -145,7 +161,7 @@ namespace lib
 					var shift = new Vector(x, y);
 					//var shift = new Vector(0, 0);
 					var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
-					var solution = ConvexPolygonSolver.Solve(poly, initialSolution);
+					var solution = ConvexPolygonSolver.TrySolve(poly, initialSolution);
 					var packedSolution = solution.Pack();
 					var packedSolutionSize = packedSolution.Size();
 					var solutionSize = solution.Size();

@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Runner
+namespace lib.ProjectionSolver
 {
 	class Program
 	{
@@ -26,11 +26,11 @@ namespace Runner
         }
 
 
-        static void SolveTask(int taskNumber)
+        static void SolveTask(int taskNumber, Rational otherSide)
         {
             var spec = new ProblemsRepo().Get(taskNumber);
             var solver = SolverMaker.CreateSolver(spec);
-            solver = SolverMaker.Solve(solver);
+            solver = SolverMaker.Solve(solver,otherSide);
             if (solver == null) return;
             SolverMaker.Visualize(solver);
         }
@@ -44,6 +44,8 @@ namespace Runner
             viz.GetX = z => z.Data.Location.X;
             viz.GetY = z => z.Data.Location.Y;
             viz.NodeCaption = z => z.Data.Location.ToString();
+            viz.EdgeCaption = z => z.Data.length.ToString();
+
             viz.Window(600, graph);
                  
         }
@@ -93,37 +95,71 @@ namespace Runner
 
         static void SolveAndSend(int id, bool wait=true)
         {
-            Console.WriteLine(id+":"+ " "+ProblemsSender.SolveAndSend(id));
+            Console.WriteLine(id+":"+ " "+SolveAndSendInternal(id));
             if (wait) Console.ReadKey();
             return;
         }
 
+        static void SolveAndSendStrip(int id, Rational otherSide)
+        {
+            Console.WriteLine(id + ":" + " " + SolveAndSendStripInternal(id,otherSide));
+            Console.ReadKey();
+            return;
+        }
 
 
-		static void Main(string[] args)
+        public static double SolveAndSendStripInternal(int id, Rational otherSide)
+        {
+            var repo = new ProblemsRepo();
+            var problemSpec = repo.Get(id);
+            var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec), otherSide, 0);
+
+            if (solver == null) return 0;
+
+            var cycleFinder = new CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(
+               solver.Projection,
+               n => n.Data.Projection);
+
+            var cycles = cycleFinder.GetCycles();
+            var reflectedCycles = CycleReflector.GetUnribbonedCycles(cycles);
+            var spec = ProjectionSolverRunner.GetSolutionsFromCycles(reflectedCycles);
+
+            spec = spec.Pack();
+            if (spec == null) return 0;
+            return ProblemsSender.Post(problemSpec, spec);
+        }
+
+        public static double SolveAndSendInternal(int id)
+        {
+            var problemSpec = new ProblemsRepo().Get(id);
+            var spec = ProjectionSolverRunner.Solve(problemSpec);
+            if (spec == null)
+                return 0;
+            return ProblemsSender.Post(problemSpec, spec);
+        }
+
+        static void Main(string[] args)
 		{
-			ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
-			return;
-			//Arithmetic.RationalTriangulate(
-			//    new Segment(new Vector(0,0), new Vector(3, 3)),
-			//    new Segment(new Vector(3, 3), new Vector(2, 6)),
-			//    new Vector(0, 0),
-			//    new Vector(2, 6));
 
-			//
+            //Arithmetic.RationalTriangulate(
+            //    new Segment(new Vector(0,0), new Vector(3, 3)),
+            //    new Segment(new Vector(3, 3), new Vector(2, 6)),
+            //    new Vector(0, 0),
+            //    new Vector(2, 6));
 
-			// DrawPathGraph(49);return;
-			//SolveAndSend(1139); return;
+            ///DrawPathGraph(49);return;
+            //SolveAndSend(1763);// return; //че за упаковка
 
-			//  SolveAndSend(40);return;
-			// DrawProblem(17);
+              SolveAndSend(1763);return;
+          //  DrawProblem(2356);
+            //SolveTask(2356, 1);
+            //SolveAndSendStrip(1235, new Rational(1, 8));
 
 
-			//что не так с 42?
-			var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
-            foreach (var e in goodTasks) SolveAndSend(e,false);
-           // SolveTask(18);
-
+            //что не так с 42?
+            var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
+       //    foreach (var e in goodTasks) SolveAndSend(e,false);Console.ReadKey();
+        
            // foreach (var e in goodTasks) SolveTask(e);
             //NewMain();return;
 

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using lib.Graphs;
-using Runner;
+using lib.ProjectionSolver;
 
 namespace lib
 {
@@ -42,7 +42,11 @@ namespace lib
 		}
 
 		public Rational length;
-		public double originality => (double) edges.AllNodes().Distinct().Count() / edges.Count;
+        public double originality1;
+        public double straightness;
+        public double metric;
+
+        public double originality => (double) edges.AllNodes().Distinct().Count() / edges.Count;
 
 		public override string ToString()
 		{
