@@ -14,7 +14,7 @@ namespace lib.Api
 			var t = new Thread(() =>
 			{
 				var spec = ProjectionSolverRunner.Solve(problemSpec);
-				res = Post(problemSpec.id, spec);
+				res = Post(spec, problemSpec.id);
 			})
 			{ IsBackground = true };
 			t.Start();
@@ -28,7 +28,6 @@ namespace lib.Api
 
 		public static double Post(int problemId, SolutionSpec solutionSpec)
 		{
-			var problemId = problemSpec.id;
 			return Post(solutionSpec, problemId);
 		}
 

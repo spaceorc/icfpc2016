@@ -77,8 +77,7 @@ namespace lib
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine(e);
-				throw;
+				MessageBox.Show(e.ToString());
 			}
 		}
 
@@ -107,7 +106,7 @@ namespace lib
 			var resp = repo.FindResponse(problem.id);
 			if (resp != null)
 			{
-				var json = JsonConvert.DeserializeObject<PostResponseJson>(resp);
+				var json = Read(resp);
 				res.OurResemblance = json.resemblance;
 			}
 			if (problemsJson.ContainsKey(problem.id))
@@ -116,6 +115,18 @@ namespace lib
 				res.ExpectedScore = problemsJson[problem.id].ExpectedScore();
 			}
 			return res;
+		}
+
+		private static PostResponseJson Read(string resp)
+		{
+			try
+			{
+				return JsonConvert.DeserializeObject<PostResponseJson>(resp);
+			}
+			catch (Exception e)
+			{
+				throw new Exception("Responce Format Error: " + resp);
+			}
 		}
 
 		private void SortByExpectedScoreClick(object sender, EventArgs eventArgs)
