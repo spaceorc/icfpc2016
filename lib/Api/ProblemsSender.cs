@@ -28,15 +28,15 @@ namespace lib.Api
 			return res;
 		}
 
-		public static double Post(SolutionSpec solutionSpec, int problemSpecId, bool pack = true)
+		public static double Post(SolutionSpec solutionSpec, int problemId, bool pack = true)
 		{
 			if (pack)
 				solutionSpec = solutionSpec.Pack();
 
-			var existingSolution = repo.FindSolution(problemSpecId);
+			var existingSolution = repo.FindSolution(problemId);
 			if (existingSolution == solutionSpec.ToString())
 			{
-				var resemblance = repo.GetProblemResemblance(problemSpecId);
+				var resemblance = repo.GetProblemResemblance(problemId);
 				Console.Out.Write($" solution is the same! current score: {resemblance} ");
 				return resemblance;
 			}
@@ -48,7 +48,7 @@ namespace lib.Api
 				return 0;
 			}
 
-			return DoPost(problemSpecId, solutionSpec);
+			return DoPost(problemId, solutionSpec);
 		}
 
 		private static double DoPost(int problemSpecId, SolutionSpec solutionSpec)

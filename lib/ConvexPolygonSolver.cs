@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -33,21 +34,44 @@ namespace lib
 			{
 				convexPolygon = positivePolygon;
 				Console.Write("CONVEX ");
-				}
-				else
-				{
+			}
+			else
+			{
 				convexPolygon = positivePolygon.GetConvexBoundary();
 				Console.Write("NOT_CONVEX using boundary ");
-				}
-
-			var initialSolution = TryGetInitialSolution(problem, convexPolygon);
-			if (initialSolution == null)
-				return null;
-
-			return TrySolve(convexPolygon, initialSolution);
 			}
+			return TrySolveInOneShot(problem, convexPolygon);
+		}
 
-		public static SolutionSpec TrySolve(Polygon poly, SolutionSpec initialSolution, TimeSpan? timeout = null)
+		private static SolutionSpec TrySolveInBestShot(ProblemSpec problem, Polygon convexPolygon)
+		{
+			var solution = EnumerateInitialSolutions(convexPolygon)
+				.Take(100)
+				.Select(x => Solve(convexPolygon, x, TimeSpan.FromSeconds(1)))
+				.OrderByDescending(x => SolutionEvaluator.EvaluateX(problem, x, dpi: 500))
+				.FirstOrDefault();
+			return solution;
+		}
+
+		private static IEnumerable<SolutionSpec> EnumerateInitialSolutions(Polygon convexPolygon)
+		{
+			var rationalEdges = convexPolygon.Segments.Where(x => Arithmetic.IsSquare(x.QuadratOfLength)).OrderByDescending(x => x.QuadratOfLength);
+			foreach (var rationalEdge in rationalEdges)
+			{
+				yield return GetInitialSolutionAtTheMiddleOfRationalEdge(convexPolygon, rationalEdge);
+			}
+		}
+
+		private static SolutionSpec TrySolveInOneShot(ProblemSpec problem, Polygon convexPolygon)
+		{
+			SolutionSpec solution = null;
+			var initialSolution = TryGetInitialSolution(problem, convexPolygon);
+			if (initialSolution != null)
+				solution = Solve(convexPolygon, initialSolution);
+			return solution;
+		}
+
+		public static SolutionSpec Solve(Polygon poly, SolutionSpec initialSolution, TimeSpan? timeout = null)
 		{
 			if (poly.GetSignedSquare() < 0)
 				throw new InvalidOperationException("poly.GetSignedSquare() < 0");
@@ -75,7 +99,7 @@ namespace lib
 		{
 			timeout = timeout ?? TimeSpan.FromSeconds(10);
 			SolutionSpec initialSolution = null;
-			var t = new Thread(() => { initialSolution = GetInitialSolutionAlongRationalEdge(problemPolygon) ?? new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem); })
+			var t = new Thread(() => { initialSolution = GetInitialSolutionByLongestRationalEdge(problemPolygon) ?? new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem); })
 			{ IsBackground = true };
 			t.Start();
 			if (!t.Join(timeout.Value))
@@ -87,13 +111,18 @@ namespace lib
 			return initialSolution;
 		}
 
-		private static SolutionSpec GetInitialSolutionAlongRationalEdge(Polygon problemPolygon)
+		private static SolutionSpec GetInitialSolutionByLongestRationalEdge(Polygon problemPolygon)
 		{
 			var longestRationalEdge = problemPolygon.Segments.Where(x => Arithmetic.IsSquare(x.QuadratOfLength)).OrderBy(x => x.QuadratOfLength).LastOrDefault();
 			if (longestRationalEdge == null)
 				return null;
-			var initialSolutionAlongRationalEdge = GetInitialSolutionAlongRationalEdge(longestRationalEdge);
-			var projections = problemPolygon.Vertices.Select(x => x.GetProjectionOntoLine(longestRationalEdge)).ToList();
+			return GetInitialSolutionAtTheMiddleOfRationalEdge(problemPolygon, longestRationalEdge);
+		}
+
+		private static SolutionSpec GetInitialSolutionAtTheMiddleOfRationalEdge(Polygon problemPolygon, Segment rationalEdge)
+		{
+			var initialSolutionAlongRationalEdge = GetInitialSolutionAlongRationalEdge(rationalEdge);
+			var projections = problemPolygon.Vertices.Select(x => x.GetProjectionOntoLine(rationalEdge)).ToList();
 			var minX = projections.Min(p => p.X);
 			var minY = projections.Min(p => p.Y);
 			var maxX = projections.Max(p => p.X);
@@ -148,7 +177,7 @@ namespace lib
 					var shift = new Vector(x, y);
 //					var shift = new Vector(0, 0);
 					var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
-					var solution = ConvexPolygonSolver.TrySolve(poly, initialSolution);
+					var solution = ConvexPolygonSolver.Solve(poly, initialSolution);
 					var packedSolution = solution.Pack();
 					var packedSolutionSize = packedSolution.Size();
 					var solutionSize = solution.Size();
