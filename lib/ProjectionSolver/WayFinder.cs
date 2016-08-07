@@ -42,8 +42,7 @@ namespace lib.ProjectionSolver
             foreach(var len in desiredLength)
                 if (path.length==len)
                 {
-                    path.originality1 = (double)path.edges.AllNodes().Distinct().Count();
-                    path.originality1 /= path.edges.Count;
+                    MakeMetrics(path);
 
                     if (!Result.ContainsKey(len)) Result[len] = new Dictionary<int, List<PPath>>();
                     var dict = Result[len];
@@ -51,6 +50,26 @@ namespace lib.ProjectionSolver
                     if (!dict.ContainsKey(begin)) dict[begin] = new List<PPath>();
                     dict[begin].Add(path);
                 }
+        }
+
+        void MakeMetrics(PPath path)
+        {
+            path.originality1 = (double)path.edges.AllNodes().Distinct().Count();
+            path.originality1 /= path.edges.Count;
+
+            path.straightness = 0.0;
+            for (int i=0;i<path.edges.Count-1;i++)
+            {
+                var first = path.edges[i].Data.segment.Direction;
+                var second = path.edges[i + 1].Data.segment.Direction;
+                var scalar = first.X * second.X + first.Y + second.Y;
+                double cos = (double)scalar / (first.Length * second.Length);
+                cos = (1 - cos) / 2;
+                path.straightness += cos;
+            }
+            path.straightness /= path.edges.Count;
+
+            path.metric = path.originality1 + path.straightness;
         }
 
         void Scoring()

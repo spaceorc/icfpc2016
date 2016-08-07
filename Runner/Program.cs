@@ -117,8 +117,6 @@ namespace lib.ProjectionSolver
             //    new Vector(0, 0),
             //    new Vector(2, 6));
 
-            //
-
             ///DrawPathGraph(49);return;
             //SolveAndSend(1763);// return; //че за упаковка
 

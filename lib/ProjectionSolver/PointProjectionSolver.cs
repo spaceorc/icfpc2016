@@ -42,7 +42,9 @@ namespace lib
 		}
 
 		public Rational length;
-        internal double originality1;
+        public double originality1;
+        public double straightness;
+        public double metric;
 
         public double originality => (double) edges.AllNodes().Distinct().Count() / edges.Count;
 

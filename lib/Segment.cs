@@ -7,6 +7,9 @@ namespace lib
     {
         public readonly Vector Start, End;
 
+
+        public Vector Direction {  get { return End - Start; } }
+
         public Segment(Vector start, Vector end)
         {
             Start = start;
