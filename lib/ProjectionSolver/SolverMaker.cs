@@ -140,7 +140,7 @@ namespace lib.ProjectionSolver
 	        {
 		        var pathLengths = new [] { 1, otherSide, 1, otherSide };
 		        var wayFinder = new WayFinder(solver.Graph, pathLengths.Distinct().ToList());
-				cycles = new PerimeterFinder(wayFinder, pathLengths).Find(metricaBorder);
+				cycles = new PerimeterFinder(wayFinder, pathLengths).Find();
 	        }
 	        else
 	        {

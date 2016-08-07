@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using ApprovalUtilities.Utilities;
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
 
 namespace lib.ProjectionSolver
 {
     public class PerimeterFinder
     {
+	    private const bool ShowDebug = true;
+
 	    public PerimeterFinder(WayFinder wayFinder, Rational[] pathLengths)
 	    {
 		    this.wayFinder = wayFinder;
 		    this.pathLengths = pathLengths;
 
-			alreadyYieldedPaths = new HashSet<string>();
+			alreadyYeildedPaths = new HashSet<string>();
 	    }
 
 	    private void DebugPathMetrics(params int[] nodeNumbers)
@@ -36,35 +39,40 @@ namespace lib.ProjectionSolver
 		    }
 	    }
 
-	    public IEnumerable<List<PPath>> Find(double cutOffBorder)
+	    public IEnumerable<List<PPath>> Find(double maxTotalPenalty = 0.4)
 	    {
 			for (var i = 0; i < 10; i++)
 				wayFinder.MakeIteration();
 
 		    var iter = 0;
-			while (true)
+		    var needMoreIterations = true;
+			while (needMoreIterations)
 			{
-				Console.WriteLine("\n === Let's make one more iteration ===");
+				if (ShowDebug)
+					Console.WriteLine("\n === Let's make one more iteration ===");
 				wayFinder.MakeIteration();
 				iter++;
 
+				needMoreIterations = false;
 				for (var start = 0; start < wayFinder.Graph.NodesCount; start++)
-					for (var indexSum = 0; ; indexSum++)
+				{
+					if (ShowDebug)
+						Console.WriteLine($"iter = {iter}, start = {start}");
+
+					foreach (var perimeter in FindRecursively(start, start, maxTotalPenalty, new Stack<PPath>()))
 					{
-						Console.WriteLine($"iter = {iter}, start = {start}, indexSum = {indexSum}");
-
-						indexSumTooBig = true;
-
-						foreach (var perimeter in FindRecursively(start, start, indexSum, new Stack<PPath>(), new Stack<int>(), cutOffBorder))
-							yield return perimeter;
-
-						if (indexSumTooBig)
-							break;
+						if (perimeter == null)
+						{
+							needMoreIterations = true;
+							continue;
+						}
+						yield return perimeter;
 					}
+				}
 			}
 	    }
 
-	    private IEnumerable<List<PPath>> FindRecursively(int loopStartNode, int nodeToContinueFrom, int indexSum, Stack<PPath> perimeterStack, Stack<int> debug, double cutOffBorder)
+	    private IEnumerable<List<PPath>> FindRecursively(int loopStartNode, int nodeToContinueFrom, double availablePenalty, Stack<PPath> perimeterStack)
 	    {
 		    var lengthIndex = perimeterStack.Count;
 			if (lengthIndex == pathLengths.Length)
@@ -75,7 +83,6 @@ namespace lib.ProjectionSolver
 				    if (HasNotBeenYieldedEarlier(perimeter))
 				    {
 					    yield return perimeter;
-						// Console.WriteLine("debug: {0}", string.Join(" ", debug));
 					}
 				}
 			    yield break;
@@ -84,29 +91,21 @@ namespace lib.ProjectionSolver
 		    var length = pathLengths[lengthIndex];
 		    var pathCandidates = wayFinder.Result.GetValueOrDefault(length)?.GetValueOrDefault(nodeToContinueFrom) ?? new List<PPath>();
 
-		    var i = 0;
-		    if (lengthIndex == pathLengths.Length - 1)
-		    {
-			    i = indexSum; // Сразу выбираем последний индекс так, чтобы сумма всех индексов в точности была indexSum
-
-			    if (i < pathCandidates.Count)
-				    indexSumTooBig = false;
-		    }
-
-		    for (; i <= indexSum && i < pathCandidates.Count; i++)
-		    {
-			    var pathCandidate = pathCandidates[i];
-				if (pathCandidate.metric < cutOffBorder)
-					continue;
+			foreach (var pathCandidate in pathCandidates)
+			{
+				var penaltyForPath = 1 - pathCandidate.metric;
+				var remainingPenalty = availablePenalty - penaltyForPath;
+				if (remainingPenalty < 0)
+					yield break;
 				
 				perimeterStack.Push(pathCandidate);
-				debug.Push(i);
-			    foreach (var perimeter in FindRecursively(loopStartNode, pathCandidate.LastEdge.To.NodeNumber, indexSum - i, perimeterStack, debug, cutOffBorder))
+			    foreach (var perimeter in FindRecursively(loopStartNode, pathCandidate.LastEdge.To.NodeNumber, remainingPenalty, perimeterStack))
 				    yield return perimeter;
-				debug.Pop();
 			    perimeterStack.Pop();
 		    }
-	    }
+			if (perimeterStack.Count == pathLengths.Length - 1)
+				yield return null; // Значит, availablePenalty не было израсходовано и после wayFinder.MakeIteration() можно поискать ещё путей
+		}
 
 	    private bool HasNotBeenYieldedEarlier(List<PPath> perimeter)
 	    {
@@ -118,15 +117,15 @@ namespace lib.ProjectionSolver
 			var c = string.Join(",", perimeter[2].NodeNumbers) + ".";
 			var d = string.Join(",", perimeter[3].NodeNumbers) + ".";
 		    return 
-				alreadyYieldedPaths.Add(a + b + c + d) &&
-				alreadyYieldedPaths.Add(c + d + a + b) &&
-				alreadyYieldedPaths.Add(d + c + b + a) &&
-				alreadyYieldedPaths.Add(b + a + d + c);
-	    }
+				alreadyYeildedPaths.Add(a + b + c + d) &&
+				alreadyYeildedPaths.Add(c + d + a + b) &&
+				alreadyYeildedPaths.Add(d + c + b + a) &&
+				alreadyYeildedPaths.Add(b + a + d + c);
+		}
 
-	    private readonly HashSet<string> alreadyYieldedPaths;
+		private bool availablePenaltyExhausted;
 
-	    private bool indexSumTooBig;
+		private readonly HashSet<string> alreadyYeildedPaths;
 
 	    private readonly WayFinder wayFinder;
 	    private readonly Rational[] pathLengths;
