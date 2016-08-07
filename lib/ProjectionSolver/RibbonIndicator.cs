@@ -57,7 +57,7 @@ namespace lib
 
             var pointStrength = g1.Value / g2.Value;
             //var parallelStrength = parallelGist.Length > 1 ? g1.Value/g1.Value : g1.Value;
-            return pointStrength/2;
+            return 3*pointStrength/2;
         }
 
         public static KeyValuePair<Rational, double>[] PointGist(PointProjectionSolver solver)
