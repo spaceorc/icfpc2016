@@ -100,25 +100,32 @@ namespace lib.ProjectionSolver
             return;
         }
 
+        static void SolveAndSendStrip(int id, Rational otherSide)
+        {
+            Console.WriteLine(id + ":" + " " + ProblemsSender.SolveAndSendStrip(id,otherSide));
+            Console.ReadKey();
+            return;
+        }
 
 
-		static void Main(string[] args)
+        static void Main(string[] args)
 		{
-			
-			//Arithmetic.RationalTriangulate(
-			//    new Segment(new Vector(0,0), new Vector(3, 3)),
-			//    new Segment(new Vector(3, 3), new Vector(2, 6)),
-			//    new Vector(0, 0),
-			//    new Vector(2, 6));
 
-			//
+            //Arithmetic.RationalTriangulate(
+            //    new Segment(new Vector(0,0), new Vector(3, 3)),
+            //    new Segment(new Vector(3, 3), new Vector(2, 6)),
+            //    new Vector(0, 0),
+            //    new Vector(2, 6));
 
-			// DrawPathGraph(49);return;
-           //SolveAndSend(1763);// return; //че за упаковка
+            //
 
-			//  SolveAndSend(40);return;
-			DrawProblem(27);
-            SolveTask(3990, new Rational(1,10));
+            ///DrawPathGraph(49);return;
+            //SolveAndSend(1763);// return; //че за упаковка
+
+            //  SolveAndSend(40);return;
+            DrawProblem(1235);
+            // SolveTask(1165, new Rational(1,4));
+            SolveAndSendStrip(1235, new Rational(1, 8));
 
 
             //что не так с 42?

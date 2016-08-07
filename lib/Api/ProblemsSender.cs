@@ -25,6 +25,29 @@ namespace lib.Api
 			}
 			return res;
 		}
+
+
+        public static double SolveAndSendStrip(int id, Rational otherSide)
+        {
+            var repo = new ProblemsRepo();
+            var problemSpec = repo.Get(id);
+            var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec), otherSide, 0);
+
+            if (solver == null) return 0;
+
+            var cycleFinder = new CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(
+               solver.Projection,
+               n => n.Data.Projection);
+
+            var cycles = cycleFinder.GetCycles();
+            var reflectedCycles = CycleReflector.GetUnribbonedCycles(cycles);
+            var spec = ProjectionSolverRunner.GetSolutionsFromCycles(reflectedCycles);
+
+            spec = spec.Pack();
+            if (spec == null) return 0;
+            return Post(problemSpec, spec);
+        }
+
 		public static double SolveAndSend(int id)
 		{
 			var repo = new ProblemsRepo();
