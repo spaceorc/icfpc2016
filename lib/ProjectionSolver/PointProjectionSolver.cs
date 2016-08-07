@@ -29,6 +29,17 @@ namespace lib
 
 	public class PPath
 	{
+		public PPath() { }
+
+		public PPath(PPath other)
+		{
+			edges = other.edges.ToList();
+			length = other.length;
+			originalityByEdges = other.originalityByEdges;
+			straightness = other.straightness;
+			metric = other.metric;
+		}
+
 		public List<Edge<EdgeInfo, NodeInfo>> edges;
 
 		public Edge<EdgeInfo, NodeInfo> LastEdge
@@ -42,7 +53,7 @@ namespace lib
 		}
 
 		public Rational length;
-        public double originality1;
+        public double originalityByEdges;
         public double straightness;
         public double metric;
 
@@ -51,10 +62,10 @@ namespace lib
 		public override string ToString()
 		{
 			return
-				originality.ToString("0.000") + " " +
+				metric + " " +
 				((double) length).ToString() + " : " +
 				edges
-					.Select(z => z.Data.segment.Start).StrJoin(" ") + " " + edges[edges.Count - 1].To.Data.Location.ToString();
+					.Select(z => z.From.NodeNumber).StrJoin(" ") + " " + edges[edges.Count - 1].To.NodeNumber.ToString();
 		}
 	}
 

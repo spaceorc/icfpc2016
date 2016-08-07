@@ -43,7 +43,7 @@ namespace lib.ProjectionSolver
             var viz = new GraphVisualizer<EdgeInfo, NodeInfo>();
             viz.GetX = z => z.Data.Location.X;
             viz.GetY = z => z.Data.Location.Y;
-          //  viz.NodeCaption = z => z.Data.Location.ToString();
+	        viz.NodeCaption = z => z.Data.Location.ToString() + " ("+z.NodeNumber.ToString()+")";
             viz.EdgeCaption = z => z.Data.length.ToString();
 
             viz.Window(600, graph);
@@ -141,23 +141,26 @@ namespace lib.ProjectionSolver
         static void Main(string[] args)
 		{
 
-            //Arithmetic.RationalTriangulate(
-            //    new Segment(new Vector(0,0), new Vector(3, 3)),
-            //    new Segment(new Vector(3, 3), new Vector(2, 6)),
-            //    new Vector(0, 0),
-            //    new Vector(2, 6));
-
-            ///DrawPathGraph(49);return;
-            //SolveAndSend(1763);// return; //че за упаковка
-
-            //  SolveAndSend(40);return;
-            DrawProblem(1235);
-            // SolveTask(1165, new Rational(1,4));
-            SolveAndSendStrip(1235, new Rational(1, 8));
+			//Arithmetic.RationalTriangulate(
+			//    new Segment(new Vector(0,0), new Vector(3, 3)),
+			//    new Segment(new Vector(3, 3), new Vector(2, 6)),
+			//    new Vector(0, 0),
+			//    new Vector(2, 6));
 
 
-            //что не так с 42?
-            var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
+			DrawProblem(1083);
+//
+			SolveTask(1083,new Rational(1,8)); return;
+
+			///DrawPathGraph(49);return;
+			//SolveAndSend(1763);// return; //че за упаковка
+
+			//  SolveAndSend(40);return;
+				SolveAndSendStrip(27, new Rational(1,10));
+
+
+			//что не так с 42?
+			var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
        //    foreach (var e in goodTasks) SolveAndSend(e,false);Console.ReadKey();
         
            // foreach (var e in goodTasks) SolveTask(e);
