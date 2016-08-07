@@ -9,7 +9,7 @@ namespace lib
 	{
 		public static SolutionSpec Pack(this SolutionSpec source)
 		{
-			return source.PackFacetNumbers().RemoveBadFacetsVertices();
+			return source.RemoveBadFacetsVertices().PackFacetNumbers();
 		}
 
 		public static SolutionSpec RemoveBadFacetsVertices(this SolutionSpec source)
