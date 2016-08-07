@@ -97,14 +97,12 @@ namespace lib
 		public SnapshotJson GetSnapshot(ApiClient api)
 		{
 			var path = Path.Combine(problemsDir, $"snapshot.txt");
-			if (File.Exists(path))
-				return JsonConvert.DeserializeObject<SnapshotJson>(File.ReadAllText(path));
-			else
+			if (!File.Exists(path) || File.GetLastWriteTime(path) < DateTime.Now - TimeSpan.FromHours(1))
 			{
-				var res = api.GetLastSnapshot();
-				File.WriteAllText(path, JsonConvert.SerializeObject(res));
-				return res;
+				var res = api.GetLastSnapshotString();
+				File.WriteAllText(path, res);
 			}
+			return JsonConvert.DeserializeObject<SnapshotJson>(File.ReadAllText(path));
 		}
 
 		public string FindSolution(int id)

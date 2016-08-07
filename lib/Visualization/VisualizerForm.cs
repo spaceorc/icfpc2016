@@ -17,11 +17,13 @@ namespace lib
 		public ProblemSpec Spec;
 		public double ExpectedScore;
 		public double OurResemblance;
+		public ProblemJson json;
+		public string Owner => json?.Owner ?? "";
 		public bool IsSolved => OurResemblance == 1.0;
 
 		public override string ToString()
 		{
-			return $"{Id} Exp {ExpectedScore:#} {(IsSolved ? "SOLVED" : OurResemblance.ToString("#.###"))}";
+			return $"{Id} Exp {ExpectedScore:#} {(IsSolved ? "SOLVED" : OurResemblance.ToString("#.###"))} {Owner}";
 		}
 	}
 
@@ -94,7 +96,10 @@ namespace lib
 				res.OurResemblance = json.resemblance;
 			}
 			if (problemsJson.ContainsKey(problem.id))
+			{
+				res.json = problemsJson[problem.id];
 				res.ExpectedScore = problemsJson[problem.id].ExpectedScore();
+			}
 			return res;
 		}
 

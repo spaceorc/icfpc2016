@@ -21,7 +21,9 @@ namespace lib.Visualization.ManualSolving
 			undo.ShortcutKeys = Keys.Z | Keys.Control;
 			var redo = new ToolStripMenuItem("Redo", null, (sender, args) => Redo());
 			redo.ShortcutKeys = Keys.Z | Keys.Control | Keys.Shift;
-			var menu = new ToolStrip(copy, move, cancel, undo, redo);
+			var border = new ToolStripMenuItem("MarkAsBorder", null, (sender, args) => ChangeModel(Model.MarkAsBorder()));
+			var noborder = new ToolStripMenuItem("MarkAsBorder", null, (sender, args) => ChangeModel(Model.MarkAsNoBorder()));
+			var menu = new ToolStrip(copy, move, cancel, undo, redo, border, noborder);
 			WindowState = FormWindowState.Maximized;
 			this.Controls.Add(menu);
 		}
