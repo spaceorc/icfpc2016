@@ -35,15 +35,32 @@ namespace lib
 			var problemsRepo = new ProblemsRepo();
 			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly())
 			{
-				if (problem.Polygons.Length == 1 && problem.Polygons.Single().IsConvex())
+				if (problem.Polygons.Length == 1)
 				{
-					Console.Write($"Problem {problem.id} is convex! Solvnig...");
-					var solution = TrySolve(problem);
+					SolutionSpec solution;
+					if (problem.Polygons.Single().IsConvex())
+					{
+						Console.Write($"Problem {problem.id} is convex! Solvnig...");
+						solution = TrySolve(problem);
+					}
+					else
+					{
+						Console.Write($"Problem {problem.id} is not convex! Solvnig using convex boundary...");
+						solution = TrySolveWithBoundary(problem);
+					}
 					if (solution != null)
 						ProblemsSender.Post(problem, solution);
 					Console.WriteLine();
 				}
 			}
+		}
+
+		public static SolutionSpec TrySolveWithBoundary(ProblemSpec problem)
+		{
+			if (problem.Polygons.Length > 1)
+				return null;
+			var convexProblem = new ProblemSpec(new [] {problem.Polygons.Single().GetConvexBoundary()}, problem.Segments);
+			return TrySolve(convexProblem);
 		}
 
 		public static SolutionSpec TrySolve(ProblemSpec problem)
