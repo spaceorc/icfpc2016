@@ -17,6 +17,11 @@ namespace lib
             End = end;
         }
 
+		public bool IsEndpoint(Vector p)
+		{
+			return p.Equals(Start) || p.Equals(End);
+		}
+
 		public Rational Distance2To(Vector p)
 		{
 			return Arithmetic.Distance2(p, this);
@@ -73,6 +78,11 @@ namespace lib
 		public Segment Move(Rational shiftX, Rational shiftY)
 		{
 			return new Segment(Start.Move(shiftX, shiftY), End.Move(shiftX, shiftY));
+		}
+		[Pure]
+		public Segment Move(Vector shift)
+		{
+			return Move(shift.X, shift.Y);
 		}
 
 		public override int GetHashCode()

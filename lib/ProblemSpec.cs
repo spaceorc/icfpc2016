@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,8 @@ namespace lib
 		public int id;
 		public readonly Polygon[] Polygons;
 		public Segment[] Segments;
+
+		public IEnumerable<Vector> Points => Segments.SelectMany(s => new[] { s.Start, s.End });
 
 		public ProblemSpec(Polygon[] polygons, Segment[] segments)
 		{

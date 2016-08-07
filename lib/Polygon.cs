@@ -111,7 +111,7 @@ namespace lib
 					var thisEdge = new Segment(vertices[(i - 1)% vertices.Count], thisVertex);
 					var nextEdge = new Segment(thisVertex, vertices[(i + 1)% vertices.Count]);
 					var prod = thisEdge.ToVector().VectorProdLength(nextEdge.ToVector());
-					if ((signedSq > 0 && prod < 0) || (signedSq < 0 && prod > 0))
+					if ((signedSq > 0 && prod <= 0) || (signedSq < 0 && prod >= 0))
 					{
 						vertices.Remove(thisVertex);
 						changed = true;
@@ -146,6 +146,8 @@ namespace lib
 		[TestCase("0,0 1,0 1,1 0,1", "0,0 1,0 1,1 0,1")]
 		[TestCase("0,0 1/2,1/2 1,0 1,1 0,1", "0,0 1,0 1,1 0,1")]
 		[TestCase("0,0 1,0 1,1 3/4,1/2 1/2,3/4 1/4,1/2 0,1", "0,0 1,0 1,1 0,1")]
+		[TestCase("0,0 0,1 1/2,1 1,1 1,0", "0,0 0,1 1,1 1,0")]
+		[TestCase("0,0 1,0 1/2,1 1,1 0,1", "0,0 1,0 1,1 0,1")]
 		public void DoSomething_GetConvexBoundary(string poly, string expectedBoundary)
 		{
 			var polygon = new Polygon(poly.Split(' ').Select(Vector.Parse).ToArray());

@@ -18,6 +18,7 @@ namespace lib
 		public static Form CreateVisualizerForm(this SolutionSpec solution, bool dest = false)
 		{
 			var form = new Form();
+			form.WindowState = FormWindowState.Maximized;
 			Painter painter = new Painter();
 			if (dest)
 				form.Paint +=
