@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lib", "lib\lib.csproj", "{99A4C223-DD49-468F-A791-5587E795A663}"
 EndProject
@@ -33,8 +33,8 @@ Global
 		{9FA243B2-B523-4254-9268-F777A37417E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9FA243B2-B523-4254-9268-F777A37417E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9FA243B2-B523-4254-9268-F777A37417E1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{55BD9244-4509-40E1-93B8-FE058FAB566C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{55BD9244-4509-40E1-93B8-FE058FAB566C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55BD9244-4509-40E1-93B8-FE058FAB566C}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{55BD9244-4509-40E1-93B8-FE058FAB566C}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{55BD9244-4509-40E1-93B8-FE058FAB566C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55BD9244-4509-40E1-93B8-FE058FAB566C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1E60E427-E877-46C2-8AD5-4F6965DF87E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
