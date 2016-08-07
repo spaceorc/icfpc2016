@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Forms;
+using lib.Api;
 
 namespace lib
 {
@@ -15,19 +16,54 @@ namespace lib
 			return form;
 		}
 
-		public static Form CreateVisualizerForm(this SolutionSpec solution, bool dest = false)
+		public static Form CreateVisualizerForm(this SolutionSpec solution, int problemId = -1)
 		{
 			var form = new Form();
+			var split = new SplitContainer();
+			split.Dock = DockStyle.Fill;
+			var menu = new MenuStrip();
+			if (problemId >= 0)
+			{
+				menu.Items.Add("submit").Click += (sender, args) => PostSolution(problemId, solution);
+			}
+			form.Controls.Add(split);
+			form.Controls.Add(menu);
+			split.Panel1.DoubleClick += (sender, args) =>
+			{
+				CopyToClipboard(solution);
+			};
+			split.Panel2.DoubleClick += (sender, args) =>
+			{
+				CopyToClipboard(solution);
+			};
 			form.WindowState = FormWindowState.Maximized;
 			Painter painter = new Painter();
-			if (dest)
-				form.Paint +=
-					(sender, args) => painter.PaintDest(args.Graphics, Math.Min(form.ClientSize.Height, form.ClientSize.Width), solution);
-			else
-				form.Paint +=
-				(sender, args) => painter.Paint(args.Graphics, Math.Min(form.ClientSize.Height, form.ClientSize.Width), solution);
-			form.Text = "Problem";
+			split.Panel1.Paint +=
+					(sender, args) => painter.Paint(args.Graphics, Math.Min(split.Panel1.ClientSize.Height, split.Panel1.ClientSize.Width), solution);
+			split.Panel2.Paint +=
+				(sender, args) => painter.PaintDest(args.Graphics, Math.Min(split.Panel2.ClientSize.Height, split.Panel2.ClientSize.Width), solution);
+			split.Resize += (sender, args) => split.Invalidate();
+			form.Text = "Solution (Doule click to copy solution to clipboard) " + problemId;
 			return form;
+		}
+
+		private static void PostSolution(int problemId, SolutionSpec solution)
+		{
+			try
+			{
+				var res = ProblemsSender.Post(solution, problemId);
+				MessageBox.Show("Resemblance = " + res);
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.ToString(), e.Message);
+			}
+		}
+
+		private static void CopyToClipboard(SolutionSpec solution)
+		{
+			Clipboard.SetText(solution.ToString());
+			MessageBox.Show("Solution have copied to clipboard");
 		}
 	}
 }

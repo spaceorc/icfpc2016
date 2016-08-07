@@ -69,7 +69,7 @@ namespace lib
 			} while (sw.Elapsed < timeout);
 			Console.Write($"Solution folding failed to complete in: {timeout.Value} ");
 			return solution;
-		}
+			}
 
 		public static SolutionSpec TryGetInitialSolution(ProblemSpec problem, Polygon problemPolygon, TimeSpan? timeout = null)
 		{

@@ -24,7 +24,9 @@ namespace lib.Visualization.ManualSolving
 			var border = new ToolStripMenuItem("MarkAsBorder", null, (sender, args) => ChangeModel(Model.MarkAsBorder()));
 			var noborder = new ToolStripMenuItem("MarkAsNOTBorder", null, (sender, args) => ChangeModel(Model.MarkAsNoBorder()));
 			var solve = new ToolStripMenuItem("Solve", null, SolveClick);
-			var menu = new ToolStrip(copy, move, cancel, undo, redo, border, noborder, solve);
+			var selectAll = new ToolStripMenuItem("Select All", null, (sender, args) => ChangeModel(Model.SelectAll()));
+			selectAll.ShortcutKeys = Keys.A | Keys.Control;
+			var menu = new ToolStrip(selectAll, copy, move, cancel, undo, redo, border, noborder, solve);
 			WindowState = FormWindowState.Maximized;
 			this.Controls.Add(menu);
 		}
@@ -37,8 +39,8 @@ namespace lib.Visualization.ManualSolving
 			{
 				var sols = Model.SolveConvex();
 				foreach (var sol in sols)
-					sol.CreateVisualizerForm(true).ShowDialog();
-				MessageBox.Show("Решение скопировано в буфер. К решению выпуклого применены все сделанные в редакторе фолды в обратном порядке. Можно пробовать сабмитить.");
+					sol.CreateVisualizerForm(Model.Problem.id).Show();
+				//MessageBox.Show("Решение скопировано в буфер. К решению выпуклого применены все сделанные в редакторе фолды в обратном порядке. Можно пробовать сабмитить.");
 			}
 		}
 

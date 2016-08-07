@@ -73,14 +73,16 @@ namespace lib
 			return s > 0 ? s : -s;
 		}
 
-		public Rational GetSignedSquare()
+		public Rational GetSignedSquare() => GetSignedSquare(Vertices);
+
+		public static Rational GetSignedSquare(IList<Vector> vertices)
 		{
 			Rational sum = 0;
-			for (int i = 0; i < Vertices.Length; i++)
+			for (int i = 0; i < vertices.Count; i++)
 			{
-				var p1 = Vertices[i];
-				var p2 = Vertices[(i + 1)%Vertices.Length];
-				sum += (p1.X - p2.X)*(p1.Y + p2.Y)/2;
+				var p1 = vertices[i];
+				var p2 = vertices[(i + 1) % vertices.Count];
+				sum += (p1.X - p2.X) * (p1.Y + p2.Y) / 2;
 			}
 			return sum;
 		}
@@ -100,8 +102,10 @@ namespace lib
 
 		public Polygon GetConvexBoundary()
 		{
-			var signedSq = GetSignedSquare();
-			var vertices = new List<Vector>(Vertices);
+			var vertices = Vertices.ToList();
+			var zero = vertices.OrderBy(v => v.Y).ThenBy(v => v.X).First();
+			vertices = vertices.OrderByDescending(v => (v - zero).ScalarProd(new Vector(1, 0))/(v - zero).Length).ToList();
+			var signedSq = GetSignedSquare(vertices);
 			while (true)
 			{
 				var changed = false;
@@ -139,15 +143,15 @@ namespace lib
 			s.Should().Be(Rational.Parse(expectedSquare));
 		}
 
-		[TestCase("0,0 0,1 1,1 1,0", "0,0 0,1 1,1 1,0")]
-		[TestCase("0,0 1/2,1/2 0,1 1,1 1,0", "0,0 0,1 1,1 1,0")]
-		[TestCase("0,0 0,1 1/2,1/2 1,1 1,0", "0,0 0,1 1,1 1,0")]
-		[TestCase("0,0 0,1 1,1 1/2,1/2 1,0", "0,0 0,1 1,1 1,0")]
-		[TestCase("0,0 1,0 1,1 0,1", "0,0 1,0 1,1 0,1")]
-		[TestCase("0,0 1/2,1/2 1,0 1,1 0,1", "0,0 1,0 1,1 0,1")]
-		[TestCase("0,0 1,0 1,1 3/4,1/2 1/2,3/4 1/4,1/2 0,1", "0,0 1,0 1,1 0,1")]
-		[TestCase("0,0 0,1 1/2,1 1,1 1,0", "0,0 0,1 1,1 1,0")]
-		[TestCase("0,0 1,0 1/2,1 1,1 0,1", "0,0 1,0 1,1 0,1")]
+		[TestCase("0,0 0,1 1,1 1,0", "1,0 1,1 0,1 0,0")]
+		[TestCase("0,0 1/2,1/2 0,1 1,1 1,0", "1,0 1,1 0,1 0,0")]
+		[TestCase("0,0 0,1 1/2,1/2 1,1 1,0", "1,0 1,1 0,1 0,0")]
+		[TestCase("0,0 0,1 1,1 1/2,1/2 1,0", "1,0 1,1 0,1 0,0")]
+		[TestCase("1,0 1,1 0,1 0,0", "1,0 1,1 0,1 0,0")]
+		[TestCase("0,0 1/2,1/2 1,0 1,1 0,1", "1,0 1,1 0,1 0,0")]
+		[TestCase("0,0 1,0 1,1 3/4,1/2 1/2,3/4 1/4,1/2 0,1", "1,0 1,1 0,1 0,0")]
+		[TestCase("0,0 0,1 1/2,1 1,1 1,0", "1,0 1,1 0,1 0,0")]
+		[TestCase("0,0 1,0 1/2,1 1,1 0,1", "1,0 1,1 0,1 0,0")]
 		public void DoSomething_GetConvexBoundary(string poly, string expectedBoundary)
 		{
 			var polygon = new Polygon(poly.Split(' ').Select(Vector.Parse).ToArray());

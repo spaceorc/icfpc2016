@@ -1,1 +1,5 @@
+<<<<<<< 513d745acc89578d688087743a43d8a70ec9219b
 {"solution_size":871,"ok":true,"resemblance":0.928864,"problem_id":3869,"solution_spec_hash":"597f860ecfb359d3769055f91fad8d79a86abea1"}
+=======
+{"solution_size":446,"ok":true,"resemblance":1.0,"problem_id":3869,"solution_spec_hash":"0350f8b5533726f5fdd9d5b98a8abffc176fae18"}
+>>>>>>> Manual Solver rulez!

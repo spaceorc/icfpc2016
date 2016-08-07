@@ -28,6 +28,12 @@ namespace lib.Api
 
 		public static double Post(int problemId, SolutionSpec solutionSpec)
 		{
+			var problemId = problemSpec.id;
+			return Post(solutionSpec, problemId);
+		}
+
+		public static double Post(SolutionSpec solutionSpec, int problemId)
+		{
 			solutionSpec = solutionSpec.Pack();
 
 			var existingSolution = repo.FindSolution(problemId);
