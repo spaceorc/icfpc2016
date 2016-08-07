@@ -63,7 +63,7 @@ namespace SquareConstructor
 			{
 				if (!success)
 					return;
-				if (!node.Contains(segment, polygon) && node.HasIntersections(segment))
+				if (!node.Contains(segment, polygon) && (node.HasIntersections(segment)))
 					success = false;
 				else
 					node.Add(segment, polygon);
@@ -154,11 +154,29 @@ namespace SquareConstructor
 			{
 				var intersection = segment.GetIntersection(pair.Item1);
 				if (intersection == null)
-					return false;
+				{
+					return CheckIfBadCollinear(segment, pair.Item1);
+				}
 				if ((intersection.Equals(segment.Start) || intersection.Equals(segment.End)) && (intersection.Equals(pair.Item1.Start) || intersection.Equals(pair.Item1.End)))
 					return false;
 				return true;
 			});
 		}
+
+		private bool CheckIfBadCollinear(Segment segment1, Segment segment2)
+		{
+			if (!segment1.AreSegmentsOnSameLine(segment2))
+				return false;
+			return IsBetweenOnLine(segment1.Start, segment2.Start, segment1.End)
+				   || IsBetweenOnLine(segment1.Start, segment2.End, segment1.End)
+				   || IsBetweenOnLine(segment2.Start, segment1.Start, segment2.End)
+				   || IsBetweenOnLine(segment2.Start, segment1.End, segment2.End);
+		}
+
+		private static bool IsBetweenOnLine(Vector a, Vector x, Vector b)
+		{
+			return (a - x).ScalarProd(b - x) < 0;
+		}
+
 	}
 }

@@ -196,13 +196,6 @@ namespace SquareConstructor
 				maxCount, 0);
 			UsedPolygonsInStack.Remove(startSegment.Item1);
 
-
-			//var count = Vertexes.GetOrDefault(vertex)?.Count ?? 0;
-			//if (!(vertex.X == 0 || vertex.Y == 0 || vertex.X == 1 || vertex.Y == 1))
-			//	variants = variants.Where(vars => (vars.Count + count)%2 == 0).ToList();
-			
-
-
 			return variants;
 		}
 
