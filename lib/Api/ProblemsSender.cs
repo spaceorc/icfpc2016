@@ -1,5 +1,4 @@
-﻿using lib.ProjectionSolver;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Threading;
 
@@ -15,7 +14,7 @@ namespace lib.Api
 			var t = new Thread(() =>
 			{
 				var spec = ProjectionSolverRunner.Solve(problemSpec);
-				res = Post(problemSpec, spec);
+				res = Post(problemSpec.id, spec);
 			})
 			{ IsBackground = true };
 			t.Start();
@@ -27,16 +26,14 @@ namespace lib.Api
 			return res;
 		}
 
-
-			
-		public static double Post(ProblemSpec problemSpec, SolutionSpec solutionSpec)
+		public static double Post(int problemId, SolutionSpec solutionSpec)
 		{
 			solutionSpec = solutionSpec.Pack();
 
-			var existingSolution = repo.FindSolution(problemSpec.id);
+			var existingSolution = repo.FindSolution(problemId);
 			if (existingSolution == solutionSpec.ToString())
 			{
-				var resemblance = repo.GetProblemResemblance(problemSpec.id);
+				var resemblance = repo.GetProblemResemblance(problemId);
 				Console.Out.Write($" solution is the same! current score: {resemblance} ");
 				return resemblance;
 			}
@@ -48,21 +45,21 @@ namespace lib.Api
 				return 0;
 			}
 
-			return DoPost(problemSpec, solutionSpec);
+			return DoPost(problemId, solutionSpec);
 		}
 
-		private static double DoPost(ProblemSpec problemSpec, SolutionSpec solutionSpec)
+		private static double DoPost(int problemId, SolutionSpec solutionSpec)
 		{
 			var client = new ApiClient();
 			try
 			{
-				var oldResemblance = repo.GetProblemResemblance(problemSpec.id);
-				var response = client.PostSolution(problemSpec.id, solutionSpec);
+				var oldResemblance = repo.GetProblemResemblance(problemId);
+				var response = client.PostSolution(problemId, solutionSpec);
 				var resemblance = repo.GetResemblance(response);
-				if (resemblance > oldResemblance)
+				if (resemblance >= oldResemblance)
 				{
-					repo.PutResponse(problemSpec.id, response);
-					repo.PutSolution(problemSpec.id, solutionSpec);
+					repo.PutResponse(problemId, response);
+					repo.PutSolution(problemId, solutionSpec);
 					Console.Out.Write($" solution improved! new score: {resemblance} ");
 				}
 				return resemblance;

@@ -8,19 +8,17 @@ namespace AutoSolver
 {
 	class Program
 	{
-		private static ApiClient client;
-		private static ProblemsRepo repo;
-
-		static void Main2(string[] args)
-		{
-			ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
-		}
+		private static readonly ApiClient client = new ApiClient();
+		private static readonly ProblemsRepo repo = new ProblemsRepo();
 
 		static void Main(string[] args)
 		{
-			repo = new ProblemsRepo();
-			client = new ApiClient();
+			DownloadNewProblems();
+			ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
+		}
 
+		static void Main2(string[] args)
+		{
 			while (true)
 			{
 				//DownloadNewProblems();
@@ -81,7 +79,7 @@ namespace AutoSolver
 							lock (mutex)
 							{
 								Console.WriteLine(" posting... ");
-								ps = ProblemsSender.Post(problemSpec, solution);
+								ps = ProblemsSender.Post(problemSpec.id, solution);
 								Console.Write($" perfect score: {ps}");
 							}
 							if (ps == 1.0)

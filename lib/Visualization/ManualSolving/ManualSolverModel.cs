@@ -26,8 +26,8 @@ namespace lib.Visualization.ManualSolving
 
 	public class ManualSolverModel
 	{
-		public ImmutableStack<Segment> mirrors = ImmutableStack<Segment>.Empty;
-		public ManualSolverModel(ProblemSpec problem, Vector shift, ImmutableArray<SegmentModel> segments, int? highlightedSegmentIndex, ImmutableList<int> selectedSegmentIndices, PendingOperationType pendingOperation, ImmutableStack<Segment> mirrors)
+		public ImmutableList<Segment> mirrors = ImmutableList<Segment>.Empty;
+		public ManualSolverModel(ProblemSpec problem, Vector shift, ImmutableArray<SegmentModel> segments, int? highlightedSegmentIndex, ImmutableList<int> selectedSegmentIndices, PendingOperationType pendingOperation, ImmutableList<Segment> mirrors)
 		{
 			Problem = problem;
 			Shift = shift;
@@ -87,11 +87,11 @@ namespace lib.Visualization.ManualSolving
 				res = res.Where(s => !selectedSegments.Contains(s));
 			res = res.Concat(reflected);
 			PendingOperation = PendingOperationType.None;
-			return With(res, null, ImmutableList<int>.Empty, PendingOperationType.None, mirrors.Push(mirror));
+			return With(res, null, ImmutableList<int>.Empty, PendingOperationType.None, mirrors.Add(mirror));
 		}
 
 		private ManualSolverModel With(IEnumerable<SegmentModel> segments, int? highlightedSegmentIndex, ImmutableList<int> selectedSegmentIndices, PendingOperationType pendingOperation,
-			ImmutableStack<Segment> mirrors)
+			ImmutableList<Segment> mirrors)
 		{
 			return new ManualSolverModel(Problem, Shift, segments.ToImmutableArray(), highlightedSegmentIndex, selectedSegmentIndices, pendingOperation, mirrors);
 		}
@@ -116,22 +116,46 @@ namespace lib.Visualization.ManualSolving
 			return this;
 		}
 
-		public SolutionSpec SolveConvex()
+		public IEnumerable<SolutionSpec> SolveConvex()
 		{
 			var polygon = SelectedSegmentIndices.Select(i => Segments[i]).ToList();
 			ProblemSpec problem = CreatProblemSpec(polygon);
-			var solutionSpec = ConvexPolygonSolver.TrySolve(problem);
-			foreach (var mirror in mirrors.Reverse())
+			var solution = TrySolve(problem);
+			return GetAllMirrorCombinatons(solution, mirrors);
+		}
+
+		private static SolutionSpec TrySolve(ProblemSpec problem)
+		{
+			if (problem.Polygons.Length > 1 || !problem.Polygons.Single().IsConvex())
+				return null;
+
+			var problemPolygon = problem.Polygons[0];
+			var initialSolution = ConvexPolygonSolver.TryGetInitialSolution(problem, problemPolygon);
+			if (initialSolution == null)
+				return null;
+
+			return ConvexPolygonSolver.TrySolve(problemPolygon, initialSolution);
+		}
+
+		private IEnumerable<SolutionSpec> GetAllMirrorCombinatons(SolutionSpec solution, ImmutableList<Segment> mirrors)
+		{
+			if (mirrors.IsEmpty) yield return solution;
+			else
 			{
-				solutionSpec = solutionSpec.Fold(mirror);
+				var mirror = mirrors[mirrors.Count - 1];
+				var leftMirrors = mirrors.RemoveAt(mirrors.Count - 1);
+				foreach (var s in GetAllMirrorCombinatons(solution.Fold(mirror), leftMirrors))
+					yield return s;
+				foreach (var s in GetAllMirrorCombinatons(solution.Fold(new Segment(mirror.End, mirror.Start)), leftMirrors))
+					yield return s;
 			}
-			return solutionSpec;
 		}
 
 		private ProblemSpec CreatProblemSpec(List<SegmentModel> polygon)
 		{
 			var ss = polygon.Select(s => s.Segment).ToArray();
-			var ps = ss.Select(s => s.Start).ToArray();
+			//TODO incorrect polygon
+			var ps = ss.SelectMany(s => new[] { s.Start, s.End }).ToArray();
 			return new ProblemSpec(new Polygon[] {new Polygon(ps),  }, ss);
 
 		}
