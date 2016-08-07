@@ -72,31 +72,56 @@ namespace lib
 				Thread.Sleep(TimeSpan.FromSeconds(1));
 			try
 			{
-				using (var client = CreateClient())
-				{
-					var content = new MultipartFormDataContent();
-					content.Add(new StringContent(problemId.ToString()), "problem_id");
-					content.Add(new StringContent(solution), "solution_spec", "solution.txt");
-					//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
-					var res = client.PostAsync($"{baseUrl}solution/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
-					var result = res.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-					if (!res.IsSuccessStatusCode)
-					{
-						if (result.Contains("\"ok\":false"))
-							Console.Write(result);
-						else
-						{
-							Console.WriteLine(res.ToString());
-							Console.WriteLine(result);
-						}
-						throw new HttpRequestException(res.ReasonPhrase);
-					}
-					return result;
-				}
+				return PostSolutionWithAttempts(problemId, solution);
 			}
 			finally
 			{
 				sw.Restart();
+			}
+		}
+
+		private string PostSolutionWithAttempts(int problemId, string solution)
+		{
+			var attempt = 0;
+			while (true)
+			{
+				var isRetriableError = true;
+				try
+				{
+					using (var client = CreateClient())
+					{
+						var content = new MultipartFormDataContent();
+						content.Add(new StringContent(problemId.ToString()), "problem_id");
+						content.Add(new StringContent(solution), "solution_spec", "solution.txt");
+						//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
+						var res = client.PostAsync($"{baseUrl}solution/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
+						var result = res.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+						if (!res.IsSuccessStatusCode)
+						{
+							if (result.Contains("\"ok\":false"))
+							{
+								Console.Write(result);
+								isRetriableError = false;
+							}
+							else
+							{
+								Console.WriteLine(res.ToString());
+								Console.WriteLine(result);
+							}
+							throw new HttpRequestException(res.ReasonPhrase);
+						}
+						return result;
+					}
+				}
+				catch (Exception e)
+				{
+					if (!isRetriableError)
+						throw;
+					Console.WriteLine("Will retry failed solution post for problem: {0}\r\n{1}", problemId, e);
+					if (++attempt > 10)
+						throw new InvalidOperationException($"Failed to post solution for {problemId} with attempts", e);
+					Thread.Sleep(TimeSpan.FromSeconds(1));
+				}
 			}
 		}
 
