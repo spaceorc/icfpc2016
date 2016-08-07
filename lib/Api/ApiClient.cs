@@ -263,7 +263,7 @@ namespace lib
 			{
 				var spec = repo.Find(p.Id);
 				var expectedScore = p.ExpectedScore();
-				var convex = spec == null ? null : (spec.Polygons.Length == 1 && spec.Polygons[0].IsConvex()).ToString();
+				var convex = spec == null ? null : (spec.Polygons.Length == 1 && spec.Polygons[0].IsConvex() && spec.Polygons[0].GetSignedSquare() > 0).ToString();
 				Console.WriteLine($"id={p.Id} size={p.SolutionSize} expected={expectedScore} isconvex={convex ?? "Unknown"}");
 				if (convex != null) totalConvex += expectedScore;
 			}

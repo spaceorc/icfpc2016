@@ -127,7 +127,7 @@ namespace lib.Visualization.ManualSolving
 
 		private static SolutionSpec TrySolve(ProblemSpec problem)
 		{
-			if (problem.Polygons.Length > 1 || !problem.Polygons.Single().IsConvex())
+			if (problem.Polygons.Length > 1 || !problem.Polygons.Single().IsConvex() || problem.Polygons.Single().GetSignedSquare() < 0)
 				return null;
 
 			var problemPolygon = problem.Polygons[0];

@@ -89,15 +89,41 @@ namespace lib
 
 		public bool IsConvex()
 		{
+			var signedSq = GetSignedSquare();
 			for (int i = 0; i < Segments.Length; i++)
 			{
 				var thisEdge = Segments[i];
 				var nextEdge = Segments[(i + 1)%Segments.Length];
 				var prod = thisEdge.ToVector().VectorProdLength(nextEdge.ToVector());
-				if (prod < 0)
+				if ((signedSq > 0 && prod <= 0) || (signedSq < 0 && prod >= 0))
 					return false;
 			}
 			return true;
+		}
+
+		public Polygon RemoveExtraVertices()
+		{
+			var vertices = new List<Vector>(Vertices);
+			while (true)
+			{
+				var changed = false;
+				for (int i = 1; i < vertices.Count + 1; i++)
+				{
+					var thisVertex = vertices[i % vertices.Count];
+					var thisEdge = new Segment(vertices[(i - 1) % vertices.Count], thisVertex);
+					var nextEdge = new Segment(thisVertex, vertices[(i + 1) % vertices.Count]);
+					var prod = thisEdge.ToVector().VectorProdLength(nextEdge.ToVector());
+					if (prod == 0)
+					{
+						vertices.Remove(thisVertex);
+						changed = true;
+						break;
+					}
+				}
+				if (!changed)
+					break;
+			}
+			return new Polygon(vertices.ToArray());
 		}
 
 		public Polygon GetConvexBoundary()
