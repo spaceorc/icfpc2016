@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using lib.Graphs;
 using NUnit.Framework;
-using lib.ProjectionSolver;
 
 namespace lib
 {
@@ -25,7 +24,7 @@ namespace lib
 				{
 					Console.WriteLine($"!solving: {p}");
 					var problemSpec = problemsRepo.Get(p);
-					var solutionSpec = ProjectionSolverRunner.Solve(problemSpec);
+					var solutionSpec = UltraSolver.AutoSolve(problemSpec);
 					var postSolution = apiClient.PostSolution(p, solutionSpec);
 					Console.WriteLine(postSolution);
 					problemsRepo.PutSolution(p, solutionSpec);
@@ -48,65 +47,14 @@ namespace lib
 			Console.WriteLine("problem");
 			Console.WriteLine(problemSpec);
 			problemSpec.CreateVisualizerForm().ShowDialog();
-			var solutionSpec = ProjectionSolverRunner.Solve(problemSpec);
+			var solutionSpec = UltraSolver.AutoSolve(problemSpec);
 			solutionSpec.CreateVisualizerForm().ShowDialog();
 			Console.WriteLine("solution");
 			Console.WriteLine(solutionSpec);
 		}
 	}
 
-	public static class ProjectionSolverRunner
-	{
-		public static SolutionSpec Solve(ProblemSpec problemSpec, double originality = 0.3)
-		{
-			var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec), 1, originality);
-            return solver != null ? Solve(solver.Projection) : null;
-		}
-
-        public static SolutionSpec Solve(Graph<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> graph)
-        {
-            var cycleFinder = new CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(
-                graph,
-                n => n.Data.Projection);
-            return GetSolution(cycleFinder);
-        }
-
-		private static SolutionSpec GetSolution(CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo> cycleFinder)
-        {
-            var cycles = cycleFinder.GetCycles();
-            return GetSolutionsFromCycles(cycles);
-        }
-
-        public static SolutionSpec GetSolutionsFromCycles(List<List<GNode<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>>> cycles)
-        {
-            var sourcePoints = cycles
-                            .SelectMany(c => c
-                                .Select(n => n.Edge.From.Data.Projection)
-                                .Concat(c.Select(n => n.Edge.To.Data.Projection)))
-                            .Distinct()
-                            .ToArray();
-            var sourcePointIndices = sourcePoints
-                .Select((x, i) => new { x, i })
-                .ToDictionary(x => x.x, x => x.i);
-            var facets = cycles
-                .Select(c => new Facet(c.Select(e => sourcePointIndices[e.FromFrom ? e.Edge.From.Data.Projection : e.Edge.To.Data.Projection])
-                    .ToArray()))
-                .ToArray();
-            var originalPointsInfo = cycles
-                .SelectMany(c => c)
-                .Select(e => new
-                {
-                    vector = e.FromFrom ? e.Edge.From.Data.Original.Data.Location : e.Edge.To.Data.Original.Data.Location,
-                    index = sourcePointIndices[e.FromFrom ? e.Edge.From.Data.Projection : e.Edge.To.Data.Projection]
-                }).ToArray();
-            var originalPoints = new Vector[sourcePoints.Length];
-            foreach (var info in originalPointsInfo)
-                originalPoints[info.index] = info.vector;
-            return new SolutionSpec(sourcePoints, facets, originalPoints);
-        }
-    }
-
-	public class GNode<TEdge, TNode>
+    public class GNode<TEdge, TNode>
 	{
 		public readonly Edge<TEdge, TNode> Edge;
 		public Node<TEdge, TNode> From => Edge.From;

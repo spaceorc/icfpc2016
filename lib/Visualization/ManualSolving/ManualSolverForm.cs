@@ -35,10 +35,9 @@ namespace lib.Visualization.ManualSolving
 				MessageBox.Show("Выдели ребра выпуклого многоугольника, который нужно решить.");
 			else
 			{
-				var sol = Model.SolveConvex();
-				sol.CreateVisualizerForm().ShowDialog();
-				sol.CreateVisualizerForm(true).ShowDialog();
-				Clipboard.SetText(sol.ToString());
+				var sols = Model.SolveConvex();
+				foreach (var sol in sols)
+					sol.CreateVisualizerForm(true).ShowDialog();
 				MessageBox.Show("Решение скопировано в буфер. К решению выпуклого применены все сделанные в редакторе фолды в обратном порядке. Можно пробовать сабмитить.");
 			}
 		}

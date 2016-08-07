@@ -41,6 +41,27 @@ namespace SquareConstructor
 			return A2 * t2 + B2;
 		}
 
+		public static bool AreSegmentsOnSameLine(this Segment segment1, Segment segment2)
+		{
+			var A1 = segment1.End - segment1.Start;
+			var B1 = segment1.Start;
+
+			var A2 = segment2.End - segment2.Start;
+			var B2 = segment2.Start;
+
+			var denominator = A1.Y * A2.X - A2.Y * A1.X;
+			if (denominator != 0)
+				return false;
+
+			if (A1.X == 0 && A2.X == 0)
+				return B1.X == B2.X;
+
+			if (A1.Y == 0 && A2.Y == 0)
+				return B1.Y == B2.Y;
+
+			return B2.X == (B1.Y - B2.Y)/A1.Y*A1.X + B1.X;
+		}
+
 		public static Vector? GetIntersection(this Segment segment, Segment intersector)
 		{
 			var point = segment.GetIntersectionWithLine(intersector);

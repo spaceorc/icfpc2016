@@ -36,7 +36,7 @@ namespace lib.ProjectionSolver
 
 	    public IEnumerable<List<PPath>> Find(double cutOffBorder)
 	    {
-			for (var i = 0; i < 20; i++)
+			for (var i = 0; i < 10; i++)
 				wayFinder.MakeIteration();
 
 		    var iter = 0;
