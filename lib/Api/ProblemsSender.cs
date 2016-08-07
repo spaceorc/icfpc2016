@@ -1,5 +1,4 @@
-﻿using lib.ProjectionSolver;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Threading;
 using SquareConstructor;
@@ -16,8 +15,8 @@ namespace lib.Api
 			var t = new Thread(() =>
 			{
 				//var spec = ProjectionSolverRunner.Solve(problemSpec);
-				var spec = new ConstructorSolver(problemSpec).Work(); //TODO pack в 41 строке убран, т.к. работает криво. Убрать комментарий, если нужно
-				res = Post(spec, problemSpec.id);
+				var spec = new ConstructorSolver(problemSpec).Work();
+				res = Post(spec, problemSpec.id, pack: false); //TODO pack работает криво (?). Убрать комментарий, если нужно
 			})
 			{ IsBackground = true };
 			t.Start();
@@ -29,9 +28,10 @@ namespace lib.Api
 			return res;
 		}
 
-		public static double Post(SolutionSpec solutionSpec, int problemSpecId)
+		public static double Post(SolutionSpec solutionSpec, int problemSpecId, bool pack = true)
 		{
-			//solutionSpec = solutionSpec.Pack();
+			if (pack)
+				solutionSpec = solutionSpec.Pack();
 
 			var existingSolution = repo.FindSolution(problemSpecId);
 			if (existingSolution == solutionSpec.ToString())
