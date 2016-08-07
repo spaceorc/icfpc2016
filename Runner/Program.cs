@@ -102,7 +102,7 @@ namespace Runner
 
 		static void Main(string[] args)
 		{
-			ConvexPolygonSolver.SolveAll();
+			ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
 			return;
 			//Arithmetic.RationalTriangulate(
 			//    new Segment(new Vector(0,0), new Vector(3, 3)),
