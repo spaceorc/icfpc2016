@@ -56,8 +56,12 @@ namespace lib.ProjectionSolver
 
         void MakeMetrics(PPath path)
         {
-            path.originality1 = (double)path.edges.AllNodes().Distinct().Count();
-            path.originality1 /= (path.edges.Count+1);
+            path.originalityByVertices = (double) path.edges.AllNodes().Distinct().Count() / (path.edges.Count + 1);
+	        var distinctEdgeCount = path.edges
+				.Select(edge => Tuple.Create(edge.From.NodeNumber, edge.To.NodeNumber))
+				.Distinct()
+				.Count();
+			path.originalityByEdges = (double) distinctEdgeCount / path.edges.Count;
 
             path.straightness = 0.0;
             for (int i=0;i<path.edges.Count-1;i++)
@@ -65,17 +69,13 @@ namespace lib.ProjectionSolver
                 var first = path.edges[i].Data.segment.Direction;
                 var second = path.edges[i + 1].Data.segment.Direction;
                 var scalar = first.X * second.X + first.Y * second.Y;
-                double cos = (double)scalar / (first.Length * second.Length);
-
-
-
-
+                var cos = scalar / (first.Length * second.Length);
                 cos = (1 + cos) / 2;
                 path.straightness += cos;
             }
             path.straightness /= path.edges.Count;
 
-	        path.metric = (path.originality1 + path.straightness)/2;
+	        path.metric = (path.originalityByVertices + path.originalityByEdges + path.straightness) / 3;
         }
 
         void Scoring()

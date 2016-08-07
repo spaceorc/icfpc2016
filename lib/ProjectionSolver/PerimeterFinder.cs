@@ -13,6 +13,27 @@ namespace lib.ProjectionSolver
 		    this.pathLengths = pathLengths;
 	    }
 
+	    private void DebugPathMetrics(params int[] nodeNumbers)
+	    {
+		    foreach (var dictByStart in wayFinder.Result.Values)
+		    {
+			    var paths = dictByStart[nodeNumbers[0]];
+			    foreach (var path in paths)
+			    {
+				    var curNodeNumbers = path.edges.Select(edge => edge.From.NodeNumber).ToList();
+					curNodeNumbers.Add(path.LastEdge.To.NodeNumber);
+				    if (curNodeNumbers.SequenceEqual(nodeNumbers))
+					{
+						Console.WriteLine($"path = {path}");
+						Console.WriteLine($"  .originalityByVertices = {path.originalityByVertices}");
+						Console.WriteLine($"  .originalityByEdges = {path.originalityByEdges}");
+						Console.WriteLine($"  .straightness = {path.straightness}");
+						return;
+				    }
+			    }
+		    }
+	    }
+
 	    public IEnumerable<List<PPath>> Find(double cutOffBorder)
 	    {
 			for (var i = 0; i < 10; i++)
