@@ -129,12 +129,31 @@ namespace lib
 				Thread.Sleep(TimeSpan.FromSeconds(1));
 			try
 			{
-				using (var client = CreateClient())
-					return client.GetStringAsync($"{baseUrl}{query}").Result;
+				return DoQueryWithAttempts(query);
 			}
 			finally
 			{
 				sw.Restart();
+			}
+		}
+
+		private string DoQueryWithAttempts(string query)
+		{
+			var attempt = 0;
+			while (true)
+			{
+				try
+				{
+					using (var client = CreateClient())
+						return client.GetStringAsync($"{baseUrl}{query}").Result;
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine("Will retry failed query: {0}\r\n{1}", query, e);
+					if (++attempt > 10)
+						throw new InvalidOperationException($"Query failed with attempts: {query}", e);
+					Thread.Sleep(TimeSpan.FromSeconds(1));
+				}
 			}
 		}
 
