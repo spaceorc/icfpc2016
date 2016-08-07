@@ -129,7 +129,7 @@ namespace lib
 		public void PrintSkewedTriangleWithHole()
 		{
 			var solutionSpec = SkewedTriangleWithHole(new Rational(49, 90), new Rational(1, 10));
-			solutionSpec.CreateVisualizerForm(true).ShowDialog();
+			solutionSpec.CreateVisualizerForm().ShowDialog();
 			Console.WriteLine(solutionSpec);
 		}
 
@@ -137,7 +137,7 @@ namespace lib
 		public void PrintSkewedTriangle()
 		{
 			var solutionSpec = SkewedTriangle(new Rational(12, 20));
-			solutionSpec.CreateVisualizerForm(true).ShowDialog();
+			solutionSpec.CreateVisualizerForm().ShowDialog();
 			Console.WriteLine(solutionSpec);
 		}
 
@@ -188,7 +188,7 @@ namespace lib
 				for (int j = 1; j <= 4; j++)
 				{
 					var solution = Triangle(new Rational(1, 4) - new Rational(i, 19), new Rational(1, 4) - new Rational(j, 21));
-					solution.CreateVisualizerForm(true).ShowDialog();
+					solution.CreateVisualizerForm().ShowDialog();
 					var ans = api.PostProblem(time, solution);
 					Console.WriteLine(ans);
 					File.WriteAllText(Path.Combine(Paths.ProblemsDir(), $"{time}.problem.txt"), solution + "\r\n\r\n" + ans);
@@ -254,7 +254,7 @@ namespace lib
 		private static void Check(SolutionSpec solution)
 		{
 			solution.CreateVisualizerForm().Show();
-			solution.CreateVisualizerForm(true).ShowDialog();
+			solution.CreateVisualizerForm().ShowDialog();
 			Console.WriteLine(solution);
 		}
 	}

@@ -328,7 +328,7 @@ namespace lib
 			var origSolution = SolutionSpec.CreateTrivial(x => x);
 			var result = origSolution.Fold("1,3/4 0,1/4");
 			result = result.Fold("1,1 1/4,0");
-			result.CreateVisualizerForm(true).ShowDialog();
+			result.CreateVisualizerForm().ShowDialog();
 		}
 
 		private object FacetToString(Facet arg)

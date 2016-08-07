@@ -17,40 +17,35 @@ namespace lib
 			var problemsRepo = new ProblemsRepo();
 			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly().Reverse())
 			{
+				Console.Write($"Problem {problem.id} ");
 				var solution = TrySolveSingleProblem(problem);
 				if (solution != null)
 					ProblemsSender.Post(problem, solution);
-				Console.WriteLine($"Elapsed: {sw.Elapsed}");
+				Console.WriteLine($" Elapsed: {sw.Elapsed}");
 			}
 		}
 
 		private static SolutionSpec TrySolveSingleProblem(ProblemSpec problem)
 		{
-			SolutionSpec solution = null;
-
-			if (problem.Polygons.Length > 1)
-				Console.Write($"Problem {problem.id} has MANY POLYGONS! Skipping...");
-			else
+			Polygon convexPolygon;
+			var positivePolygon = problem.Polygons.Single(x => x.GetSignedSquare() > 0);
+			if (positivePolygon.IsConvex())
 			{
-				var theProblem = problem;
-				if (problem.Polygons.Single().IsConvex())
-				{
-					Console.Write($"Problem {problem.id} is convex! Solvnig...");
+				convexPolygon = positivePolygon;
+				Console.Write("CONVEX ");
 				}
 				else
 				{
-					Console.Write($"Problem {problem.id} is not convex! Solvnig using convex boundary...");
-					theProblem = new ProblemSpec(new[] { problem.Polygons.Single().GetConvexBoundary() }, problem.Segments);
+				convexPolygon = positivePolygon.GetConvexBoundary();
+				Console.Write("NOT_CONVEX using boundary ");
 				}
 
-				var convexPolygon = theProblem.Polygons.Single();
-				var initialSolution = TryGetInitialSolution(theProblem, convexPolygon);
-				if (initialSolution != null)
-					solution = TrySolve(convexPolygon, initialSolution);
-				
+			var initialSolution = TryGetInitialSolution(problem, convexPolygon);
+			if (initialSolution == null)
+				return null;
+
+			return TrySolve(convexPolygon, initialSolution);
 			}
-			return solution;
-		}
 
 		public static SolutionSpec TrySolve(Polygon poly, SolutionSpec initialSolution, TimeSpan? timeout = null)
 		{
@@ -80,10 +75,7 @@ namespace lib
 		{
 			timeout = timeout ?? TimeSpan.FromSeconds(10);
 			SolutionSpec initialSolution = null;
-			var t = new Thread(() =>
-			{
-				initialSolution = GetInitialSolutionAlongRationalEdge(problemPolygon) ?? new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem);
-			})
+			var t = new Thread(() => { initialSolution = GetInitialSolutionAlongRationalEdge(problemPolygon) ?? new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem); })
 			{ IsBackground = true };
 			t.Start();
 			if (!t.Join(timeout.Value))

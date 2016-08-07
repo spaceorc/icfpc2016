@@ -121,6 +121,7 @@ namespace lib.Visualization.ManualSolving
 			var polygon = SelectedSegmentIndices.Select(i => Segments[i]).ToList();
 			ProblemSpec problem = CreatProblemSpec(polygon);
 			var solution = TrySolve(problem);
+			if (solution == null) return Enumerable.Empty<SolutionSpec>();
 			return GetAllMirrorCombinatons(solution, mirrors);
 		}
 
@@ -154,9 +155,11 @@ namespace lib.Visualization.ManualSolving
 		private ProblemSpec CreatProblemSpec(List<SegmentModel> polygon)
 		{
 			var ss = polygon.Select(s => s.Segment).ToArray();
-			//TODO incorrect polygon
-			var ps = ss.SelectMany(s => new[] { s.Start, s.End }).ToArray();
-			return new ProblemSpec(new Polygon[] {new Polygon(ps),  }, ss);
+			var ps = ss.SelectMany(s => new[] { s.Start, s.End }).Distinct().ToArray();
+			var convexHull = new Polygon(ps).GetConvexBoundary();
+			var convexProblem = new ProblemSpec(new Polygon[] {convexHull,  }, ss);
+			convexProblem.CreateVisualizerForm().Show();
+			return convexProblem;
 
 		}
 
@@ -176,6 +179,11 @@ namespace lib.Visualization.ManualSolving
 			var res = Segments.Where(s => !selectedSegments.Contains(s));
 			res = res.Concat(border);
 			return With(res, null, ImmutableList<int>.Empty, PendingOperationType.None, mirrors);
+		}
+
+		public ManualSolverModel SelectAll()
+		{
+			return With(Segments, HighlightedSegmentIndex, Enumerable.Range(0, Segments.Length).ToImmutableList(), PendingOperationType.None, mirrors);
 		}
 	}
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -47,7 +48,7 @@ namespace lib
 			return new SolutionSpec(src, facets, dst);
 		}
 
-		[Test]
+		[Test, RequiresThread(ApartmentState.STA)]
 		public void PrintD4()
 		{
 			var sol = D4(new Rational(9, 20), new Rational(19, 40), new Rational(12, 40), new Rational(13, 40));
@@ -55,7 +56,7 @@ namespace lib
 			sol.AreFacetsValid(1).Should().BeTrue();
 
 			Console.WriteLine(sol.Pack());
-			sol.CreateVisualizerForm(true).ShowDialog();
+			sol.CreateVisualizerForm(1).ShowDialog();
 		}
 
 	}
@@ -108,7 +109,7 @@ namespace lib
 			//Console.WriteLine(Enumerable.Range(100, 100).AsParallel().Min(k => MakeFinalFolds(sol, new Rational(1, k), 3, 5, 8, 12).Pack().Size()));
 			//return;
 			var sol2 = MakeFinalFolds(sol, new Rational(1, 120), 3, 5, 8, 12).Pack();
-			sol2.CreateVisualizerForm(true).ShowDialog();
+			sol2.CreateVisualizerForm().ShowDialog();
 			sol2.CreateVisualizerForm().ShowDialog();
 			//Console.WriteLine(sol2.ToString());
 			//var sol3 = MakeFinalFolds(sol, 999).Pack();

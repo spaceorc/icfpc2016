@@ -62,7 +62,7 @@ namespace AutoSolver
 
 		private static void SolveWithProjectionSolverRunner(ProblemSpec problemSpec)
 		{
-			var originalities = new[] { 0, 0.3, 0.95 };
+			var originalities = new[] { 0.5 };
 			var mutex = new object();
 			var solutionFoundEvent = new ManualResetEvent(false);
 			var threads = originalities

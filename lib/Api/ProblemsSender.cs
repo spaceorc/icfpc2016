@@ -16,8 +16,8 @@ namespace lib.Api
 			var t = new Thread(() =>
 			{
 				//var spec = ProjectionSolverRunner.Solve(problemSpec);
-				var spec = new ConstructorSolver(problemSpec).Work();
-				res = Post(problemSpec, spec);
+				var spec = new ConstructorSolver(problemSpec).Work(); //TODO pack в 41 строке убран, т.к. работает криво. Убрать комментарий, если нужно
+				res = Post(spec, problemSpec.Id);
 			})
 			{ IsBackground = true };
 			t.Start();
@@ -32,6 +32,11 @@ namespace lib.Api
 
 			
 		public static double Post(ProblemSpec problemSpec, SolutionSpec solutionSpec)
+		{
+			return Post(solutionSpec, problemId);
+		}
+
+		public static double Post(SolutionSpec solutionSpec, int problemId)
 		{
 			//solutionSpec = solutionSpec.Pack();
 
