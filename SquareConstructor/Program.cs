@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,54 +13,17 @@ namespace SquareConstructor
 	{
 		static void Main(string[] args)
 		{
-			var matrix = new SegmentsMatrix(10);
-			List<bool> successes = new List<bool>();
-			
-			var problem =
-				@"1
-13
--1/42,0
-1/42,0
-5/102,6/119
-7/18,2/7
-22/75,46/75
-170/819,413/702
-29/210,143/210
-0,97/168
--29/210,143/210
--170/819,413/702
--22/75,46/75
--7/18,2/7
--5/102,6/119
-16
--1/42,0 -23/84,1/2
-1/42,0 23/84,1/2
--1/42,0 -2/21,1/2
-1/42,0 2/21,1/2
--1/42,0 1/42,0
--1/42,0 7/18,2/7
-1/42,0 -7/18,2/7
--7/18,2/7 -22/75,46/75
-7/18,2/7 22/75,46/75
--23/84,1/2 -29/210,143/210
-23/84,1/2 29/210,143/210
--7/18,2/7 29/210,143/210
-7/18,2/7 -29/210,143/210
--2/21,1/2 22/75,46/75
-2/21,1/2 -22/75,46/75
--23/84,1/2 23/84,1/2
-";
+			var problem = File.ReadAllText("../../../problems/008.spec.txt");
 
 			var spec = ProblemSpec.Parse(problem);
 
 			var solver = new ConstructorSolver(spec);
-			solver.Work();
-
-			var polygons = PolygonFinder.GetRealPolygons(spec);
+			var solution = solver.Work();
+			
 			Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             var form = new PolygonsAndSegmentsForm();
-            form.SetData(spec.Polygons, polygons.SelectMany(p => p.Segments).ToArray());
+            form.SetData(solution.Polygons, new Segment[0]);
             Application.Run(form);
         }
 	}
