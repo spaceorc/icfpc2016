@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Windows.Forms;
 using lib.Api;
 
@@ -52,7 +53,20 @@ namespace lib
 			try
 			{
 				var res = ProblemsSender.Post(solution, problemId);
-				MessageBox.Show("Resemblance = " + res);
+				if (res == 1.0)
+				{
+					var repo = new ProblemsRepo();
+					var problemSpec = repo.Get(problemId);
+					var problemSpecStr = problemSpec.ToString();
+					var toSend = repo.GetAllNotSolvedPerfectly().Where(p => p.ToString() == problemSpecStr).ToList();
+					foreach (var sameProb in toSend)
+					{
+						res = Math.Min(res, ProblemsSender.Post(solution, sameProb.id));
+					}
+					MessageBox.Show($"Resemblance = 1.0. {toSend.Count} same problem. min resemblence = {res}");
+				}
+				else
+					MessageBox.Show("Resemblance = " + res + " no same problems");
 			}
 			catch (Exception e)
 			{

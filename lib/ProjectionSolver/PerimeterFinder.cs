@@ -99,9 +99,6 @@ namespace lib.ProjectionSolver
 			    yield break;
 		    }
 
-		    if (lengthIndex == 0 && IsTooMuchMemoryConsumed())
-				yield break; // Всё равно уже не найдёт решение
-
 		    var length = pathLengths[lengthIndex];
 		    var pathCandidates = wayFinder.Result.GetValueOrDefault(length)?.GetValueOrDefault(nodeToContinueFrom) ?? new List<PPath>();
 
@@ -120,16 +117,6 @@ namespace lib.ProjectionSolver
 			if (perimeterStack.Count == pathLengths.Length - 1)
 				yield return null; // Значит, availablePenalty не было израсходовано и после wayFinder.MakeIteration() можно поискать ещё путей
 		}
-
-		private const long BytesPerGiB = 1024L * 1024 * 1024;
-
-	    private static bool IsTooMuchMemoryConsumed()
-	    {
-			var gibCount = (double)GC.GetTotalMemory(true) / BytesPerGiB;
-			if(gibCount > 2)
-				Console.WriteLine($"Memory consumed: {gibCount:0.00} GiB");
-		    return gibCount > 3;
-	    }
 
 		private bool HasNotBeenYieldedEarlier(List<PPath> perimeter)
 	    {

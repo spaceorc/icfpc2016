@@ -1,1 +1,1 @@
-{"solution_size":1324,"ok":true,"resemblance":0.98579,"problem_id":847,"solution_spec_hash":"79f09ed4653aa718791c2a1223c058b9b0ace283"}
+{"solution_size":726,"ok":true,"resemblance":1.0,"problem_id":847,"solution_spec_hash":"3df2dc9e4db50828d2215b3491b3ffd2c44905b2"}
