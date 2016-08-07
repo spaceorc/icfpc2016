@@ -27,12 +27,14 @@ namespace AutoSolver
 					DownloadNewProblems();
 
 				Console.WriteLine("Solving...");
-				foreach (var problemSpec in repo.GetAllNotSolvedPerfectly().OrderBy(EstimateDifficulty).Skip(100))
-				{
-					Console.Write($"Solving {problemSpec.id}...");
-					SolveWithProjectionSolverRunner(problemSpec);
-					Console.WriteLine();
-				}
+				repo.GetAllNotSolvedPerfectly()
+					.OrderBy(EstimateDifficulty)
+					.AsParallel()
+					.ForAll(problemSpec =>
+					{
+						Console.WriteLine($"Solving {problemSpec.id}...");
+						SolveWithProjectionSolverRunner(problemSpec);
+					});
 
 				Console.WriteLine("Waiting 1 minute...");
 				Thread.Sleep(TimeSpan.FromMinutes(1));
@@ -104,7 +106,7 @@ namespace AutoSolver
 				})
 				.ToArray();
 
-			solutionFoundEvent.WaitOne(TimeSpan.FromSeconds(10));
+			solutionFoundEvent.WaitOne(TimeSpan.FromSeconds(15));
 
 			foreach (var t in threads)
 				if (t.IsAlive)
