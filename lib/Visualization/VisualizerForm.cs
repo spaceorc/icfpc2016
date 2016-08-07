@@ -59,8 +59,12 @@ namespace lib
 				list = new ListBox();
 				list.Width = 300;
 				list.Dock = DockStyle.Left;
-				list.BringToFront();
-				snapshotJson = repo.GetSnapshot(api);
+                list.BringToFront();
+
+                output = new ListBox();
+                output.Dock = DockStyle.Bottom;
+
+                snapshotJson = repo.GetSnapshot(api);
 				problemsJson = snapshotJson.Problems.ToDictionary(p => p.Id, p => p);
 
 				list.Items.AddRange(GetItems(false));
@@ -76,6 +80,7 @@ namespace lib
 
 				Size = new Size(800, 600);
 				Controls.Add(problemPanel);
+				Controls.Add(output);
 				Controls.Add(list);
 				Controls.Add(menu);
 			}
@@ -162,12 +167,7 @@ namespace lib
 					painter.Paint(graphics, Math.Min(clientSize.Height, clientSize.Width), problem);
 					Text = problem.id.ToString();
 
-				    var gist = RibbonGist(problem);
-                    output.Items.Clear();
-                    foreach (var g in gist)
-                    {
-                        output.Items.Add(string.Format("{0}\t{1}", g.Key, g.Value));
-                    }
+                    PaintRibbonGistToOutput();
 				}
 				catch
 				{
@@ -176,37 +176,21 @@ namespace lib
 			}
 		}
 
-        public static KeyValuePair<Rational, long>[] RibbonGist(ProblemSpec spec)
-        {
-            var result = new Dictionary<Rational, long>();
-            var solver = SolverMaker.CreateSolver(spec);
-            var rationalSegments = solver.AllSegments
-                .Where(s => Arithmetic.IsSquare(s.QuadratOfLength))
-                .ToArray();
-            var rationalVectors = new HashSet<Vector>();
-            foreach (var segment in rationalSegments)
-            {
-                rationalVectors.Add(segment.Start);
-                rationalVectors.Add(segment.End);
-            }
-            foreach (var vector in rationalVectors)
-            {
-                foreach (var segment in rationalSegments)
-                {
-                    var d = segment.Distance2To(vector);
-                    if (d == 0)
-                        continue;
-                    d = d.Reduce();
-                    //if (d.Numerator != 1)
-                    //    continue;
-
-                    if (!result.ContainsKey(d))
-                        result[d] = 0;
-                    result[d]++;
-                }
-            }
-            return result.OrderByDescending(p => p.Value).Take(10).ToArray();
-        }
+	    private void PaintRibbonGistToOutput()
+	    {
+            var solver = SolverMaker.CreateSolver(problem);
+	        var gist = RibbonIndicator.RibbonGist(solver);
+	        var r = RibbonIndicator.Indicate(gist);
+	        output.Items.Clear();
+	        if (r.HasValue)
+	        {
+	            output.Items.Add("RIBBON!");
+	        }
+	        foreach (var g in gist)
+	        {
+	            output.Items.Add(string.Format("{0}\t{1}", g.Key, g.Value));
+	        }
+	    }
     }
 
     [TestFixture]

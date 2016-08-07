@@ -77,9 +77,8 @@ namespace lib.ProjectionSolver
             if (!pr.IsCompleteProjection()) return false;
             solver.ProjectionScheme = pr;
             solver.Projection = GenerateOutGraph(solver.ProjectionScheme, false);
-            var solution = ProjectionSolverRunner.Solve(solver.Projection);
-            if (solution.AreFacetsValid(pr.SideY*pr.SideX)) return true;
-            return false;
+            var solution = SolutionSpecBuilder.BuildSolutionByGraph(solver.Projection);
+            return solution.AreFacetsValid(pr.SideY*pr.SideX);
         }
 
 

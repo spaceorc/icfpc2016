@@ -74,7 +74,7 @@ namespace AutoSolver
 					{
 						try
 						{
-							var solution = ProjectionSolverRunner.Solve(problemSpec);
+							var solution = UltraSolver.AutoSolve(problemSpec);
 							if (solution == null || solution.Size() > 5000 || !solution.AreFacetsValid())
 								return;
 							double ps;

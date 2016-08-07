@@ -1,6 +1,5 @@
 ﻿using DataScience;
 using lib;
-using lib.Api;
 using lib.DiofantEquationSolver;
 using lib.Graphs;
 using System;
@@ -14,27 +13,12 @@ using System.Windows.Forms;
 
 namespace lib.ProjectionSolver
 {
-	class Program
+    class Program
 	{
-
-
-
-
         class PathStat
         {
             public List<PPath> pathes = new List<PPath>();
         }
-
-
-        static void SolveTask(int taskNumber, Rational otherSide)
-        {
-            var spec = new ProblemsRepo().Get(taskNumber);
-            var solver = SolverMaker.CreateSolver(spec);
-            solver = SolverMaker.Solve(solver,otherSide);
-            if (solver == null) return;
-            SolverMaker.Visualize(solver);
-        }
-
 
         static void DrawProblem(int task)
         {
@@ -93,51 +77,6 @@ namespace lib.ProjectionSolver
             viz.Window(500, gr);
         }
 
-        static void SolveAndSend(int id, bool wait=true)
-        {
-            Console.WriteLine(id+":"+ " "+SolveAndSendInternal(id));
-            if (wait) Console.ReadKey();
-            return;
-        }
-
-        static void SolveAndSendStrip(int id, Rational otherSide)
-        {
-            Console.WriteLine(id + ":" + " " + SolveAndSendStripInternal(id,otherSide));
-            Console.ReadKey();
-            return;
-        }
-
-
-        public static double SolveAndSendStripInternal(int id, Rational otherSide)
-        {
-            var repo = new ProblemsRepo();
-            var problemSpec = repo.Get(id);
-            var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec), otherSide, 0);
-
-            if (solver == null) return 0;
-
-            var cycleFinder = new CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(
-               solver.Projection,
-               n => n.Data.Projection);
-
-            var cycles = cycleFinder.GetCycles();
-            var reflectedCycles = CycleReflector.GetUnribbonedCycles(cycles);
-            var spec = ProjectionSolverRunner.GetSolutionsFromCycles(reflectedCycles);
-
-            spec = spec.Pack();
-            if (spec == null) return 0;
-            return ProblemsSender.Post(problemSpec, spec);
-        }
-
-        public static double SolveAndSendInternal(int id)
-        {
-            var problemSpec = new ProblemsRepo().Get(id);
-            var spec = ProjectionSolverRunner.Solve(problemSpec);
-            if (spec == null)
-                return 0;
-            return ProblemsSender.Post(problemSpec, spec);
-        }
-
         static void Main(string[] args)
 		{
 
@@ -150,7 +89,8 @@ namespace lib.ProjectionSolver
             ///DrawPathGraph(49);return;
             //SolveAndSend(1763);// return; //че за упаковка
 
-              SolveAndSend(1763);return;
+            UltraSolver.SolveAndSend(1763);
+            return;
           //  DrawProblem(2356);
             //SolveTask(2356, 1);
             //SolveAndSendStrip(1235, new Rational(1, 8));
