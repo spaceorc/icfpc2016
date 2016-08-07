@@ -43,7 +43,7 @@ namespace lib.ProjectionSolver
             var viz = new GraphVisualizer<EdgeInfo, NodeInfo>();
             viz.GetX = z => z.Data.Location.X;
             viz.GetY = z => z.Data.Location.Y;
-          //  viz.NodeCaption = z => z.Data.Location.ToString();
+            viz.NodeCaption = z => z.Data.Location.ToString();
             viz.EdgeCaption = z => z.Data.length.ToString();
 
             viz.Window(600, graph);
@@ -150,10 +150,10 @@ namespace lib.ProjectionSolver
             ///DrawPathGraph(49);return;
             //SolveAndSend(1763);// return; //че за упаковка
 
-            //  SolveAndSend(40);return;
-            DrawProblem(1235);
-            // SolveTask(1165, new Rational(1,4));
-            SolveAndSendStrip(1235, new Rational(1, 8));
+              SolveAndSend(1763);return;
+          //  DrawProblem(2356);
+            //SolveTask(2356, 1);
+            //SolveAndSendStrip(1235, new Rational(1, 8));
 
 
             //что не так с 42?

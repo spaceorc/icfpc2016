@@ -31,6 +31,8 @@ namespace lib.ProjectionSolver
         }
 
 
+
+
         static Graph<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>
             GenerateOutGraph(Projection proj, bool bidirectional)
         {
@@ -94,6 +96,7 @@ namespace lib.ProjectionSolver
         {
             while (true)
             {
+                //Visualize(solver, pr);
                 if (EvaluateProjection(solver, pr)) return solver;
                 var hordEdgeStage = Projector.AddVeryGoodEdges(pr);
                 if (hordEdgeStage != null)
@@ -112,7 +115,7 @@ namespace lib.ProjectionSolver
             var pr = new Projection(solver.Graph, solver.AllSegments, solver.SegmentFamilies, cycle[0].length, cycle[1].length);
             pr.Stages.Push(Projector.CreateInitialProjection(cycle, pr));
 
-           // Visualize(solver, pr, cycleCounter.ToString());
+            //Visualize(solver, pr, cycleCounter.ToString());
 
             var res=TryHordEdges(solver, pr);
             if (res != null) return res;
@@ -142,7 +145,7 @@ namespace lib.ProjectionSolver
 
             cycleCounter = -1;
 
-            foreach (var c in cycles)
+            foreach (var c in cycles.Skip(1))
             {
                 cycleCounter++;
                 var res = TryCycle(solver, c);

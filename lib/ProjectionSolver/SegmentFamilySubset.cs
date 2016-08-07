@@ -23,6 +23,10 @@ namespace lib.ProjectionSolver
             Segment = new Segment(Begin, End);
         }
 
+        public override string ToString()
+        {
+            return Begin.ToString() + " " + End.ToString();
+        }
 
 
         public Vector Begin

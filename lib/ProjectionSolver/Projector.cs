@@ -68,8 +68,10 @@ namespace lib.ProjectionSolver
 
 
         
-        public static EdgeProjection TryInsertFamily(SegmentFamilySubset subset, ProjectionCurrentState state)
+        public static List<EdgeProjection> TryInsertFamily(SegmentFamilySubset subset, ProjectionCurrentState state)
         {
+
+
 
             if (state.SegmentIsCovered(subset)) return null;
             var start = state.GetNode(subset.Begin);
@@ -77,15 +79,17 @@ namespace lib.ProjectionSolver
             var end = state.GetNode(subset.End);
             if (end == null) return null;
 
+            var result = new List<EdgeProjection>();
+
             foreach (var s in state.nodesMap[start])
                 foreach (var f in state.nodesMap[end])
                 {
                     var length = new Segment(s.Projection, f.Projection).QuadratOfLength;
                     if (length != new Segment(subset.Begin, subset.End).QuadratOfLength) continue;
-                    var result = new EdgeProjection { begin = s, end = f, Segments = subset.Insides.ToList() };
-                    return result;
+                    result.Add(new EdgeProjection { begin = s, end = f, Segments = subset.Insides.ToList() });
+                    
                 }
-            return null;
+            return result;
         }
 
 
@@ -93,8 +97,10 @@ namespace lib.ProjectionSolver
 
         public static IEnumerable<SegmentFamilySubset> GetAllPossibleSegments(List<SegmentFamily> family)
         {
-            foreach (var f in family)
-                for (int size = 1; size < f.Segments.Length + 1; size++)
+            var maxLength = family.Max(z => z.Segments.Length) + 1;
+
+            for (int size=1;size<maxLength;size++)
+                foreach (var f in family)
                     for (int start = 0; start <= f.Segments.Length - size; start++)
                         yield return new SegmentFamilySubset(f, start, size);
         }
@@ -109,9 +115,9 @@ namespace lib.ProjectionSolver
             foreach (var subs in GetAllPossibleSegments(p.SegmentsFamily))
             {
                 var res = TryInsertFamily(subs, ep);
-                if (res != null)
+                if (res != null && res.Count!=0)
                 {
-                    stage.Edges.Add(res);
+                    stage.Edges.AddRange(res);
                     return stage;
                 }
             }
