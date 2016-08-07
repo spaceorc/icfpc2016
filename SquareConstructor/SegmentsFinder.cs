@@ -32,6 +32,7 @@ namespace SquareConstructor
 				var polygon = polygons.Last(p => ArePointsPolygon(p.Vertices, holePolygon));
 				polygons.Remove(polygon);
 			}
+			
 			return polygons;
 		}
 

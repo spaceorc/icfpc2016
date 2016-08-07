@@ -13,8 +13,7 @@ namespace SquareConstructor
 	{
 		static void Main(string[] args)
 		{
-			var problem = File.ReadAllText("../../../problems/008.spec.txt");
-
+			var problem = File.ReadAllText("../../../problems/023.spec.txt");
 			var spec = ProblemSpec.Parse(problem);
 
 			var solver = new ConstructorSolver(spec);

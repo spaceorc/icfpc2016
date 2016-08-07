@@ -56,6 +56,9 @@ namespace SquareConstructor
 			polygon.Segments.ForEach(segment => RemoveSegment(segment, polygon));
 		}
 
+		private int cCount = 0;
+		private int sCount = 0;
+
 		private bool AddSegment(Segment segment, Polygon polygon)
 		{
 			bool success = true;
@@ -87,6 +90,8 @@ namespace SquareConstructor
 			var maxX = (start.X < end.X ? end.X : start.X).ToInt();
 			var minY = (start.Y < end.Y ? start.Y : end.Y).ToInt();
 			var maxY = (start.Y < end.Y ? end.Y : start.Y).ToInt();
+
+			DoItToNode(minX, minY, doIt);
 
 			for (int i = minX; i <= maxX; i++)
 			{

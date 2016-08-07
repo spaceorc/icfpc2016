@@ -15,7 +15,7 @@ namespace SquareConstructor
 		private Dictionary<Vector, List<Polygon>> Vertexes = new Dictionary<Vector, List<Polygon>>();
 		private HashSet<Vector> UsedVertexes = new HashSet<Vector>();
 		private Polygon[] GivenPolygons; 
-		private SegmentsMatrix SegmentsMatrix = new SegmentsMatrix(10);
+		private SegmentsMatrix SegmentsMatrix = new SegmentsMatrix(1);
 		private Dictionary<Segment, List<Polygon>> GivenGraph;
 
 		private Dictionary<Vector, List<List<Polygon>>> Variants = new Dictionary<Vector, List<List<Polygon>>>();
@@ -42,10 +42,12 @@ namespace SquareConstructor
 				GivenPolygons = spec.Polygons.ToArray();
 			}
 
+			int i = 0;
 			GivenPolygons
 				.OrderByDescending(p => p.GetUnsignedSquare())
 				.First(polygon =>
 				{
+					Console.WriteLine($"{i++}/{GivenPolygons.Length} started");
 					return polygon.Segments.Any(segment => StartWithPolygonSegment(polygon, segment));
 				}
 			);
@@ -113,6 +115,8 @@ namespace SquareConstructor
 
 		private bool SetPolygon(Polygon polygon)
 		{
+			if(Square + polygon.GetUnsignedSquare() > 1)
+				Console.WriteLine("");
 			if(!SegmentsMatrix.TryAddPolygon(polygon))
 				return false;
 			polygon.Segments.ForEach(segment => Segments.AddToList(segment, polygon));
@@ -191,8 +195,10 @@ namespace SquareConstructor
 				return null;
 
 			List<List<Polygon>> variants = new List<List<Polygon>>();
-			DoRound(startSegment.Item1, startSegment.Item2, startSegment.Item2, variants, new Stack<Polygon>(), vertex,
+			UsedPolygonsInStack.Add(startSegment.Item1);
+			DoRound(startSegment.Item1, startSegment.Item1, startSegment.Item2, startSegment.Item2, variants, new Stack<Polygon>(), vertex,
 				maxCount, 0);
+			UsedPolygonsInStack.Remove(startSegment.Item1);
 
 			return variants;
 		}
@@ -204,13 +210,13 @@ namespace SquareConstructor
 
 		private HashSet<Polygon> UsedPolygonsInStack = new HashSet<Polygon>(); 
 
-		private void DoRound(Polygon polygon, Segment startSegment, Segment segment, List<List<Polygon>> result,
+		private void DoRound(Polygon polygon, Polygon startPolygon, Segment startSegment, Segment segment, List<List<Polygon>> result,
 			Stack<Polygon> stack, Vector vertex, int maxCount, int deep)
 		{
 			if(result.Count > maxCount)
 				return;
 
-			if(deep > 25)
+			if(deep > 10)
 				Console.WriteLine("");
 
 			if (startSegment.Equals(segment) && stack.Count > 0 || IsOnSquareBound(segment))
@@ -221,12 +227,12 @@ namespace SquareConstructor
 
 			if (Segments.ContainsKey(segment))
 			{
-				var skipPolygons = Segments[segment].Where(p => !UsedPolygonsInStack.Contains(p)).ToList();
+				var skipPolygons = Segments[segment].Where(p => !UsedPolygonsInStack.Contains(p) || polygon != startPolygon && p == startPolygon).ToList();
 				if (skipPolygons.Count > 0)
 				{
 					var skipSegment = skipPolygons[0].Segments.First(s => IsEndOfSegment(vertex, s) && !s.Equals(segment));
 					UsedPolygonsInStack.Add(skipPolygons[0]);
-					DoRound(skipPolygons[0], startSegment, skipSegment, result, stack, vertex, maxCount, deep + 1);
+					DoRound(skipPolygons[0], startPolygon, startSegment, skipSegment, result, stack, vertex, maxCount, deep + 1);
 					UsedPolygonsInStack.Remove(skipPolygons[0]);
 					return;
 				}
@@ -242,8 +248,10 @@ namespace SquareConstructor
 			{
 				if(!SegmentsMatrix.TryAddPolygon(pPolygon))
 					continue;
+				var newSegment = pPolygon.Segments.Where(s => s.Start.Equals(vertex) || s.End.Equals(vertex)).First(s => !s.Equals(segment));
+				
 				stack.Push(pPolygon);
-				DoRound(pPolygon, startSegment, pPolygon.Segments.Where(s => s.Start.Equals(vertex) || s.End.Equals(vertex)).First(s => !s.Equals(segment)), result, stack, vertex, maxCount, deep + 1);
+				DoRound(pPolygon, startPolygon, startSegment, newSegment, result, stack, vertex, maxCount, deep + 1);
 				stack.Pop();
 				SegmentsMatrix.RemovePolygon(pPolygon);
 			}
