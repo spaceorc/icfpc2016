@@ -50,8 +50,8 @@ namespace lib.ProjectionSolver
 
             //foreach (var e in goodTasks)
 
-            //DrawProblem(5811);
-            //UltraSolver.SolveAndShow(5811);
+           // DrawProblem(5161);
+            UltraSolver.SolveAndShow(5161);
 //UltraSolver.SolveAndSend(41);
 
             
@@ -103,8 +103,10 @@ namespace lib.ProjectionSolver
             var viz = new GraphVisualizer<EdgeInfo, NodeInfo>();
             viz.GetX = z => z.Data.Location.X;
             viz.GetY = z => z.Data.Location.Y;
-            //  viz.NodeCaption = z => z.Data.Location.ToString() + " ("+z.NodeNumber.ToString()+")";
-            viz.EdgeCaption = z => z.Data.length.ToString();
+              //viz.NodeCaption = z => z.Data.Location.ToString() + " ("+z.NodeNumber.ToString()+")";
+            viz.NodeCaption = z => z.NodeNumber.ToString();
+
+            //viz.EdgeCaption = z => z.Data.length.ToString();
 
             viz.Window(600, graph);
 

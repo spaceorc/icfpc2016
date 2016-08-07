@@ -22,6 +22,7 @@ namespace lib.ProjectionSolver
 	    {
 		    foreach (var dictByStart in wayFinder.Result.Values)
 		    {
+                if (!dictByStart.ContainsKey(nodeNumbers[0])) continue;
 			    var paths = dictByStart[nodeNumbers[0]];
 			    foreach (var path in paths)
 			    {
@@ -33,18 +34,21 @@ namespace lib.ProjectionSolver
 						Console.WriteLine($"  .originalityByVertices = {path.originalityByVertices}");
 						Console.WriteLine($"  .originalityByEdges = {path.originalityByEdges}");
 						Console.WriteLine($"  .straightness = {path.straightness}");
+                        Console.WriteLine($"  .index={paths.IndexOf(path)}/{paths.Count}");
 						return;
 				    }
 			    }
 		    }
 	    }
 
+	    const int InitialItersCount = 8;
+
 	    public IEnumerable<List<PPath>> Find(double maxTotalPenalty = 0.4)
 	    {
-			for (var i = 0; i < 10; i++)
+			for (var i = 0; i < InitialItersCount; i++)
 				wayFinder.MakeIteration();
-
-		    var iter = 0;
+			
+		    var iter = InitialItersCount;
 		    var needMoreIterations = true;
 			while (needMoreIterations)
 			{
