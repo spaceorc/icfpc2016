@@ -39,12 +39,18 @@ namespace lib
 		private SnapshotJson snapshotJson;
 		private Dictionary<int, ProblemJson> problemsJson;
 
+
+
 		public VisualizerForm()
 		{
 			var sortByExpectedScore = new ToolStripButton("SortByScore", null, SortByExpectedScoreClick);
 			sortByExpectedScore.CheckOnClick = true;
-			var solve = new ToolStripButton("Solve", null, SolveClick);
-			var menu = new ToolStrip(sortByExpectedScore, solve);
+
+            var sortById = new ToolStripButton("SortById", null, SortByIdClick);
+            sortById.CheckOnClick = true;
+
+            var solve = new ToolStripButton("Solve", null, SolveClick);
+			var menu = new ToolStrip(sortByExpectedScore, sortById, solve);
 			list = new ListBox();
 			list.Width = 300;
 			list.Dock = DockStyle.Left;
@@ -69,7 +75,9 @@ namespace lib
 			Controls.Add(menu);
 		}
 
-		private void SolveClick(object sender, EventArgs e)
+
+
+        private void SolveClick(object sender, EventArgs e)
 		{
 			var res = ProblemsSender.TrySolveAndSend(problem);
 			MessageBox.Show($"resemblance = {res}");
@@ -109,7 +117,13 @@ namespace lib
 			list.Items.AddRange(GetItems(true));
 		}
 
-		private void ListOnDoubleClick(object sender, EventArgs eventArgs)
+        private void SortByIdClick(object sender, EventArgs eventArgs)
+        {
+            list.Items.Clear();
+            list.Items.AddRange(GetItems(false));
+        }
+
+        private void ListOnDoubleClick(object sender, EventArgs eventArgs)
 		{
 			new ManualSolverForm(problem).Show(this);
 		}

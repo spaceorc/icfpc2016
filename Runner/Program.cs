@@ -26,11 +26,11 @@ namespace lib.ProjectionSolver
         }
 
 
-        static void SolveTask(int taskNumber)
+        static void SolveTask(int taskNumber, Rational otherSide)
         {
             var spec = new ProblemsRepo().Get(taskNumber);
             var solver = SolverMaker.CreateSolver(spec);
-            solver = SolverMaker.Solve(solver);
+            solver = SolverMaker.Solve(solver,otherSide);
             if (solver == null) return;
             SolverMaker.Visualize(solver);
         }
@@ -44,6 +44,8 @@ namespace lib.ProjectionSolver
             viz.GetX = z => z.Data.Location.X;
             viz.GetY = z => z.Data.Location.Y;
             viz.NodeCaption = z => z.Data.Location.ToString();
+            viz.EdgeCaption = z => z.Data.length.ToString();
+
             viz.Window(600, graph);
                  
         }
@@ -102,8 +104,7 @@ namespace lib.ProjectionSolver
 
 		static void Main(string[] args)
 		{
-			ConvexPolygonSolver.SolveAll();
-			return;
+			
 			//Arithmetic.RationalTriangulate(
 			//    new Segment(new Vector(0,0), new Vector(3, 3)),
 			//    new Segment(new Vector(3, 3), new Vector(2, 6)),
@@ -116,13 +117,13 @@ namespace lib.ProjectionSolver
          //  SolveAndSend(1763); return;
 
 			//  SolveAndSend(40);return;
-			// DrawProblem(17);
+			DrawProblem(1165);
 
 
 			//что не так с 42?
 			var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
          //   foreach (var e in goodTasks) SolveAndSend(e,false);
-            SolveTask(15);
+            SolveTask(1165,new Rational(1,4));
 
            // foreach (var e in goodTasks) SolveTask(e);
             //NewMain();return;

@@ -59,7 +59,7 @@ namespace lib
 	{
 		public static SolutionSpec Solve(ProblemSpec problemSpec, double originality = 0.3)
 		{
-			var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec), originality);
+			var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec), 1, originality);
             return solver != null ? Solve(solver.Projection) : null;
 		}
 

@@ -47,7 +47,7 @@ namespace lib
 			return sb.ToString();
 		}
 
-		public bool ValidateFacetSquares()
+		public bool ValidateFacetSquares(Rational requiredSize)
 		{
 			Rational totalSquare = 0;
 			foreach (var facet in Facets)
@@ -60,7 +60,7 @@ namespace lib
 
 				totalSquare += sourceSquare;
 			}
-			return totalSquare == 1;
+			return totalSquare == requiredSize;
 		}
 	}
 }

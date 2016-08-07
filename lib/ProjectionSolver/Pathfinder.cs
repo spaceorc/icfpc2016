@@ -56,7 +56,7 @@ namespace lib.ProjectionSolver
 					yield return e;
         }
 
-        static IEnumerable<List<PPath>> FindAllCyclesRecursive(List<PPath> cycle, Dictionary<int,List<PPath>> map)
+        static IEnumerable<List<PPath>> FindAllCyclesRecursive(List<PPath> cycle, Dictionary<int,List<PPath>> map1, Dictionary<int, List<PPath>> map2)
         {
             if (cycle.Count==4)
             {
@@ -64,24 +64,29 @@ namespace lib.ProjectionSolver
                     yield return cycle;
                 yield break;
             }
+
+            var currentMap = cycle.Count % 2 == 0 ? map1 : map2;
+
 	        var mapKey = cycle[cycle.Count - 1].LastEdge.To.NodeNumber;
-	        if (!map.ContainsKey(mapKey))
+	        if (!currentMap.ContainsKey(mapKey))
 		        yield break;
-			foreach(var e in map[mapKey])
+			foreach(var e in currentMap[mapKey])
             {
                 var c = cycle.ToList();
                 c.Add(e);
-                foreach (var r in FindAllCyclesRecursive(c, map))
+                foreach (var r in FindAllCyclesRecursive(c, map1, map2))
                     yield return r;
             }
         }
 
-        public static IEnumerable<List<PPath>> FindAllCycles(List<PPath> pathes)
+        public static IEnumerable<List<PPath>> FindAllCycles(List<PPath> pathes, List<PPath> pathes2)
         {
-            var map = pathes.GroupBy(z => z.FirstEdge.From.NodeNumber).ToDictionary(z => z.Key, z => z.ToList());
-            foreach (var e in map.Keys)
-                foreach (var s in map[e])
-                    foreach (var c in FindAllCyclesRecursive(new List<PPath> { s }, map))
+            var map1 = pathes.GroupBy(z => z.FirstEdge.From.NodeNumber).ToDictionary(z => z.Key, z => z.ToList());
+            var map2 = pathes2.GroupBy(z => z.FirstEdge.From.NodeNumber).ToDictionary(z => z.Key, z => z.ToList());
+
+            foreach (var e in map1.Keys)
+                foreach (var s in map1[e])
+                    foreach (var c in FindAllCyclesRecursive(new List<PPath> { s }, map1, map2))
                     {
                         yield return c;
                     }

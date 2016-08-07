@@ -184,7 +184,7 @@ namespace lib
 		public void PrintD4()
 		{
 			var sol = D4(new Rational(9,20), new Rational(19, 40), new Rational(12, 40), new Rational(13, 40));
-			sol.ValidateFacetSquares().Should().BeTrue();
+			sol.ValidateFacetSquares(1).Should().BeTrue();
 			Console.WriteLine(sol.Pack());
 			sol.CreateVisualizerForm(true).ShowDialog();
 		}

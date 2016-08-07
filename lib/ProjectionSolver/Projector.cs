@@ -23,8 +23,8 @@ namespace lib.ProjectionSolver
         {
             ProjectionStage stage = new ProjectionStage();
 
-            var corners = new[] { new Vector(0, 0), new Vector(0, 1), new Vector(1, 1), new Vector(1, 0) };
-            var direction = new[] { new Vector(0, 1), new Vector(1, 0), new Vector(0, -1), new Vector(-1, 0) };
+            var corners = new[] { new Vector(0, 0), new Vector(p.SideX, 0), new Vector(p.SideX, p.SideY), new Vector(0, p.SideY) };
+            var direction = new[] { new Vector(1, 0), new Vector(0, 1), new Vector(-1, 0), new Vector(0, -1) };
 
 
             for (int i = 0; i < 4; i++)
