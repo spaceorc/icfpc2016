@@ -18,19 +18,38 @@ namespace lib.ProjectionSolver
 	{
 
 
+        static void ShowRibbonStat(IEnumerable<int> tasks)
+        {
 
+            foreach (var e in tasks)
+                Console.WriteLine($"{e}\t{RibbonIndicator.GetRibbonWidth(new ProblemsRepo().Get(e))}");
+            Console.ReadKey();
+        }
 
         static void Main(string[] args)
 		{
+            var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131, 1903 };
 
-			//Arithmetic.RationalTriangulate(
-			//    new Segment(new Vector(0,0), new Vector(3, 3)),
-			//    new Segment(new Vector(3, 3), new Vector(2, 6)),
-			//    new Vector(0, 0),
-			//    new Vector(2, 6));
+            var nonRibbons = new[] { 4248 , 4008, 4033, 1490, 4206};
 
+            var ribbons = new[] { 5157, 5208, 5161 };
 
-			DrawProblem(5811);
+            //Arithmetic.RationalTriangulate(
+            //    new Segment(new Vector(0,0), new Vector(3, 3)),
+            //    new Segment(new Vector(3, 3), new Vector(2, 6)),
+            //    new Vector(0, 0),
+            //    new Vector(2, 6));
+
+            ShowRibbonStat(ribbons.Concat(nonRibbons));
+
+            //foreach (var e in goodTasks)
+
+            //DrawProblem(5811);
+            //UltraSolver.SolveAndShow(5811);
+//UltraSolver.SolveAndSend(41);
+
+            
+			
 //
 			//SolveTask(5811,new Rational(1,37)); return;
             //SolveTask(21, 1);return;
@@ -43,8 +62,7 @@ namespace lib.ProjectionSolver
 
 
             //что не так с 42?
-            var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
-       //    foreach (var e in goodTasks) SolveAndSend(e,false);Console.ReadKey();
+            //    foreach (var e in goodTasks) SolveAndSend(e,false);Console.ReadKey();
         
            // foreach (var e in goodTasks) SolveTask(e);
             //NewMain();return;
@@ -57,6 +75,10 @@ namespace lib.ProjectionSolver
             public List<PPath> pathes = new List<PPath>();
         }
 
+        static void SolveWithUltrasolver(int taskNumber)
+        {
+            UltraSolver.SolveAndShow(taskNumber);
+        }
 
         static void SolveTask(int taskNumber, Rational otherSide)
         {
@@ -125,50 +147,50 @@ namespace lib.ProjectionSolver
             viz.Window(500, gr);
         }
 
-        static void SolveAndSend(int id, bool wait = true)
-        {
-            Console.WriteLine(id + ":" + " " + SolveAndSendInternal(id));
-            if (wait) Console.ReadKey();
-            return;
-        }
+        //static void SolveAndSend(int id, bool wait = true)
+        //{
+        //    Console.WriteLine(id + ":" + " " + SolveAndSendInternal(id));
+        //    if (wait) Console.ReadKey();
+        //    return;
+        //}
 
-        static void SolveAndSendStrip(int id, Rational otherSide)
-        {
-            Console.WriteLine(id + ":" + " " + SolveAndSendStripInternal(id, otherSide));
-            Console.ReadKey();
-            return;
-        }
+        //static void SolveAndSendStrip(int id, Rational otherSide)
+        //{
+        //    Console.WriteLine(id + ":" + " " + SolveAndSendStripInternal(id, otherSide));
+        //    Console.ReadKey();
+        //    return;
+        //}
 
 
-        public static double SolveAndSendStripInternal(int id, Rational otherSide)
-        {
-            var repo = new ProblemsRepo();
-            var problemSpec = repo.Get(id);
-            var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec), otherSide, 0);
+        //public static double SolveAndSendStripInternal(int id, Rational otherSide)
+        //{
+        //    var repo = new ProblemsRepo();
+        //    var problemSpec = repo.Get(id);
+        //    var solver = SolverMaker.Solve(SolverMaker.CreateSolver(problemSpec), otherSide, 0);
 
-            if (solver == null) return 0;
+        //    if (solver == null) return 0;
 
-            var cycleFinder = new CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(
-               solver.Projection,
-               n => n.Data.Projection);
+        //    var cycleFinder = new CycleFinder<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>(
+        //       solver.Projection,
+        //       n => n.Data.Projection);
 
-            var cycles = cycleFinder.GetCycles();
-            var reflectedCycles = CycleReflector.GetUnribbonedCycles(cycles);
-            var spec = ProjectionSolverRunner.GetSolutionsFromCycles(reflectedCycles);
+        //    var cycles = cycleFinder.GetCycles();
+        //    var reflectedCycles = CycleReflector.GetUnribbonedCycles(cycles);
+        //    var spec = SolutionSpecBuilder.GetSolutionsByCycles(reflectedCycles);
 
-            spec = spec.Pack();
-            if (spec == null) return 0;
-            return ProblemsSender.Post(problemSpec.id, spec);
-        }
+        //    spec = spec.Pack();
+        //    if (spec == null) return 0;
+        //    return ProblemsSender.Post(problemSpec.id, spec);
+        //}
 
-        public static double SolveAndSendInternal(int id)
-        {
-            var problemSpec = new ProblemsRepo().Get(id);
-            var spec = ProjectionSolverRunner.Solve(problemSpec);
-            if (spec == null)
-                return 0;
-            return ProblemsSender.Post(problemSpec.id, spec);
-        }
+        //public static double SolveAndSendInternal(int id)
+        //{
+        //    var problemSpec = new ProblemsRepo().Get(id);
+        //    var spec = ProjectionSolverRunner.Solve(problemSpec);
+        //    if (spec == null)
+        //        return 0;
+        //    return ProblemsSender.Post(problemSpec.id, spec);
+        //}
 
     }
 }

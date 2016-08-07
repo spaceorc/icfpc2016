@@ -1,4 +1,5 @@
-﻿using System;
+﻿using lib.ProjectionSolver;
+using System;
 using System.Net.Http;
 using System.Threading;
 
@@ -13,7 +14,7 @@ namespace lib.Api
 			var res = 0.0;
 			var t = new Thread(() =>
 			{
-				var spec = ProjectionSolverRunner.Solve(problemSpec);
+				var spec = UltraSolver.AutoSolve(problemSpec);
 				res = Post(problemSpec.id, spec);
 			})
 			{ IsBackground = true };
