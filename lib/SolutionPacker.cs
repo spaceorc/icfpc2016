@@ -425,6 +425,9 @@ namespace lib
 		[TestCase(
 			"0,0|1/2,0|1,0|0,1/2|1/2,1/2|1,1/2|0,1|1/2,1|1,1", "0,0|1/2,0|1,0|0,1/2|1/2,1/2|1,1/2|0,1|1/2,1|1,1", "0 1 4 3|4 5 2 1|7 8 5 4|4 7 6 3",
 			"0,0|1,0|0,1|1,1", "0,0|1,0|0,1|1,1", "3 1 0 2")]
+		[TestCase(
+			"0,0|1,0|1,1/3|1/3,1/3|1/3,1|0,1|1,1", "0,0|1,0|1,1/3|1/3,1/3|1/3,1|0,1|1/3,1/3", "0 1 2 3 4 5|6 2 4|3 2 4",
+			"0,0|1,0|1,1/3|1/3,1|0,1|1,1", "0,0|1,0|1,1/3|1/3,1|0,1|1/3,1/3", "0 1 2 3 4|5 2 3")]
 		public void Normalize(string sourcePoints, string destPoints, string facets, string expectedSourcePoints, string expectedDestPoints, string expectedFacets)
 		{
 			var origSolution = new SolutionSpec(
