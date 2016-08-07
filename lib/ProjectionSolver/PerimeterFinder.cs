@@ -40,40 +40,47 @@ namespace lib.ProjectionSolver
 			    }
 		    }
 	    }
+		
+		private const int MaxWayFinderIters = 30;
 
-	    const int InitialItersCount = 8;
-
-	    public IEnumerable<List<PPath>> Find(double maxTotalPenalty = 0.4)
+	    public IEnumerable<List<PPath>> Find()
 	    {
-			for (var i = 0; i < InitialItersCount; i++)
-				wayFinder.MakeIteration();
-			
-		    var iter = InitialItersCount;
-		    var needMoreIterations = true;
-			while (needMoreIterations)
-			{
+		    var iter = 0;
+			for (var maxTotalPenalty = 0.4; maxTotalPenalty < 3; maxTotalPenalty *= 1.15)
+		    {
 				if (ShowDebug)
-					Console.WriteLine("\n === Let's make one more iteration ===");
-				wayFinder.MakeIteration();
-				iter++;
+					Console.WriteLine($"maxTotalPenalty = {maxTotalPenalty:0.00}");
 
-				needMoreIterations = false;
-				for (var start = 0; start < wayFinder.Graph.NodesCount; start++)
-				{
-					if (ShowDebug)
-						Console.WriteLine($"iter = {iter}, start = {start}");
+			    var needMoreIterations = true;
+			    while (needMoreIterations)
+			    {
+				    if (iter < MaxWayFinderIters)
+				    {
+					    wayFinder.MakeIteration();
+					    iter++;
+				    }
 
-					foreach (var perimeter in FindRecursively(start, start, maxTotalPenalty, new Stack<PPath>()))
-					{
-						if (perimeter == null)
-						{
-							needMoreIterations = true;
-							continue;
-						}
-						yield return perimeter;
-					}
+				    needMoreIterations = false;
+				    for (var start = 0; start < wayFinder.Graph.NodesCount; start++)
+				    {
+					    //if (ShowDebug)
+						//    Console.WriteLine($"iter = {iter}, start = {start}");
+
+					    foreach (var perimeter in FindRecursively(start, start, maxTotalPenalty, new Stack<PPath>()))
+					    {
+						    if (perimeter == null)
+						    {
+							    needMoreIterations = true;
+							    continue;
+						    }
+						    yield return perimeter;
+					    }
+				    }
+
+				    if (iter == MaxWayFinderIters)
+					    break;
 				}
-			}
+		    }
 	    }
 
 	    private IEnumerable<List<PPath>> FindRecursively(int loopStartNode, int nodeToContinueFrom, double availablePenalty, Stack<PPath> perimeterStack)
@@ -91,6 +98,9 @@ namespace lib.ProjectionSolver
 				}
 			    yield break;
 		    }
+
+		    if (lengthIndex == 0 && IsTooMuchMemoryConsumed())
+				yield break; // Всё равно уже не найдёт решение
 
 		    var length = pathLengths[lengthIndex];
 		    var pathCandidates = wayFinder.Result.GetValueOrDefault(length)?.GetValueOrDefault(nodeToContinueFrom) ?? new List<PPath>();
@@ -111,7 +121,17 @@ namespace lib.ProjectionSolver
 				yield return null; // Значит, availablePenalty не было израсходовано и после wayFinder.MakeIteration() можно поискать ещё путей
 		}
 
-	    private bool HasNotBeenYieldedEarlier(List<PPath> perimeter)
+		private const long BytesPerGiB = 1024L * 1024 * 1024;
+
+	    private static bool IsTooMuchMemoryConsumed()
+	    {
+			var gibCount = (double)GC.GetTotalMemory(true) / BytesPerGiB;
+			if(gibCount > 2)
+				Console.WriteLine($"Memory consumed: {gibCount:0.00} GiB");
+		    return gibCount > 3;
+	    }
+
+		private bool HasNotBeenYieldedEarlier(List<PPath> perimeter)
 	    {
 		    if (perimeter.Count != 4 || pathLengths[0] != pathLengths[2] || pathLengths[1] != pathLengths[3])
 				throw new ArgumentException("PerimeterFinder.CheckRepetitions can't work with this parameters");
@@ -126,8 +146,6 @@ namespace lib.ProjectionSolver
 				alreadyYeildedPaths.Add(d + c + b + a) &&
 				alreadyYeildedPaths.Add(b + a + d + c);
 		}
-
-		private bool availablePenaltyExhausted;
 
 		private readonly HashSet<string> alreadyYeildedPaths;
 
