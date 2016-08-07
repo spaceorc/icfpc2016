@@ -41,32 +41,34 @@ namespace lib
 
 		public VisualizerForm()
 		{
-			var sortByExpectedScore = new ToolStripButton("SortByScore", null, SortByExpectedScoreClick);
-			sortByExpectedScore.CheckOnClick = true;
-			var solve = new ToolStripButton("Solve", null, SolveClick);
-			var menu = new ToolStrip(sortByExpectedScore, solve);
+			try
+			{
+				var sortByExpectedScore = new ToolStripButton("SortByScore", null, SortByExpectedScoreClick);
+				sortByExpectedScore.CheckOnClick = true;
+				var solve = new ToolStripButton("Solve", null, SolveClick);
+				var menu = new ToolStrip(sortByExpectedScore, solve);
 				list = new ListBox();
-			list.Width = 300;
+				list.Width = 300;
 				list.Dock = DockStyle.Left;
 				list.BringToFront();
-			snapshotJson = repo.GetSnapshot(api);
-			problemsJson = snapshotJson.Problems.ToDictionary(p => p.Id, p => p);
+				snapshotJson = repo.GetSnapshot(api);
+				problemsJson = snapshotJson.Problems.ToDictionary(p => p.Id, p => p);
 
-			list.Items.AddRange(GetItems(false));
+				list.Items.AddRange(GetItems(false));
 				list.SelectedValueChanged += ListOnSelectedValueChanged;
-			list.DoubleClick += ListOnDoubleClick;
+				list.DoubleClick += ListOnDoubleClick;
 
-			problemPanel = new Panel()
+				problemPanel = new Panel()
 				{
 					Dock = DockStyle.Fill,
 				};
 
-			problemPanel.Paint += (sender, args) => PaintProblem(args.Graphics, problemPanel.ClientSize);
+				problemPanel.Paint += (sender, args) => PaintProblem(args.Graphics, problemPanel.ClientSize);
 
 				Size = new Size(800, 600);
-			Controls.Add(problemPanel);
+				Controls.Add(problemPanel);
 				Controls.Add(list);
-			Controls.Add(menu);
+				Controls.Add(menu);
 			}
 			catch (Exception e)
 			{
@@ -89,7 +91,7 @@ namespace lib
 		}
 
 		private ProblemListItem CreateItem(ProblemSpec problem)
-			{
+		{
 			var res = new ProblemListItem()
 			{
 				Id = problem.id,
@@ -105,7 +107,7 @@ namespace lib
 			{
 				res.json = problemsJson[problem.id];
 				res.ExpectedScore = problemsJson[problem.id].ExpectedScore();
-		}
+			}
 			return res;
 		}
 
@@ -121,11 +123,11 @@ namespace lib
 		}
 
 		protected override void OnLoad(EventArgs e)
-			{
+		{
 			base.OnLoad(e);
 			if (list.Items.Count > 0)
 				list.SelectedIndex = 0;
-			}
+		}
 
 		private void ListOnSelectedValueChanged(object sender, EventArgs eventArgs)
 		{
@@ -141,12 +143,12 @@ namespace lib
 				{
 					painter.Paint(graphics, Math.Min(clientSize.Height, clientSize.Width), problem);
 					Text = problem.id.ToString();
-			}
+				}
 				catch
 				{
 					Text = "ERROR";
-		}
-	}
+				}
+			}
 		}
 	}
 
