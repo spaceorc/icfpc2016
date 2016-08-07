@@ -154,7 +154,6 @@ namespace lib.Visualization.ManualSolving
 			var ps = ss.SelectMany(s => new[] { s.Start, s.End }).Distinct().ToArray();
 			var convexHull = new Polygon(ps).GetConvexBoundary();
 			var convexProblem = new ProblemSpec(new Polygon[] {convexHull,  }, ss);
-			convexProblem.CreateVisualizerForm().Show();
 			return convexProblem;
 
 		}
