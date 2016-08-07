@@ -22,23 +22,33 @@ namespace lib
 
 		public VisualizerForm(string problemsDir, Func<ProblemSpec, SolutionSpec> solve = null)
 		{
-			this.problemsDir = problemsDir;
-			this.solve = solve;
-			list = new ListBox();
-			list.Dock = DockStyle.Left;
-			list.BringToFront();
-			list.Items.AddRange(GetProblems(problemsDir));
-			list.SelectedValueChanged += ListOnSelectedValueChanged;
-			splitContainer = new SplitContainer()
+			try
 			{
-				Dock = DockStyle.Fill,
-			};
-			splitContainer.Panel1.Paint += (sender, args) => PaintProblem(args.Graphics, splitContainer.Panel1.ClientSize);
-			splitContainer.Panel2.Paint += (sender, args) => PaintSpec(args.Graphics, splitContainer.Panel2.ClientSize);
-			splitContainer.SplitterDistance = splitContainer.ClientSize.Width/2;
-			Size = new Size(800, 600);
-			Controls.Add(splitContainer);
-			Controls.Add(list);
+				this.problemsDir = problemsDir;
+				this.solve = solve;
+				list = new ListBox();
+				list.Dock = DockStyle.Left;
+				list.BringToFront();
+				list.Items.AddRange(GetProblems(problemsDir));
+				list.SelectedValueChanged += ListOnSelectedValueChanged;
+				splitContainer = new SplitContainer()
+				{
+					Dock = DockStyle.Fill,
+				};
+				splitContainer.Panel1.Paint += (sender, args) => PaintProblem(args.Graphics, splitContainer.Panel1.ClientSize);
+				splitContainer.Panel2.Paint += (sender, args) => PaintSpec(args.Graphics, splitContainer.Panel2.ClientSize);
+				splitContainer.SplitterDistance = splitContainer.ClientSize.Width/2;
+				Size = new Size(800, 600);
+				Controls.Add(splitContainer);
+				Controls.Add(list);
+
+
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
+			}
 		}
 
 		protected override void OnLoad(EventArgs e)

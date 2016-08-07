@@ -10,7 +10,8 @@ using SquareConstructor;
 namespace lib
 {
     public class Polygon
-	{
+    {
+	    public int Id;
 		public readonly Vector[] Vertices;
 	    public readonly Segment[] Segments;
 
@@ -59,7 +60,12 @@ namespace lib
 
 		public Polygon Reflect(Segment mirror)
 		{
-			return new Polygon(Vertices.Select(v => v.Reflect(mirror)).ToArray()) {IsReflected = !IsReflected};
+			var polygon = new Polygon(Vertices.Select(v => v.Reflect(mirror)).ToArray()) {IsReflected = !IsReflected, Id = Id};
+			for (int i = 0; i < Segments.Length; i++)
+			{
+				polygon.Segments[i].Id = Segments[i].Id;
+			}
+			return polygon;
 		}
 
 		public Rational GetUnsignedSquare()

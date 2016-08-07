@@ -25,11 +25,30 @@ namespace SquareConstructor
 				if(usedSegments.Contains(Tuple.Create(segment.Start, segment.End)))
 					continue;
 				var points = GeneratePolygon(segment, outerSegments, usedSegments).ToArray();
-				if (holePolygons.Any(p => points.Count(p.Contains) == p.Count))
-					continue;
 				polygons.Add(new Polygon(points));
 			}
+			foreach (var holePolygon in holePolygons)
+			{
+				var polygon = polygons.Last(p => ArePointsPolygon(p.Vertices, holePolygon));
+				polygons.Remove(polygon);
+			}
 			return polygons;
+		}
+
+		private static bool ArePointsPolygon(Vector[] points, HashSet<Vector> polygon)
+		{
+			if (polygon.Any(p => !points.Contains(p)))
+				return false;
+
+			for (int i = 0; i < points.Length; i++)
+			{
+				if(polygon.Contains(points[i]))
+					continue;
+				if(Arithmetic.PointInSegment(points[i], new Segment(points[(i+points.Length-1)%points.Length], points[(i+1)%points.Length])))
+					continue;
+				return false;
+			}
+			return true;
 		}
 
 		private static IEnumerable<Vector> GeneratePolygon(Segment startSegment, Dictionary<Vector, List<Segment>> outerSegments, HashSet<Tuple<Vector, Vector>> usedSegments)
