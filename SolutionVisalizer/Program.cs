@@ -24,7 +24,6 @@ namespace SolutionVisalizer
 			var form = new VisualizerForm();
 			Application.Run(form);
 		}
-
 		
 	}
 }

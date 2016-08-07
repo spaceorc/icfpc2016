@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -36,6 +37,11 @@ namespace lib
 			return new Polygon(f.Vertices.Select(i => DestPoints[i]).ToArray());
 		}
 
+		public IEnumerable<Segment> GetAllDestSegments()
+		{
+			return PolygonsDest.SelectMany(p => p.Segments);
+		}
+
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
@@ -53,7 +59,12 @@ namespace lib
 			return ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
 		}
 
-	public bool ValidateFacetSquares(Rational requiredSize)
+        public bool AreFacetsValid()
+        {
+            return AreFacetsValid(1);
+        }
+
+	public bool AreFacetsValid(Rational requiredSize)
 		{
 			Rational totalSquare = 0;
 			foreach (var facet in Facets)

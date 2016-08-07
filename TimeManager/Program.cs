@@ -14,6 +14,7 @@ namespace TimeManager
 			var httpListener = new HttpListener();
 			httpListener.Prefixes.Add("http://+:666/");
 			var nextAllowedTimestamp = DateTime.UtcNow.Add(allowedRate);
+			long requestsCount = 0;
 			var locker = new object();
 			httpListener.Start();
 			while (true)
@@ -51,7 +52,8 @@ namespace TimeManager
 											Console.WriteLine($"Sleeping {timeToSleep}");
 											Thread.Sleep(timeToSleep);
 										}
-										Console.WriteLine("Go");
+										Interlocked.Increment(ref requestsCount);
+										Console.WriteLine("Go. Requests: " + requestsCount);
 										w.WriteLine("Go");
 									}
 								}

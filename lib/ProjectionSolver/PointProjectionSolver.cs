@@ -35,7 +35,7 @@ namespace lib
 		{
 			edges = other.edges.ToList();
 			length = other.length;
-			originalityByEdges = other.originalityByEdges;
+			originality1 = other.originality1;
 			straightness = other.straightness;
 			metric = other.metric;
 		}
@@ -53,7 +53,7 @@ namespace lib
 		}
 
 		public Rational length;
-        public double originalityByEdges;
+        public double originality1;
         public double straightness;
         public double metric;
 
