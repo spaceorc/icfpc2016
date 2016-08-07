@@ -106,6 +106,7 @@
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Problems.cs" />
     <Compile Include="ProjectionSolver\CycleFinder.cs" />
+    <Compile Include="ProjectionSolver\CycleReflector.cs" />
     <Compile Include="ProjectionSolver\Pathfinder.cs" />
     <Compile Include="ProjectionSolver\PointProjectionSolver.cs" />
     <Compile Include="ProjectionSolver\ProjectionDataClasses.cs" />
