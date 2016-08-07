@@ -17,7 +17,7 @@ namespace lib.Api
 			{
 				//var spec = ProjectionSolverRunner.Solve(problemSpec);
 				var spec = new ConstructorSolver(problemSpec).Work(); //TODO pack в 41 строке убран, т.к. работает криво. Убрать комментарий, если нужно
-				res = Post(spec, problemSpec.Id);
+				res = Post(problemSpec, spec);
 			})
 			{ IsBackground = true };
 			t.Start();
@@ -33,17 +33,17 @@ namespace lib.Api
 			
 		public static double Post(ProblemSpec problemSpec, SolutionSpec solutionSpec)
 		{
-			return Post(solutionSpec, problemId);
+			return Post(solutionSpec, problemSpec.id);
 		}
 
-		public static double Post(SolutionSpec solutionSpec, int problemId)
+		public static double Post(SolutionSpec solutionSpec, int problemSpecId)
 		{
 			//solutionSpec = solutionSpec.Pack();
 
-			var existingSolution = repo.FindSolution(problemSpec.id);
+			var existingSolution = repo.FindSolution(problemSpecId);
 			if (existingSolution == solutionSpec.ToString())
 			{
-				var resemblance = repo.GetProblemResemblance(problemSpec.id);
+				var resemblance = repo.GetProblemResemblance(problemSpecId);
 				Console.Out.Write($" solution is the same! current score: {resemblance} ");
 				return resemblance;
 			}
@@ -55,7 +55,7 @@ namespace lib.Api
 				return 0;
 			}
 
-			return DoPost(problemSpec, solutionSpec);
+			return DoPost(solutionSpec, problemSpecId);
 		}
 
 		private static double DoPost(ProblemSpec problemSpec, SolutionSpec solutionSpec)
