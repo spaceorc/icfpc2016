@@ -79,13 +79,19 @@ namespace lib
 					content.Add(new StringContent(solution), "solution_spec", "solution.txt");
 					//workaround: http://stackoverflow.com/questions/31129873/make-http-client-synchronous-wait-for-response
 					var res = client.PostAsync($"{baseUrl}solution/submit", content).ConfigureAwait(false).GetAwaiter().GetResult();
+					var result = res.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 					if (!res.IsSuccessStatusCode)
 					{
-						Console.WriteLine(res.ToString());
-						Console.WriteLine(res.Content.ReadAsStringAsync().Result);
+						if (result.Contains("\"ok\":false"))
+							Console.Write(result);
+						else
+						{
+							Console.WriteLine(res.ToString());
+							Console.WriteLine(result);
+						}
 						throw new HttpRequestException(res.ReasonPhrase);
 					}
-					return res.Content.ReadAsStringAsync().Result;
+					return result;
 				}
 			}
 			finally
@@ -185,8 +191,7 @@ namespace lib
 						Thread.Sleep(1000);
 						return;
 					}
-					var waitResponse = message.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-					Console.WriteLine(waitResponse);
+					message.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 				}
 			}
 			catch (Exception)

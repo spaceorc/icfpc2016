@@ -33,7 +33,7 @@ namespace lib
 		public static void SolveAllNotSolvedPerfectly()
 		{
 			var problemsRepo = new ProblemsRepo();
-			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly())
+			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly().Reverse())
 			{
 				if (problem.Polygons.Length == 1)
 				{
