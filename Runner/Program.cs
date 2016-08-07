@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Runner
+namespace lib.ProjectionSolver
 {
 	class Program
 	{
@@ -112,7 +112,7 @@ namespace Runner
             //
 
            // DrawPathGraph(49);return;
-           //SolveAndSend(1139); return;
+         //  SolveAndSend(1763); return;
 
             //  SolveAndSend(40);return;
             // DrawProblem(17);
@@ -120,8 +120,8 @@ namespace Runner
 
             //что не так с 42?
             var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
-            foreach (var e in goodTasks) SolveAndSend(e,false);
-           // SolveTask(18);
+         //   foreach (var e in goodTasks) SolveAndSend(e,false);
+            SolveTask(15);
 
            // foreach (var e in goodTasks) SolveTask(e);
             //NewMain();return;

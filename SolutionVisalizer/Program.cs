@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using lib;
-using Runner;
+using lib.ProjectionSolver;
 using Path = System.IO.Path;
 
 namespace SolutionVisalizer

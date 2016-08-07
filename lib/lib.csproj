@@ -108,8 +108,10 @@
     <Compile Include="ProjectionSolver\CycleFinder.cs" />
     <Compile Include="ProjectionSolver\Pathfinder.cs" />
     <Compile Include="ProjectionSolver\PointProjectionSolver.cs" />
+    <Compile Include="ProjectionSolver\ProjectionDataClasses.cs" />
     <Compile Include="ProjectionSolver\Projector.cs" />
     <Compile Include="ProjectionSolver\SegmentFamily.cs" />
+    <Compile Include="ProjectionSolver\SegmentFamilySubset.cs" />
     <Compile Include="ProjectionSolver\SolverMaker.cs" />
     <Compile Include="SolutionSpecExt.cs" />
     <Compile Include="SolvedProblemsFinder.cs" />

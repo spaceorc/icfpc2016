@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using lib.Graphs;
 using NUnit.Framework;
-using Runner;
+using lib.ProjectionSolver;
 
 namespace lib
 {

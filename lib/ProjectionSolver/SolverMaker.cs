@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Runner
+namespace lib.ProjectionSolver
 {
     public class SolverMaker
     {
@@ -109,7 +109,7 @@ namespace Runner
 
         static PointProjectionSolver TryCycle(PointProjectionSolver solver, List<PPath> cycle)
         {
-            var pr = Projector.CreateProjection(solver.SegmentFamilies, solver.AllSegments, solver.Graph);
+            var pr = new Projection(solver.Graph,solver.AllSegments,solver.SegmentFamilies,1,1);
             pr.Stages.Push(Projector.CreateInitialProjection(cycle, pr));
 
 //            Visualize(solver, pr, cycleCounter.ToString());
