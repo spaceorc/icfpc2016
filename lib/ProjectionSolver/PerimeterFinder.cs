@@ -11,6 +11,8 @@ namespace lib.ProjectionSolver
 	    {
 		    this.wayFinder = wayFinder;
 		    this.pathLengths = pathLengths;
+
+			alreadyYieldedPaths = new HashSet<string>();
 	    }
 
 	    private void DebugPathMetrics(params int[] nodeNumbers)
@@ -62,16 +64,20 @@ namespace lib.ProjectionSolver
 			}
 	    }
 
-	    private IEnumerable<List<PPath>> FindRecursively(int loopStartNode, int nodeToContinueFrom, int indexSum, Stack<PPath> currentPerimeter, Stack<int> debug, double cutOffBorder)
+	    private IEnumerable<List<PPath>> FindRecursively(int loopStartNode, int nodeToContinueFrom, int indexSum, Stack<PPath> perimeterStack, Stack<int> debug, double cutOffBorder)
 	    {
-		    var lengthIndex = currentPerimeter.Count;
+		    var lengthIndex = perimeterStack.Count;
 			if (lengthIndex == pathLengths.Length)
 		    {
 			    if (nodeToContinueFrom == loopStartNode)
 			    {
-				    yield return currentPerimeter.Select(ppath => new PPath(ppath)).Reverse().ToList();
-					// Console.WriteLine("debug: {0}", string.Join(" ", debug));
-			    }
+				    var perimeter = perimeterStack.Select(ppath => new PPath(ppath)).Reverse().ToList();
+				    if (HasNotBeenYieldedEarlier(perimeter))
+				    {
+					    yield return perimeter;
+						// Console.WriteLine("debug: {0}", string.Join(" ", debug));
+					}
+				}
 			    yield break;
 		    }
 
@@ -93,14 +99,32 @@ namespace lib.ProjectionSolver
 				if (pathCandidate.metric < cutOffBorder)
 					continue;
 				
-				currentPerimeter.Push(pathCandidate);
+				perimeterStack.Push(pathCandidate);
 				debug.Push(i);
-			    foreach (var perimeter in FindRecursively(loopStartNode, pathCandidate.LastEdge.To.NodeNumber, indexSum - i, currentPerimeter, debug, cutOffBorder))
+			    foreach (var perimeter in FindRecursively(loopStartNode, pathCandidate.LastEdge.To.NodeNumber, indexSum - i, perimeterStack, debug, cutOffBorder))
 				    yield return perimeter;
 				debug.Pop();
-			    currentPerimeter.Pop();
+			    perimeterStack.Pop();
 		    }
 	    }
+
+	    private bool HasNotBeenYieldedEarlier(List<PPath> perimeter)
+	    {
+		    if (perimeter.Count != 4 || pathLengths[0] != pathLengths[2] || pathLengths[1] != pathLengths[3])
+				throw new ArgumentException("PerimeterFinder.CheckRepetitions can't work with this parameters");
+
+			var a = string.Join(",", perimeter[0].NodeNumbers) + ".";
+			var b = string.Join(",", perimeter[1].NodeNumbers) + ".";
+			var c = string.Join(",", perimeter[2].NodeNumbers) + ".";
+			var d = string.Join(",", perimeter[3].NodeNumbers) + ".";
+		    return 
+				alreadyYieldedPaths.Add(a + b + c + d) &&
+				alreadyYieldedPaths.Add(c + d + a + b) &&
+				alreadyYieldedPaths.Add(d + c + b + a) &&
+				alreadyYieldedPaths.Add(b + a + d + c);
+	    }
+
+	    private readonly HashSet<string> alreadyYieldedPaths;
 
 	    private bool indexSumTooBig;
 
