@@ -159,6 +159,7 @@ namespace lib
 
 		private HttpClient CreateClient()
 		{
+			AskTimeSlot();
 			var handler = new HttpClientHandler()
 			{
 				AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
@@ -169,6 +170,30 @@ namespace lib
 			client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
 			client.DefaultRequestHeaders.ExpectContinue = false;
 			return client;
+		}
+
+		private void AskTimeSlot()
+		{
+			try
+			{
+				using (var client = new HttpClient())
+				{
+					client.BaseAddress = new Uri("http://spaceorc-t430:666/");
+					var message = client.GetAsync("/ask").GetAwaiter().GetResult();
+					if (!message.IsSuccessStatusCode)
+					{
+						Console.WriteLine("Bad response from TimeManager. Just waiting 1 seconds...");
+						Thread.Sleep(1000);
+						return;
+					}
+					var waitResponse = message.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+					Console.WriteLine(waitResponse);
+				}
+			}
+			catch (Exception)
+			{
+				Console.WriteLine("TimeManager is unavailable");
+			}
 		}
 	}
 
