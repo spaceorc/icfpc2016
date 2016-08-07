@@ -89,13 +89,13 @@ namespace lib.ProjectionSolver
 
 			DrawProblem(1083);
 //
-			SolveTask(1083,new Rational(1,8)); return;
+			//SolveTask(1083,new Rational(1,8)); return;
 
 			///DrawPathGraph(49);return;
 			//SolveAndSend(1763);// return; //че за упаковка
 
 			//  SolveAndSend(40);return;
-				SolveAndSendStrip(27, new Rational(1,10));
+				//SolveAndSendStrip(27, new Rational(1,10));
 
 
 			//что не так с 42?
