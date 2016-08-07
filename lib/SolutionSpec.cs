@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -34,6 +35,11 @@ namespace lib
 		private Polygon FacetToPolygonDst(Facet f)
 		{
 			return new Polygon(f.Vertices.Select(i => DestPoints[i]).ToArray());
+		}
+
+		public IEnumerable<Segment> GetAllDestSegments()
+		{
+			return PolygonsDest.SelectMany(p => p.Segments);
 		}
 
 		public override string ToString()

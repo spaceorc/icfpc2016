@@ -71,6 +71,11 @@ namespace lib
 		{
 			return new Segment(Start.Move(shiftX, shiftY), End.Move(shiftX, shiftY));
 		}
+		[Pure]
+		public Segment Move(Vector shift)
+		{
+			return Move(shift.X, shift.Y);
+		}
 
 		public override int GetHashCode()
 		{

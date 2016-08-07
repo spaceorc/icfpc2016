@@ -223,6 +223,16 @@ namespace lib
 				Console.WriteLine($"writing {filepath}");
 				File.WriteAllText(filepath, spec);
 			}
+			//1763
+		}
+
+		[Test]
+		public void CalcImperfectScore()
+		{
+			var snapshotJson = new ProblemsRepo().GetSnapshot(new ApiClient());
+			var v = snapshotJson.Problems.Where(p => p.Ranking.All(r => r.resemblance != 1.0))
+				.Sum(p => p.SolutionSize / (1+p.Ranking.Length));
+			Console.WriteLine(v);
 		}
 
 		[Test]
