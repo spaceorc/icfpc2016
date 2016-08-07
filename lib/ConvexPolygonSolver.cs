@@ -56,12 +56,12 @@ namespace lib
 			return TrySolveInOneShot(problem, convexPolygon);
 		}
 
-		private static SolutionSpec TrySolveInBestShot(ProblemSpec problem, Polygon convexPolygon)
+		public static SolutionSpec TrySolveInBestShot(ProblemSpec problem, Polygon convexPolygon)
 		{
 			var solution = EnumerateInitialSolutions(convexPolygon)
-				.Take(100)
+				.Take(20)
 				.Select(x => Solve(convexPolygon, x, TimeSpan.FromSeconds(1)))
-				.OrderByDescending(x => SolutionEvaluator.EvaluateX(problem, x, dpi: 500))
+				.OrderByDescending(x => SolutionEvaluator.EvaluateX(problem, x, dpi: 200))
 				.FirstOrDefault();
 			return solution;
 		}

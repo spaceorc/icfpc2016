@@ -131,11 +131,7 @@ namespace lib.Visualization.ManualSolving
 				return null;
 
 			var problemPolygon = problem.Polygons[0];
-			var initialSolution = ConvexPolygonSolver.TryGetInitialSolution(problem, problemPolygon);
-			if (initialSolution == null)
-				return null;
-
-			return ConvexPolygonSolver.Solve(problemPolygon, initialSolution);
+			return ConvexPolygonSolver.TrySolveInBestShot(problem, problemPolygon.GetConvexBoundary());
 		}
 
 		private IEnumerable<SolutionSpec> GetAllMirrorCombinatons(SolutionSpec solution, ImmutableList<Segment> mirrors)

@@ -39,7 +39,7 @@ namespace lib
 		private Panel problemPanel;
 		private SnapshotJson snapshotJson;
 		private Dictionary<int, ProblemJson> problemsJson;
-	    private ListBox output;
+		private ListBox output;
 
 
 
@@ -50,23 +50,25 @@ namespace lib
 				var sortByExpectedScore = new ToolStripButton("SortByScore", null, SortByExpectedScoreClick);
 				sortByExpectedScore.CheckOnClick = true;
 
-            var sortById = new ToolStripButton("SortById", null, SortByIdClick);
-            sortById.CheckOnClick = true;
+				var sortById = new ToolStripButton("SortById", null, SortByIdClick);
+				sortById.CheckOnClick = true;
+				var sortByOwner = new ToolStripButton("SortByOwner", null, SortByOwnerClick);
+				sortByOwner.CheckOnClick = true;
 
 				var solve = new ToolStripButton("Solve", null, SolveClick);
-			var menu = new ToolStrip(sortByExpectedScore, sortById, solve);
+				var menu = new ToolStrip(sortByExpectedScore, sortById, sortByOwner, solve);
 				list = new ListBox();
 				list.Width = 300;
 				list.Dock = DockStyle.Left;
-                list.BringToFront();
+				list.BringToFront();
 
-                output = new ListBox();
-                output.Dock = DockStyle.Bottom;
+				output = new ListBox();
+				output.Dock = DockStyle.Bottom;
 
-                snapshotJson = repo.GetSnapshot(api);
+				snapshotJson = repo.GetSnapshot(api);
 				problemsJson = snapshotJson.Problems.ToDictionary(p => p.Id, p => p);
 
-				list.Items.AddRange(GetItems(false));
+				list.Items.AddRange(GetItems(x => x));
 				list.SelectedValueChanged += ListOnSelectedValueChanged;
 				list.DoubleClick += ListOnDoubleClick;
 
@@ -89,19 +91,16 @@ namespace lib
 			}
 		}
 
-
-
-        private void SolveClick(object sender, EventArgs e)
+		private void SolveClick(object sender, EventArgs e)
 		{
 			var res = ProblemsSender.TrySolveAndSend(problem);
 			MessageBox.Show($"resemblance = {res}");
 		}
 
-		private object[] GetItems(bool sortScore)
+		private object[] GetItems(Func<IEnumerable<ProblemListItem>, IEnumerable<ProblemListItem>> sortAndFilter)
 		{
-			var allItems = repo.GetAll().Select(CreateItem);
-			if (!sortScore) return allItems.Cast<object>().ToArray();
-			return allItems.Where(p => !p.IsSolved).OrderByDescending(p => p.ExpectedScore).Cast<object>().ToArray();
+			IEnumerable<ProblemListItem> allItems = repo.GetAll().Select(CreateItem);
+			return sortAndFilter(allItems).Cast<object>().ToArray();
 		}
 
 		private ProblemListItem CreateItem(ProblemSpec problem)
@@ -139,17 +138,27 @@ namespace lib
 
 		private void SortByExpectedScoreClick(object sender, EventArgs eventArgs)
 		{
-			list.Items.Clear();
-			list.Items.AddRange(GetItems(true));
+			SortBy(allItems => allItems.Where(p => !p.IsSolved).OrderByDescending(p => p.ExpectedScore));
 		}
 
-        private void SortByIdClick(object sender, EventArgs eventArgs)
-        {
-            list.Items.Clear();
-            list.Items.AddRange(GetItems(false));
-        }
+		private void SortByOwnerClick(object sender, EventArgs e)
+		{
+			SortBy(x => x.OrderByDescending(p => p.Owner));
+		}
 
-        private void ListOnDoubleClick(object sender, EventArgs eventArgs)
+		private void SortBy(Func<IEnumerable<ProblemListItem>, IEnumerable<ProblemListItem>> sortAndFilter)
+		{
+			list.Items.Clear();
+			list.Items.AddRange(GetItems(sortAndFilter));
+		}
+
+		private void SortByIdClick(object sender, EventArgs eventArgs)
+		{
+			list.Items.Clear();
+			list.Items.AddRange(GetItems(x => x));
+		}
+
+		private void ListOnDoubleClick(object sender, EventArgs eventArgs)
 		{
 			new ManualSolverForm(problem).Show(this);
 		}
@@ -163,7 +172,7 @@ namespace lib
 
 		private void ListOnSelectedValueChanged(object sender, EventArgs eventArgs)
 		{
-			problem = ((ProblemListItem) list.SelectedItem).Spec;
+			problem = ((ProblemListItem)list.SelectedItem).Spec;
 			problemPanel.Invalidate();
 		}
 
@@ -173,11 +182,11 @@ namespace lib
 			{
 				try
 				{
-                    
+
 					painter.Paint(graphics, Math.Min(clientSize.Height, clientSize.Width), problem);
 					Text = problem.id.ToString();
 
-                    PaintRibbonGistToOutput();
+					//PaintRibbonGistToOutput();
 				}
 				catch
 				{
@@ -186,24 +195,24 @@ namespace lib
 			}
 		}
 
-	    private void PaintRibbonGistToOutput()
-	    {
-            var solver = SolverMaker.CreateSolver(problem);
-	        var gist = RibbonIndicator.RibbonGist(solver);
-	        var r = RibbonIndicator.Indicate(gist);
-	        output.Items.Clear();
-	        if (r.HasValue)
-	        {
-	            output.Items.Add("RIBBON!");
-	        }
-	        foreach (var g in gist)
-	        {
-	            output.Items.Add(string.Format("{0}\t{1}", g.Key, g.Value));
-	        }
-	    }
-    }
+		private void PaintRibbonGistToOutput()
+		{
+			var solver = SolverMaker.CreateSolver(problem);
+			KeyValuePair<Rational, double>[] gist = RibbonIndicator.RibbonGist(solver);
+			var r = RibbonIndicator.Indicate(gist);
+			output.Items.Clear();
+			if (r.HasValue)
+			{
+				output.Items.Add("RIBBON!");
+			}
+			foreach (var g in gist)
+			{
+				output.Items.Add(string.Format("{0}\t{1}", g.Key, g.Value));
+			}
+		}
+	}
 
-    [TestFixture]
+	[TestFixture]
 	public class VisualizerForm_Should
 	{
 		[Test]
