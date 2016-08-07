@@ -120,8 +120,21 @@ namespace lib.Visualization.ManualSolving
 		{
 			var polygon = SelectedSegmentIndices.Select(i => Segments[i]).ToList();
 			ProblemSpec problem = CreatProblemSpec(polygon);
-			var solution = ConvexPolygonSolver.TrySolve(problem);
+			var solution = TrySolve(problem);
 			return GetAllMirrorCombinatons(solution, mirrors);
+		}
+
+		private static SolutionSpec TrySolve(ProblemSpec problem)
+		{
+			if (problem.Polygons.Length > 1 || !problem.Polygons.Single().IsConvex())
+				return null;
+
+			var problemPolygon = problem.Polygons[0];
+			var initialSolution = ConvexPolygonSolver.TryGetInitialSolution(problem, problemPolygon);
+			if (initialSolution == null)
+				return null;
+
+			return ConvexPolygonSolver.TrySolve(problemPolygon, initialSolution);
 		}
 
 		private IEnumerable<SolutionSpec> GetAllMirrorCombinatons(SolutionSpec solution, ImmutableList<Segment> mirrors)

@@ -11,6 +11,47 @@ namespace lib
 {
 	public static class ConvexPolygonSolver
 	{
+		public static void SolveAllNotSolvedPerfectly()
+		{
+			var sw = Stopwatch.StartNew();
+			var problemsRepo = new ProblemsRepo();
+			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly().Reverse())
+			{
+				var solution = TrySolveSingleProblem(problem);
+				if (solution != null)
+					ProblemsSender.Post(problem.id, solution);
+				Console.WriteLine($"Elapsed: {sw.Elapsed}");
+			}
+		}
+
+		private static SolutionSpec TrySolveSingleProblem(ProblemSpec problem)
+		{
+			SolutionSpec solution = null;
+
+			if (problem.Polygons.Length > 1)
+				Console.Write($"Problem {problem.id} has MANY POLYGONS! Skipping...");
+			else
+			{
+				var theProblem = problem;
+				if (problem.Polygons.Single().IsConvex())
+				{
+					Console.Write($"Problem {problem.id} is convex! Solvnig...");
+				}
+				else
+				{
+					Console.Write($"Problem {problem.id} is not convex! Solvnig using convex boundary...");
+					theProblem = new ProblemSpec(new[] { problem.Polygons.Single().GetConvexBoundary() }, problem.Segments);
+				}
+
+				var convexPolygon = theProblem.Polygons.Single();
+				var initialSolution = TryGetInitialSolution(theProblem, convexPolygon);
+				if (initialSolution != null)
+					solution = TrySolve(convexPolygon, initialSolution);
+				
+			}
+			return solution;
+		}
+
 		public static SolutionSpec TrySolve(Polygon poly, SolutionSpec initialSolution, TimeSpan? timeout = null)
 		{
 			if (poly.GetSignedSquare() < 0)
@@ -35,57 +76,9 @@ namespace lib
 			return solution;
 		}
 
-		public static void SolveAllNotSolvedPerfectly()
+		public static SolutionSpec TryGetInitialSolution(ProblemSpec problem, Polygon problemPolygon, TimeSpan? timeout = null)
 		{
-			var sw = Stopwatch.StartNew();
-			var problemsRepo = new ProblemsRepo();
-			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly().Reverse())
-			{
-				if (problem.Polygons.Length > 1)
-					Console.Write($"Problem {problem.id} has MANY POLYGONS! Skipping...");
-				else
-				{
-					SolutionSpec solution;
-					if (problem.Polygons.Single().IsConvex())
-					{
-						Console.Write($"Problem {problem.id} is convex! Solvnig...");
-						solution = TrySolve(problem);
-					}
-					else
-					{
-						Console.Write($"Problem {problem.id} is not convex! Solvnig using convex boundary...");
-						solution = TrySolveWithBoundary(problem);
-					}
-					if (solution != null)
-						ProblemsSender.Post(problem, solution);
-				}
-				Console.WriteLine($"Elapsed: {sw.Elapsed}");
-			}
-		}
-
-		public static SolutionSpec TrySolveWithBoundary(ProblemSpec problem)
-		{
-			if (problem.Polygons.Length > 1)
-				return null;
-			var convexProblem = new ProblemSpec(new [] {problem.Polygons.Single().GetConvexBoundary()}, problem.Segments);
-			return TrySolve(convexProblem);
-		}
-
-		public static SolutionSpec TrySolve(ProblemSpec problem)
-		{
-			if (problem.Polygons.Length > 1 || !problem.Polygons.Single().IsConvex())
-				return null;
-
-			var problemPolygon = problem.Polygons[0];
-			var initialSolution = TryGetInitialSolution(problem, problemPolygon);
-			if (initialSolution == null)
-				return null;
-
-			return TrySolve(problemPolygon, initialSolution);
-		}
-
-		private static SolutionSpec TryGetInitialSolution(ProblemSpec problem, Polygon problemPolygon)
-		{
+			timeout = timeout ?? TimeSpan.FromSeconds(10);
 			SolutionSpec initialSolution = null;
 			var t = new Thread(() =>
 			{
@@ -93,11 +86,11 @@ namespace lib
 			})
 			{ IsBackground = true };
 			t.Start();
-			if (!t.Join(TimeSpan.FromSeconds(10)))
+			if (!t.Join(timeout.Value))
 			{
 				t.Abort();
 				t.Join();
-				Console.WriteLine("Failed to get initial solution in 10 sec! Skipping");
+				Console.Write($"Failed to get initial solution in {timeout}! Skipping");
 			}
 			return initialSolution;
 		}
