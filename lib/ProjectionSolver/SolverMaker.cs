@@ -112,7 +112,7 @@ namespace lib.ProjectionSolver
             var pr = new Projection(solver.Graph, solver.AllSegments, solver.SegmentFamilies, cycle[0].length, cycle[1].length);
             pr.Stages.Push(Projector.CreateInitialProjection(cycle, pr));
 
-            //Visualize(solver, pr, cycleCounter.ToString());
+            Visualize(solver, pr, cycleCounter.ToString());
 
             var res=TryHordEdges(solver, pr);
             if (res != null) return res;

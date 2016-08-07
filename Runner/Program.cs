@@ -43,7 +43,7 @@ namespace lib.ProjectionSolver
             var viz = new GraphVisualizer<EdgeInfo, NodeInfo>();
             viz.GetX = z => z.Data.Location.X;
             viz.GetY = z => z.Data.Location.Y;
-            viz.NodeCaption = z => z.Data.Location.ToString();
+          //  viz.NodeCaption = z => z.Data.Location.ToString();
             viz.EdgeCaption = z => z.Data.length.ToString();
 
             viz.Window(600, graph);
@@ -114,17 +114,17 @@ namespace lib.ProjectionSolver
 			//
 
 			// DrawPathGraph(49);return;
-         //  SolveAndSend(1763); return;
+           //SolveAndSend(1763);// return; //че за упаковка
 
 			//  SolveAndSend(40);return;
-			DrawProblem(1165);
+			DrawProblem(27);
+            SolveTask(3990, new Rational(1,10));
 
 
-			//что не так с 42?
-			var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
-         //   foreach (var e in goodTasks) SolveAndSend(e,false);
-            SolveTask(1165,new Rational(1,4));
-
+            //что не так с 42?
+            var goodTasks = new[] { 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 38, 39, 40, 41, 46, 1131 , 1903};
+       //    foreach (var e in goodTasks) SolveAndSend(e,false);Console.ReadKey();
+        
            // foreach (var e in goodTasks) SolveTask(e);
             //NewMain();return;
 
