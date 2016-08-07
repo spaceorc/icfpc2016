@@ -23,18 +23,18 @@ namespace lib
         public static Rational? Indicate(KeyValuePair<Rational, double>[] pointGist, KeyValuePair<Rational,
             double>[] parallelGist, double percent)
         {
-            //var strength = GetStrength(pointGist, parallelGist, percent);
-            //if (!strength.HasValue)
-            //    return null;
+            var strength = GetStrength(pointGist, parallelGist, percent);
+            if (!strength.HasValue)
+                return null;
 
-            //if (strength < 1.0)
-            //    return null;
+            if (strength < 1.0)
+                return null;
 
             if (pointGist.Length == 0)
                 return null;
-            var pp1 = pointGist.Where(p => p.Key.Numerator == 1);
-            if (pp1.Any())
-                return pp1.First().Key;
+            var point = pointGist.Where(p => p.Key.Numerator == 1).ToArray();
+            if (point.Any())
+                return point.First().Key;
             if (parallelGist.Any())
                 return parallelGist.First().Key;
             return pointGist.First().Key;
@@ -50,14 +50,14 @@ namespace lib
             var g2 = pointGist[1];
 
             if (g1.Key.Numerator != 1 || g1.Key.Denomerator < 4)
-                return 0.0;
+                return null;
 
             if (percent < 0.5)
-                return 0.0;
+                return null;
 
             var pointStrength = g1.Value / g2.Value;
-            var parallelStrength = parallelGist.Length > 1 ? g1.Value/g1.Value : g1.Value;
-            return (pointStrength + parallelStrength)/2;
+            //var parallelStrength = parallelGist.Length > 1 ? g1.Value/g1.Value : g1.Value;
+            return pointStrength/2;
         }
 
         public static KeyValuePair<Rational, double>[] PointGist(PointProjectionSolver solver)
