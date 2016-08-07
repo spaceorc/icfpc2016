@@ -108,6 +108,7 @@
     <Compile Include="ProjectionSolver\CycleFinder.cs" />
     <Compile Include="ProjectionSolver\CycleReflector.cs" />
     <Compile Include="ProjectionSolver\Pathfinder.cs" />
+    <Compile Include="ProjectionSolver\PerimeterFinder.cs" />
     <Compile Include="ProjectionSolver\PointProjectionSolver.cs" />
     <Compile Include="ProjectionSolver\ProjectionDataClasses.cs" />
     <Compile Include="ProjectionSolver\Projector.cs" />

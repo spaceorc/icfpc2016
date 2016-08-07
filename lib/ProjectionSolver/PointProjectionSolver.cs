@@ -42,7 +42,9 @@ namespace lib
 		}
 
 		public Rational length;
-		public double originality => (double) edges.AllNodes().Distinct().Count() / edges.Count;
+        internal double originality1;
+
+        public double originality => (double) edges.AllNodes().Distinct().Count() / edges.Count;
 
 		public override string ToString()
 		{
