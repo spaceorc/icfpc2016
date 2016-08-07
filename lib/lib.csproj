@@ -85,6 +85,14 @@
     <Compile Include="Api\ProblemsRepo.cs" />
     <Compile Include="Api\ProblemsSender.cs" />
     <Compile Include="Arithmetic.cs" />
+    <Compile Include="Constructor\ConstructorSolver.cs" />
+    <Compile Include="Constructor\DictionaryExtension.cs" />
+    <Compile Include="Constructor\PolygonGraph.cs" />
+    <Compile Include="Constructor\Program.cs" />
+    <Compile Include="Constructor\RationalMatrix.cs" />
+    <Compile Include="Constructor\Rounder.cs" />
+    <Compile Include="Constructor\SegmentsFinder.cs" />
+    <Compile Include="Constructor\SegmentsMatrix.cs" />
     <Compile Include="ConvexPolygonSolver.cs" />
     <Compile Include="D4Problem.cs" />
     <Compile Include="DataScience\CombinedAccessor.cs" />

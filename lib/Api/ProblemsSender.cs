@@ -2,6 +2,7 @@
 using System;
 using System.Net.Http;
 using System.Threading;
+using SquareConstructor;
 
 namespace lib.Api
 {
@@ -14,7 +15,7 @@ namespace lib.Api
 			var res = 0.0;
 			var t = new Thread(() =>
 			{
-				var spec = ProjectionSolverRunner.Solve(problemSpec);
+				var spec = new ConstructorSolver(problemSpec).Work();
 				res = Post(problemSpec, spec);
 			})
 			{ IsBackground = true };

@@ -79,10 +79,6 @@
       <Project>{3f474806-7ff4-4df9-a061-35367e99dcb8}</Project>
       <Name>Runner</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SquareConstructor\SquareConstructor.csproj">
-      <Project>{82e3b127-3aab-477e-baa8-b13e57b099c3}</Project>
-      <Name>SquareConstructor</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

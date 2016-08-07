@@ -8,7 +8,7 @@ using lib;
 
 namespace SquareConstructor
 {
-	public class ConstructorSolver
+	class ConstructorSolver
 	{
 		private Dictionary<Segment, List<Polygon>> Segments = new Dictionary<Segment, List<Polygon>>();
 		private HashSet<Polygon> UsedPolygons = new HashSet<Polygon>();
@@ -216,7 +216,7 @@ namespace SquareConstructor
 			if(result.Count > maxCount)
 				return;
 
-			if(deep > 30)
+			if(deep > 10)
 				Console.WriteLine("");
 
 			if (startSegment.Equals(segment) && stack.Count > 0 || IsOnSquareBound(segment))
