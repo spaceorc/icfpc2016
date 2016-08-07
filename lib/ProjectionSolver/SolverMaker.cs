@@ -67,7 +67,7 @@ namespace lib.ProjectionSolver
             var viz = new GraphVisualizer<PointProjectionSolver.ProjectedEdgeInfo, PointProjectionSolver.ProjectedNodeInfo>();
             viz.GetX = z => z.Data.Projection.X;
             viz.GetY = z => z.Data.Projection.Y;
-            viz.NodeCaption = z => z.Data.Original.Data.Location.ToString();
+           // viz.NodeCaption = z => z.Data.Original.Data.Location.ToString();
             viz.Window(500, gr, name);
         }
 
@@ -95,7 +95,7 @@ namespace lib.ProjectionSolver
         {
             while (true)
             {
-                //Visualize(solver, pr);
+              //  Visualize(solver, pr);
                 if (EvaluateProjection(solver, pr)) return solver;
                 var hordEdgeStage = Projector.AddVeryGoodEdges(pr);
                 if (hordEdgeStage != null)
@@ -115,8 +115,8 @@ namespace lib.ProjectionSolver
             pr.Stages.Push(Projector.CreateInitialProjection(cycle, pr));
 
 			//Console.WriteLine(string.Join(" ||| ", cycle));
-            //Visualize(solver, pr, cycleCounter.ToString());
-			//Visualize(solver, pr, cycleCounter.ToString());
+           // Visualize(solver, pr, cycleCounter.ToString());
+			
 
             var res=TryHordEdges(solver, pr);
             if (res != null) return res;
@@ -159,7 +159,7 @@ namespace lib.ProjectionSolver
 
             cycleCounter = -1;
 
-            foreach (var c in cycles.Skip(1))
+            foreach (var c in cycles)
             {
                 cycleCounter++;
                 var res = TryCycle(solver, c);

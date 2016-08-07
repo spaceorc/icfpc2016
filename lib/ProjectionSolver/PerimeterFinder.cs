@@ -17,6 +17,7 @@ namespace lib.ProjectionSolver
 	    {
 		    foreach (var dictByStart in wayFinder.Result.Values)
 		    {
+                if (!dictByStart.ContainsKey(nodeNumbers[0])) continue;
 			    var paths = dictByStart[nodeNumbers[0]];
 			    foreach (var path in paths)
 			    {
@@ -28,6 +29,7 @@ namespace lib.ProjectionSolver
 						Console.WriteLine($"  .originalityByVertices = {path.originalityByVertices}");
 						Console.WriteLine($"  .originalityByEdges = {path.originalityByEdges}");
 						Console.WriteLine($"  .straightness = {path.straightness}");
+                        Console.WriteLine($"  .index={paths.IndexOf(path)}/{paths.Count}");
 						return;
 				    }
 			    }
@@ -36,14 +38,20 @@ namespace lib.ProjectionSolver
 
 	    public IEnumerable<List<PPath>> Find(double cutOffBorder)
 	    {
-			for (var i = 0; i < 10; i++)
+			for (var i = 0; i < 8; i++)
 				wayFinder.MakeIteration();
 
-		    var iter = 0;
+            DebugPathMetrics(5, 10, 3);
+            DebugPathMetrics(2, 0, 13, 14, 8, 7, 12, 11, 5);
+            DebugPathMetrics(6, 11, 13, 1, 9, 14, 12, 4, 3);
+            DebugPathMetrics(6,10,2);
+
+
+            var iter = 0;
 			while (true)
 			{
 				Console.WriteLine("\n === Let's make one more iteration ===");
-				wayFinder.MakeIteration();
+//				wayFinder.MakeIteration();
 				iter++;
 
 				for (var start = 0; start < wayFinder.Graph.NodesCount; start++)
