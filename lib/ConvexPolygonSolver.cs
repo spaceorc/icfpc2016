@@ -157,8 +157,8 @@ namespace lib
 					var initialSolution = SolutionSpec.CreateTrivial(v => v + shift);
 					var solution = ConvexPolygonSolver.Solve(poly, initialSolution);
 					var packedSolution = solution.Pack();
-					var packedSolutionSize = packedSolution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
-					var solutionSize = solution.ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
+					var packedSolutionSize = packedSolution.Size();
+					var solutionSize = solution.Size();
 					if (packedSolutionSize <= 5000)
 					{
 						Console.WriteLine($"{shift}: {solutionSize}; packed: {packedSolutionSize}");

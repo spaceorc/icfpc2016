@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -99,8 +100,15 @@ namespace lib
 			var path = Path.Combine(problemsDir, $"snapshot.txt");
 			if (!File.Exists(path) || File.GetLastWriteTime(path) < DateTime.Now - TimeSpan.FromHours(1))
 			{
-				var res = api.GetLastSnapshotString();
-				File.WriteAllText(path, res);
+				try
+				{
+					var res = api.GetLastSnapshotString();
+					File.WriteAllText(path, res);
+				}
+				catch (Exception e)
+				{
+					MessageBox.Show(e.Message, "Cant donwload fresh snapshot");
+				}
 			}
 			return JsonConvert.DeserializeObject<SnapshotJson>(File.ReadAllText(path));
 		}

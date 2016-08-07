@@ -22,10 +22,25 @@ namespace lib.Visualization.ManualSolving
 			var redo = new ToolStripMenuItem("Redo", null, (sender, args) => Redo());
 			redo.ShortcutKeys = Keys.Z | Keys.Control | Keys.Shift;
 			var border = new ToolStripMenuItem("MarkAsBorder", null, (sender, args) => ChangeModel(Model.MarkAsBorder()));
-			var noborder = new ToolStripMenuItem("MarkAsBorder", null, (sender, args) => ChangeModel(Model.MarkAsNoBorder()));
-			var menu = new ToolStrip(copy, move, cancel, undo, redo, border, noborder);
+			var noborder = new ToolStripMenuItem("MarkAsNOTBorder", null, (sender, args) => ChangeModel(Model.MarkAsNoBorder()));
+			var solve = new ToolStripMenuItem("Solve", null, SolveClick);
+			var menu = new ToolStrip(copy, move, cancel, undo, redo, border, noborder, solve);
 			WindowState = FormWindowState.Maximized;
 			this.Controls.Add(menu);
+		}
+
+		private void SolveClick(object sender, EventArgs e)
+		{
+			if (!Model.SelectedSegmentIndices.Any())
+				MessageBox.Show("Выдели ребра выпуклого многоугольника, который нужно решить.");
+			else
+			{
+				var sol = Model.SolveConvex();
+				sol.CreateVisualizerForm().ShowDialog();
+				sol.CreateVisualizerForm(true).ShowDialog();
+				Clipboard.SetText(sol.ToString());
+				MessageBox.Show("Решение скопировано в буфер. К решению выпуклого применены все сделанные в редакторе фолды в обратном порядке. Можно пробовать сабмитить.");
+			}
 		}
 
 		private void Undo()

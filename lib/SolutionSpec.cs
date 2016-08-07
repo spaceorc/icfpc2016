@@ -47,6 +47,11 @@ namespace lib
 			return sb.ToString();
 		}
 
+		public int Size()
+		{
+			return ToString().Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty).Length;
+		}
+
 		public bool ValidateFacetSquares()
 		{
 			Rational totalSquare = 0;
