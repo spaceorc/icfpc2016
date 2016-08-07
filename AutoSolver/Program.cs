@@ -8,19 +8,17 @@ namespace AutoSolver
 {
 	class Program
 	{
-		private static ApiClient client;
-		private static ProblemsRepo repo;
+		private static readonly ApiClient client = new ApiClient();
+		private static readonly ProblemsRepo repo = new ProblemsRepo();
 
 		static void Main2(string[] args)
 		{
+			DownloadNewProblems();
 			ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
 		}
 
 		static void Main(string[] args)
 		{
-			repo = new ProblemsRepo();
-			client = new ApiClient();
-
 			while (true)
 			{
 				//DownloadNewProblems();

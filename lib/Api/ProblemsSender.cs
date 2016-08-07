@@ -59,7 +59,7 @@ namespace lib.Api
 				var oldResemblance = repo.GetProblemResemblance(problemSpec.id);
 				var response = client.PostSolution(problemSpec.id, solutionSpec);
 				var resemblance = repo.GetResemblance(response);
-				if (resemblance > oldResemblance)
+				if (resemblance >= oldResemblance)
 				{
 					repo.PutResponse(problemSpec.id, response);
 					repo.PutSolution(problemSpec.id, solutionSpec);
