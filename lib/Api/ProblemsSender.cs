@@ -55,21 +55,21 @@ namespace lib.Api
 				return 0;
 			}
 
-			return DoPost(solutionSpec, problemSpecId);
+			return DoPost(problemSpecId, solutionSpec);
 		}
 
-		private static double DoPost(ProblemSpec problemSpec, SolutionSpec solutionSpec)
+		private static double DoPost(int problemSpecId, SolutionSpec solutionSpec)
 		{
 			var client = new ApiClient();
 			try
 			{
-				var oldResemblance = repo.GetProblemResemblance(problemSpec.id);
-				var response = client.PostSolution(problemSpec.id, solutionSpec);
+				var oldResemblance = repo.GetProblemResemblance(problemSpecId);
+				var response = client.PostSolution(problemSpecId, solutionSpec);
 				var resemblance = repo.GetResemblance(response);
 				if (resemblance >= oldResemblance)
 				{
-					repo.PutResponse(problemSpec.id, response);
-					repo.PutSolution(problemSpec.id, solutionSpec);
+					repo.PutResponse(problemSpecId, response);
+					repo.PutSolution(problemSpecId, solutionSpec);
 					Console.Out.Write($" solution improved! new score: {resemblance} ");
 				}
 				return resemblance;
