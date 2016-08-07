@@ -33,7 +33,6 @@ namespace lib
 		private readonly ApiClient api = new ApiClient();
 		private Painter painter = new Painter();
 		private ProblemSpec problem;
-		private SolutionSpec solution;
 		private ListBox list;
 		private Panel problemPanel;
 		private SnapshotJson snapshotJson;

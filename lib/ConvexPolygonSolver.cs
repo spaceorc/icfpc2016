@@ -75,10 +75,7 @@ namespace lib
 		{
 			timeout = timeout ?? TimeSpan.FromSeconds(10);
 			SolutionSpec initialSolution = null;
-			var t = new Thread(() =>
-			{
-				initialSolution = GetInitialSolutionAlongRationalEdge(problemPolygon) ?? new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem);
-			})
+			var t = new Thread(() => { initialSolution = GetInitialSolutionAlongRationalEdge(problemPolygon) ?? new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem); })
 			{ IsBackground = true };
 			t.Start();
 			if (!t.Join(timeout.Value))

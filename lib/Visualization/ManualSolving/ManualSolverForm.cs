@@ -92,7 +92,7 @@ namespace lib.Visualization.ManualSolving
 			ChangeModel(Model.SelectSegment());
 		}
 
-		public Rational Margin = new Rational(1, 1);
+		public new Rational Margin = new Rational(1, 1);
 
 		public Rational GetScaleFactor()
 		{
