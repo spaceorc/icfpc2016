@@ -27,8 +27,10 @@ namespace lib.ProjectionSolver
             return ps;
         }
 
-        public WayFinder(Graph<EdgeInfo, NodeInfo> Graph, List<Rational> desiredLength)
+        public WayFinder(Graph<EdgeInfo, NodeInfo> graph, List<Rational> desiredLength)
         {
+	        Graph = graph;
+
             currentPathes = CreateMatrix();
             for (int i = 0; i < Graph.NodesCount; i++)
                 currentPathes[i, i].Add(new PPath { edges = new List<Edge<EdgeInfo, NodeInfo>>(), length = 0 });
@@ -55,26 +57,30 @@ namespace lib.ProjectionSolver
         void MakeMetrics(PPath path)
         {
             path.originality1 = (double)path.edges.AllNodes().Distinct().Count();
-            path.originality1 /= path.edges.Count;
+            path.originality1 /= (path.edges.Count+1);
 
             path.straightness = 0.0;
             for (int i=0;i<path.edges.Count-1;i++)
             {
                 var first = path.edges[i].Data.segment.Direction;
                 var second = path.edges[i + 1].Data.segment.Direction;
-                var scalar = first.X * second.X + first.Y + second.Y;
+                var scalar = first.X * second.X + first.Y * second.Y;
                 double cos = (double)scalar / (first.Length * second.Length);
-                cos = (1 - cos) / 2;
+
+
+
+
+                cos = (1 + cos) / 2;
                 path.straightness += cos;
             }
             path.straightness /= path.edges.Count;
 
-            path.metric = path.originality1 + path.straightness;
+	        path.metric = (path.originality1 + path.straightness)/2;
         }
 
         void Scoring()
         {
-            var comparer = new Comparison<PPath>((a, b) => a.originality1.CompareTo(b.originality1));
+            var comparer = new Comparison<PPath>((a, b) => -a.metric.CompareTo(b.metric));
 
             foreach (var len in Result.Keys)
                 foreach(var begin in Result[len].Keys)
@@ -97,6 +103,7 @@ namespace lib.ProjectionSolver
                             newPathes[begin, end.NodeNumber].Add(path);
                             RegisterOutput(path);
                         }
+	        currentPathes = newPathes;
 
             Scoring();
         }
