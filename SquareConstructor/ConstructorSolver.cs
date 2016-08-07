@@ -191,10 +191,8 @@ namespace SquareConstructor
 				return null;
 
 			List<List<Polygon>> variants = new List<List<Polygon>>();
-			UsedPolygonsInStack.Add(startSegment.Item1);
 			DoRound(startSegment.Item1, startSegment.Item2, startSegment.Item2, variants, new Stack<Polygon>(), vertex,
 				maxCount, 0);
-			UsedPolygonsInStack.Remove(startSegment.Item1);
 
 			return variants;
 		}
