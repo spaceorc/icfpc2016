@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using lib;
 using lib.Api;
@@ -42,14 +43,47 @@ namespace AutoSolver
 					Thread.Sleep(TimeSpan.FromMinutes(1));
 				}
 			}
-			else
+			else if (args.Contains("--convex"))
 			{
 				ShowIntro("ConvexPolygonSolver");
-
 				var newProblems = DownloadNewProblems();
 				ConvexPolygonSolver.SolveAll(newProblems);
 				ConvexPolygonSolver.SolveAllNotSolvedPerfectly();
 			}
+			else
+			{
+				ShowIntro("DumbSolver");
+				var newProblems = DownloadNewProblems();
+				Console.Out.WriteLine($"newProblems.Count: {newProblems.Count}");
+				var noSolutionProblems = repo.GetAllNotSolvedPerfectly().Where(x => repo.FindResponse(x.id) == null).Skip(15).ToList();
+				Console.Out.WriteLine($"noSolutionProblems.Count: {noSolutionProblems.Count}");
+				var sw = Stopwatch.StartNew();
+				for (var i = 0; i < noSolutionProblems.Count; i++)
+				{
+					var problem = noSolutionProblems[i];
+					Console.Write($"{sw.Elapsed:c} Problem {problem.id:0000} ({i:0000}/{noSolutionProblems.Count:0000}) ");
+					var solution = TryGetInitialSolution(problem);
+					if (solution != null)
+						ProblemsSender.Post(solution, problem.id);
+					Console.WriteLine();
+				}
+			}
+		}
+
+		private static SolutionSpec TryGetInitialSolution(ProblemSpec problem, TimeSpan? timeout = null)
+		{
+			timeout = timeout ?? TimeSpan.FromSeconds(10);
+			SolutionSpec initialSolution = null;
+			var t = new Thread(() => { initialSolution = new ImperfectSolver().SolveMovingAndRotatingInitialSquare(problem); })
+			{ IsBackground = true };
+			t.Start();
+			if (!t.Join(timeout.Value))
+			{
+				t.Abort();
+				t.Join();
+				Console.Write($"Failed to get initial solution in {timeout}! Skipping");
+			}
+			return initialSolution;
 		}
 
 		private static void ShowIntro(string algorithmName)
