@@ -35,7 +35,7 @@ namespace lib
 		{
 			edges = other.edges.ToList();
 			length = other.length;
-			originality1 = other.originality1;
+			originalityByVertices = other.originalityByVertices;
 			straightness = other.straightness;
 			metric = other.metric;
 		}
@@ -53,11 +53,9 @@ namespace lib
 		}
 
 		public Rational length;
-        public double originality1;
+        public double originalityByVertices, originalityByEdges;
         public double straightness;
         public double metric;
-
-        public double originality => (double) edges.AllNodes().Distinct().Count() / edges.Count;
 
 		public override string ToString()
 		{

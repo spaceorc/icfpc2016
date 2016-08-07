@@ -149,8 +149,8 @@ namespace lib.ProjectionSolver
 
 
 			DrawProblem(1083);
-//
-			SolveTask(1083,new Rational(1,8)); return;
+			SolveTask(1083, new Rational(1,8));
+			return;
 
 			///DrawPathGraph(49);return;
 			//SolveAndSend(1763);// return; //че за упаковка
