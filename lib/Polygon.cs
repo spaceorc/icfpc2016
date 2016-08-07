@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace lib
 {
-	public class Polygon
+	public class Polygon : IEquatable<Polygon>
 	{
 		public int Id;
 		public readonly Vector[] Vertices;
@@ -20,6 +20,32 @@ namespace lib
 		{
 			Vertices = vertices;
 			Segments = BuildSegments(vertices).ToArray();
+		}
+
+		public bool Equals(Polygon other)
+		{
+			if (other.Vertices.Length != Vertices.Length)
+				return false;
+			return !Vertices.Where((t, i) => !other.Vertices[i].Equals(t)).Any();
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			if (obj.GetType() != this.GetType()) return false;
+			return Equals((Polygon) obj);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				var hashCode = 0;
+				foreach (var vector in Vertices)
+					hashCode = hashCode * 397 ^ vector.GetHashCode();
+				return hashCode;
+			}
 		}
 
 		private static List<Segment> BuildSegments(Vector[] vertices)

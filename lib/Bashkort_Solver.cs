@@ -12,6 +12,27 @@ namespace lib
 	public class Bashkort_Solver
 	{
 		[Test]
+		public void PostSolutionsForSameProblems()
+		{
+			var repo = new ProblemsRepo();
+			var solutions = new Dictionary<int, Tuple<string, double>>();
+			foreach (var problemSpec in repo.GetAll().Where(p => repo.FindSolution(p.id) != null))
+			{
+				var polygonsHashCode = problemSpec.GetPolygonsHashCode();
+				Tuple<string, double> prev;
+				if (!solutions.TryGetValue(polygonsHashCode, out prev) || prev.Item2 < repo.GetProblemResemblance(problemSpec.id))
+					solutions[polygonsHashCode] = Tuple.Create(repo.FindSolution(problemSpec.id), repo.GetProblemResemblance(problemSpec.id));
+			}
+			foreach (var problemSpec in repo.GetAll())
+			{
+				var polygonsHashCode = problemSpec.GetPolygonsHashCode();
+				Tuple<string, double> best;
+				if (solutions.TryGetValue(polygonsHashCode, out best))
+					ProblemsSender.Post(new SolutionSpec(best.Item1), problemSpec.id, pack: false);
+			}
+		}
+
+		[Test]
 		[TestCase(3852, "9999077/69994655", "1116/69994655", false)]
 		[TestCase(3965, "997/9981", "11/9981", true)]
 		[TestCase(4008, "11173797/89390393", "17/89390393", true)]

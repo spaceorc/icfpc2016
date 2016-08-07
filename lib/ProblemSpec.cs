@@ -21,6 +21,17 @@ namespace lib
 			Segments = segments;
 		}
 
+		public int GetPolygonsHashCode()
+		{
+			unchecked
+			{
+				var hashCode = 0;
+				foreach (var polygon in Polygons)
+					hashCode = hashCode*397 ^ polygon.GetHashCode();
+				return hashCode;
+			}
+		}
+
 		public ProblemSpec MoveToOrigin()
 		{
 			var vs = Polygons.SelectMany(p => p.Vertices).ToList();
