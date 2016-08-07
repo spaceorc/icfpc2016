@@ -52,8 +52,6 @@ namespace lib.ProjectionSolver
 
         static void DrawPathGraph(int task)
         {
-
-            
             var fname = string.Format("...\\..\\..\\problems\\{0:D3}.spec.txt", task);
             var spec = ProblemSpec.Parse(File.ReadAllText(fname));
             var r = Pathfinder.BuildGraph(spec);
@@ -126,7 +124,7 @@ namespace lib.ProjectionSolver
 
             spec = spec.Pack();
             if (spec == null) return 0;
-            return ProblemsSender.Post(problemSpec.id, spec);
+            return ProblemsSender.Post(problemSpec, spec);
         }
 
         public static double SolveAndSendInternal(int id)
@@ -135,7 +133,7 @@ namespace lib.ProjectionSolver
             var spec = ProjectionSolverRunner.Solve(problemSpec);
             if (spec == null)
                 return 0;
-            return ProblemsSender.Post(problemSpec.id, spec);
+            return ProblemsSender.Post(problemSpec, spec);
         }
 
         static void Main(string[] args)

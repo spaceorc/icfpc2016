@@ -79,7 +79,7 @@ namespace AutoSolver
 							lock (mutex)
 							{
 								Console.WriteLine(" posting... ");
-								ps = ProblemsSender.Post(problemSpec.id, solution);
+								ps = ProblemsSender.Post(problemSpec, solution);
 								Console.Write($" perfect score: {ps}");
 							}
 							if (ps == 1.0)

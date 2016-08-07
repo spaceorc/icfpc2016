@@ -19,7 +19,7 @@ namespace lib
 			{
 				var solution = TrySolveSingleProblem(problem);
 				if (solution != null)
-					ProblemsSender.Post(problem.id, solution);
+					ProblemsSender.Post(problem, solution);
 				Console.WriteLine($"Elapsed: {sw.Elapsed}");
 			}
 		}
