@@ -63,7 +63,10 @@ namespace lib.Api
 				{
 					repo.PutResponse(problemSpecId, response);
 					repo.PutSolution(problemSpecId, solutionSpec);
-					Console.Out.Write($" solution improved! new score: {resemblance} ");
+					if (resemblance > oldResemblance)
+						Console.Out.Write($" solution improved! new score: {resemblance} ");
+					else
+						Console.Out.Write($" just solution changed! old = new score: {resemblance} ");
 				}
 				return resemblance;
 			}

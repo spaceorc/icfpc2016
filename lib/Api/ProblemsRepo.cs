@@ -44,18 +44,18 @@ namespace lib
 		public IEnumerable<ProblemSpec> GetAll()
 		{
 			return Directory.GetFiles(problemsDir, "*.spec.txt")
-				.Select(p => ProblemSpec.Parse(File.ReadAllText(p), ExtractProblemId(p)));
+				.Select(p => ProblemSpec.Parse(File.ReadAllText(p), ExtractProblemId(p))).ToList();
 		}
 
 		public IEnumerable<ProblemSpec> GetAllNotSolvedPerfectly()
 		{
-			return GetAll().Where(x => GetProblemResemblance(x.id) < 1.0);
+			return GetAll().Where(x => GetProblemResemblance(x.id) < 1.0).ToList();
 		}
 
 		public IEnumerable<Tuple<string, int>> GetAllProblemSpecContentAndId()
 		{
 			return Directory.GetFiles(problemsDir, "*.spec.txt")
-				.Select(p => Tuple.Create(File.ReadAllText(p), ExtractProblemId(p)));
+				.Select(p => Tuple.Create(File.ReadAllText(p), ExtractProblemId(p))).ToList();
 		}
 
 		private static int ExtractProblemId(string fileName)
