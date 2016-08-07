@@ -39,7 +39,7 @@ namespace lib
 		{
 			var sw = Stopwatch.StartNew();
 			var problemsRepo = new ProblemsRepo();
-			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly())
+			foreach (var problem in problemsRepo.GetAllNotSolvedPerfectly().Reverse())
 			{
 				if (problem.Polygons.Length > 1)
 					Console.Write($"Problem {problem.id} has MANY POLYGONS! Skipping...");
