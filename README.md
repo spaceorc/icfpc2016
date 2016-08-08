@@ -3,20 +3,20 @@
 ## Members
 
 * Pavel Egorov — visualizer, manual solver, problems, this readme
-* Mikhail Khruschev — solver
-* Yuriy Okulovskiy — solver
-* Ivan Dashkevich — convex solver, infrastructure, birthday!!!
-* Andrey Kostousov— convex solver, infrastructure
-* Dmitriy Titarenko — problems, infrastructure
+* Mikhail Khruschev — solver
+* Yuriy Okulovskiy — solver
+* Ivan Dashkevich — convex solver, infrastructure, birthday!!!
+* Andrey Kostousov — convex solver, infrastructure
+* Dmitriy Titarenko — problems, infrastructure
 * Alexandr Borozdin — infrastructure, manual solver, solver
 * Alexey Dubrovin — infrastructure, solver
-* Ivan Domashnikh — solver
+* Ivan Domashnikh — solver
 * Alexey Kirpichnikov — help
 * Grigoriy Nazarov — help
 * Alexandr Kokovin — help
 
 
-## Interesting classes in source:
+## Interesting classes in the source code
 
 Solvers:
 
@@ -39,6 +39,8 @@ Infrastructure:
 * problems/ — directory with problems, solutions and responses of solution/submit api call
 
 ## Manual solver?!?
+
+Yes, we gaina lot of points via semi automatic solver. Human do several folds to make it convex, and then convex solver do the rest.
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=6_2JAzxuTNM
 " target="_blank"><img src="http://img.youtube.com/vi/6_2JAzxuTNM/0.jpg" 
