@@ -40,5 +40,6 @@ Infrastructure:
 
 ## Manual solver?!?
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/6_2JAzxuTNM" frameborder="0" allowfullscreen></iframe>
-
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=6_2JAzxuTNM
+" target="_blank"><img src="http://img.youtube.com/vi/6_2JAzxuTNM/0.jpg" 
+alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
