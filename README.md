@@ -1,4 +1,4 @@
-# ICFPC 2016. Team kontur.ru (ID: 89)
+﻿# ICFPC 2016. Team kontur.ru (ID: 89)
 
 ## Members
 * Alexandr Borozdin — infrastructure, manual solver, solver
@@ -6,7 +6,7 @@
 * Ivan Domashnikh — solver
 * Alexey Dubrovin — infrastructure, solver
 * Pavel Egorov — visualizer, manual solver, problems, this readme
-* Mikhail Khruschev — solver
+* Mikhail Khruschev — constructor solver
 * Alexey Kirpichnikov — help everybody
 * Alexandr Kokovin — problems
 * Andrey Kostousov — convex solver, infrastructure
@@ -22,6 +22,7 @@ Solvers:
 * lib/ConvexPolygonSolver.cs — for convex problems
 * lib/SolutionSpecExt.cs — implementation of the solution folding.
 * lib/ProjectionSolver/UltraSolver.cs — for simple not convex problems (try to compose initial square perimeter with rational segments from problem and then restore other points)
+* lib/Constructor/ConstructorSolver.cs — for other simple not convex problems (try to construct initial square from polygons of given siluete)
 * lib/ManualSolverForm.cs — UI for manual problems solving (you can do several reflections and then apply convex solver)
 * lib/VisualizerForm.cs — visualizer of all problems with ability to open ManualSolverForm
 * lib/SolutionPacker.cs — optimizer of the solution size.
