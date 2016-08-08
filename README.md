@@ -1,19 +1,18 @@
 # ICFPC 2016. Team kontur.ru (ID: 89)
 
 ## Members
-
+* Alexandr Borozdin — infrastructure, manual solver, solver
+* Ivan Dashkevich — convex solver, infrastructure, birthday!!!
+* Ivan Domashnikh — solver
+* Alexey Dubrovin — infrastructure, solver
 * Pavel Egorov — visualizer, manual solver, problems, this readme
 * Mikhail Khruschev — solver
-* Yuriy Okulovskiy — solver
-* Ivan Dashkevich — convex solver, infrastructure, birthday!!!
+* Alexey Kirpichnikov — help everybody
+* Alexandr Kokovin — problems
 * Andrey Kostousov — convex solver, infrastructure
+* Grigoriy Nazarov — help everybody
+* Yuriy Okulovskiy — solver
 * Dmitriy Titarenko — problems, infrastructure
-* Alexandr Borozdin — infrastructure, manual solver, solver
-* Alexey Dubrovin — infrastructure, solver
-* Ivan Domashnikh — solver
-* Alexey Kirpichnikov — help
-* Grigoriy Nazarov — help
-* Alexandr Kokovin — help
 
 
 ## Interesting classes in the source code
