@@ -8,10 +8,10 @@
 * Alexey Dubrovin — infrastructure, solver
 * Pavel Egorov — visualizer, manual solver, problems, this readme
 * Mikhail Khruschev — constructor solver
-* Alexey Kirpichnikov — help everybody
+* Alexey Kirpichnikov — help for everybody
 * Alexandr Kokovin — problems
 * Andrey Kostousov — convex solver, infrastructure
-* Grigoriy Nazarov — help everybody
+* Grigoriy Nazarov — help for everybody
 * Yuriy Okulovskiy — solver
 * Dmitriy Titarenko — problems, infrastructure
 
