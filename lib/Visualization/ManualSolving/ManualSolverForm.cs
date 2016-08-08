@@ -39,7 +39,7 @@ namespace lib.Visualization.ManualSolving
 			{
 				var sols = Model.SolveConvex();
 				foreach (var sol in sols)
-					sol.CreateVisualizerForm(Model.Problem.id).Show();
+					sol.CreateVisualizerForm(Model.Problem.id).Show(this);
 				//MessageBox.Show("Решение скопировано в буфер. К решению выпуклого применены все сделанные в редакторе фолды в обратном порядке. Можно пробовать сабмитить.");
 			}
 		}

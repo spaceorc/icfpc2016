@@ -16,7 +16,10 @@ namespace lib
 
 		public static void SolveAllNotSolvedPerfectly()
 		{
-			SolveAll(problemsRepo.GetAllNotSolvedPerfectly().Reverse().ToList());
+			var snapshotJson = problemsRepo.GetSnapshot(new ApiClient());
+			var problemToRank = snapshotJson.Problems.ToDictionary(p => p.Id, p => p.ExpectedScore());
+			var allNotSolvedPerfectly = problemsRepo.GetAllNotSolvedPerfectly().OrderByDescending(x => problemToRank[x.id]);
+			SolveAll(allNotSolvedPerfectly.ToList());
 		}
 
 		public static void SolveAll(List<ProblemSpec> problems)
