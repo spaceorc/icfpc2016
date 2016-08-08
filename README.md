@@ -1,7 +1,8 @@
-﻿# ICFPC 2016. Team kontur.ru (ID: 89)
+# ICFPC 2016. Team kontur.ru (ID: 89)
 
 ## Members
-* Alexandr Borozdin — infrastructure, manual solver, solver
+
+* Alexander Borzunov — infrastructure, one of automatic solvers, manual solver
 * Ivan Dashkevich — convex solver, infrastructure, birthday!!!
 * Ivan Domashnikh — solver
 * Alexey Dubrovin — infrastructure, solver
@@ -14,33 +15,32 @@
 * Yuriy Okulovskiy — solver
 * Dmitriy Titarenko — problems, infrastructure
 
-
-## Interesting classes in the source code
+## Notable places in the source code
 
 Solvers:
 
-* lib/ConvexPolygonSolver.cs — for convex problems
-* lib/SolutionSpecExt.cs — implementation of the solution folding.
-* lib/ProjectionSolver/UltraSolver.cs — for simple not convex problems (try to compose initial square perimeter with rational segments from problem and then restore other points)
-* lib/Constructor/ConstructorSolver.cs — for other simple not convex problems (try to construct initial square from polygons of given siluete)
-* lib/ManualSolverForm.cs — UI for manual problems solving (you can do several reflections and then apply convex solver)
-* lib/VisualizerForm.cs — visualizer of all problems with ability to open ManualSolverForm
-* lib/SolutionPacker.cs — optimizer of the solution size.
+* [lib/ConvexPolygonSolver.cs](lib/ConvexPolygonSolver.cs) — for convex problems
+* [lib/SolutionSpecExt.cs](lib/SolutionSpecExt.cs) — implementation of the solution folding
+* [lib/ProjectionSolver/UltraSolver.cs](lib/ProjectionSolver/UltraSolver.cs) — for simple non-convex problems (tries to compose initial square perimeter with rational segments from a problem and then restore other points)
+* [lib/Constructor/ConstructorSolver.cs](lib/Constructor/ConstructorSolver.cs) — for other simple non-convex problems (tries to construct the initial square from polygons of the given silhouette)
+* [lib/Visualization/ManualSolving/ManualSolverForm.cs](lib/Visualization/ManualSolving/ManualSolverForm.cs) — UI for manual problem solving (you can do several reflections and then apply the convex solver)
+* [lib/Visualization/Visualizer.cs](lib/Visualization/Visualizer.cs) — visualizer of all problems with ability to open ManualSolverForm
+* [lib/SolutionPacker.cs](lib/SolutionPacker.cs) — optimizer of the solution size
 
-Problems:
+Problem generators:
 
-* lib/D4Problem.cs — generator of problems not solvable in 3 dimensions.
-* lib/Problems.cs — generator of some other simple problems.
+* [lib/D4Problem.cs](lib/D4Problem.cs) — generator of problems not solvable in 3 dimensions.
+* [lib/Problems.cs](lib/Problems.cs) — generator of some other simple problems.
 
 Infrastructure:
 
-* TimeManager — throttler for api calls
-* AutoSolver — daemon, download new problems and run solvers.
-* problems/ — directory with problems, solutions and responses of solution/submit api call
+* [TimeManager/](TimeManager/) — throttler for api calls
+* [AutoSolver/](AutoSolver/) — daemon that downloads new problems and runs solvers.
+* [problems/](problems/) — directory with problems, solutions and responses of solution/submit api call
 
 ## Manual solver?!?
 
-Yes, we gaina lot of points via semi automatic solver. Human do several folds to make it convex, and then convex solver do the rest.
+Yes, we gain a lot of points via a semi-automatic solver. A human needs to do several folds to make a figure convex, and then the convex solver do the rest.
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=6_2JAzxuTNM
 " target="_blank"><img src="http://img.youtube.com/vi/6_2JAzxuTNM/0.jpg" 
