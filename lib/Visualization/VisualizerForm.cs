@@ -65,7 +65,7 @@ namespace lib
 				output = new ListBox();
 				output.Dock = DockStyle.Bottom;
 
-				snapshotJson = repo.GetSnapshot(api);
+				snapshotJson = repo.GetSnapshot(null);
 				problemsJson = snapshotJson.Problems.ToDictionary(p => p.Id, p => p);
 
 				list.Items.AddRange(GetItems(x => x));

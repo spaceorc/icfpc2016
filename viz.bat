@@ -1,1 +1,1 @@
-start "" SolutionVisalizer\bin\Debug\viz.exe
+start "" SolutionVisualizer\bin\Debug\viz.exe

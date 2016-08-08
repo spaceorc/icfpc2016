@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lib", "lib\lib.csproj", "{9
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runner", "Runner\Runner.csproj", "{3F474806-7FF4-4DF9-A061-35367E99DCB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolutionVisalizer", "SolutionVisalizer\SolutionVisalizer.csproj", "{9FA243B2-B523-4254-9268-F777A37417E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolutionVisualizer", "SolutionVisualizer\SolutionVisualizer.csproj", "{9FA243B2-B523-4254-9268-F777A37417E1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoSolver", "AutoSolver\AutoSolver.csproj", "{55BD9244-4509-40E1-93B8-FE058FAB566C}"
 EndProject
