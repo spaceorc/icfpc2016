@@ -289,6 +289,43 @@ namespace lib
 			Console.WriteLine(sum);
 		}
 
+		[Test]
+		public void CalculateOurScore()
+		{
+			var repo = new ProblemsRepo();
+			var sn = repo.GetSnapshot(null);
+			var ourScore1 = 0.0;
+			var ourScore2 = 0.0;
+			var ourScore3 = 0.0;
+			foreach (var pr in sn.Problems)
+			{
+				var solutions = pr.Ranking.Count(r => r.resemblance == 1.0);
+				var part = pr.SolutionSize / (solutions + 1.0);
+				var myR = repo.GetProblemResemblance(pr.Id);
+				if (myR == 1.0)
+				{
+					ourScore1 += part;
+				}
+				else
+				{
+					var rSum = pr.Ranking.Where(r => r.resemblance != 1.0).Sum(r => r.resemblance);
+					ourScore2 += part*myR/rSum;
+				}
+				if (pr.Owner == "89")
+				{
+					ourScore3 += (5000 - pr.SolutionSize)/Math.Max(6, solutions + 1.0);
+				}
+			}
+			Console.WriteLine(ourScore1);
+			Console.WriteLine(ourScore2);
+			Console.WriteLine(ourScore3);
+			Console.WriteLine(ourScore1+ourScore2+ ourScore3);
+			var prCount = repo.GetAll().Count();
+			var noSolvedCount = repo.GetAllNotSolvedPerfectly().Count();
+			Console.WriteLine(prCount -noSolvedCount);
+			Console.WriteLine(prCount);
+		}
+
 		private bool IsRibbon(ProblemSpec prob)
 		{
 			var ds = prob.Segments.Select(s => s.Direction).ToList();

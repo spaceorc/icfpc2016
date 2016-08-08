@@ -103,7 +103,7 @@ namespace lib
 		public SnapshotJson GetSnapshot(ApiClient api)
 		{
 			var path = Path.Combine(problemsDir, $"snapshot.txt");
-			if (!File.Exists(path) || File.GetLastWriteTime(path) < DateTime.Now - TimeSpan.FromHours(1))
+			if (api != null && (!File.Exists(path) || File.GetLastWriteTime(path) < DateTime.Now - TimeSpan.FromHours(1)))
 			{
 				try
 				{
