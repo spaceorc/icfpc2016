@@ -29,8 +29,9 @@ namespace SquareConstructor
 			}
 			foreach (var holePolygon in holePolygons)
 			{
-				var polygon = polygons.Last(p => ArePointsPolygon(p.Vertices, holePolygon));
-				polygons.Remove(polygon);
+				var polygon = polygons.LastOrDefault(p => ArePointsPolygon(p.Vertices, holePolygon));
+				if(polygon != null)
+					polygons.Remove(polygon);
 			}
 			
 			return polygons;
@@ -73,6 +74,8 @@ namespace SquareConstructor
 					}
 				}
 				segment = best;
+				if(segment == null)
+					yield break;
 				yield return segment.Start;
 				usedSegments.Add(Tuple.Create(segment.Start, segment.End));
 			}

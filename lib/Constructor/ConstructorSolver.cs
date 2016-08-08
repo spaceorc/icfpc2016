@@ -43,9 +43,10 @@ namespace SquareConstructor
 			}
 
 			int i = 0;
-			GivenPolygons
-				.OrderByDescending(p => p.GetUnsignedSquare())
-				.First(polygon =>
+			var result = GivenPolygons
+				.OrderByDescending(HasRightAngle)
+				.ThenByDescending(p => p.GetUnsignedSquare())
+				.FirstOrDefault(polygon =>
 				{
 					Console.WriteLine($"{i++}/{GivenPolygons.Length} started");
 					return polygon.Segments.Any(segment => StartWithPolygonSegment(polygon, segment));
@@ -53,6 +54,19 @@ namespace SquareConstructor
 			);
 			
 			return GenerateSolution();
+		}
+
+		private bool HasRightAngle(Polygon polygon)
+		{
+			for (int i = 0; i < polygon.Segments.Length; i++)
+			{
+				var s1 = polygon.Segments[i];
+				var s2 = polygon.Segments[(i + 1)%polygon.Segments.Length];
+				if ((s1.End - s1.Start).ScalarProd(s2.End - s2.Start) == 0)
+					return true;
+			}
+
+			return false;
 		}
 
 		private SolutionSpec GenerateSolution()
@@ -145,17 +159,19 @@ namespace SquareConstructor
 
 			foreach (var pair in Vertexes.Where(pair => !Variants.ContainsKey(pair.Key) && !UsedVertexes.Contains(pair.Key)))
 			{
-				var rounds = GetRounds(pair.Key, 1000); //возвращает Null если цикл уже построен
-				if (rounds != null)
+				var rounds = GetRounds(pair.Key, 10); //возвращает Null если цикл уже построен
+				if (rounds != null && rounds.Count <= 10)
 					Variants[pair.Key] = rounds;
-				else
+				else if(rounds == null)
 				{
 					UsedVertexes.Add(pair.Key);
 					continue;
 				}
-				if (Variants[pair.Key].Count == 0)
+				if ((Variants.GetOrDefault(pair.Key)?.Count ?? 0) == 0)
 					return false;
 			}
+			if (Variants.Count == 0)
+				return false;
 
 			var simplest = Variants.Min(v => v.Value.Count);
 			var variant = Variants.First(v => v.Value.Count == simplest);
@@ -248,8 +264,13 @@ namespace SquareConstructor
 			{
 				if(!SegmentsMatrix.TryAddPolygon(pPolygon))
 					continue;
-				var newSegment = pPolygon.Segments.Where(s => s.Start.Equals(vertex) || s.End.Equals(vertex)).First(s => !s.Equals(segment));
-				
+				var newSegment = pPolygon.Segments.Where(s => s.Start.Equals(vertex) || s.End.Equals(vertex)).FirstOrDefault(s => !s.Equals(segment));
+				if (newSegment == null)
+				{
+					SegmentsMatrix.RemovePolygon(pPolygon);
+					return;
+				}
+
 				stack.Push(pPolygon);
 				DoRound(pPolygon, startPolygon, startSegment, newSegment, result, stack, vertex, maxCount, deep + 1);
 				stack.Pop();
