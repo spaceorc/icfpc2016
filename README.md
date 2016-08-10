@@ -8,7 +8,7 @@
 * Alexey Dubrovin — infrastructure, solver
 * Pavel Egorov — visualizer, manual solver, problems, this readme
 * Mikhail Khruschev — constructor solver
-* Alexey Kirpichnikov — help for everybody
+* Alexey Kirpichnikov — solving WILD_BASHKORT_MAGES problems
 * Alexandr Kokovin — problems
 * Andrey Kostousov — convex solver, infrastructure
 * Grigoriy Nazarov — help for everybody
