@@ -8,7 +8,7 @@
 * Alexey Dubrovin — infrastructure, solver
 * Pavel Egorov — visualizer, manual solver, problems, this readme
 * Mikhail Khruschev — constructor solver
-* Alexey Kirpichnikov — solving WILD_BASHKORT_MAGES problems
+* Alexey Kirpichnikov — solving WILD_BASHKORT_MAGES problems, research
 * Alexandr Kokovin — problems
 * Andrey Kostousov — convex solver, infrastructure
 * Grigoriy Nazarov — help for everybody
@@ -45,3 +45,14 @@ Yes, we gain a lot of points via a semi-automatic solver. A human needs to do se
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=6_2JAzxuTNM
 " target="_blank"><img src="http://img.youtube.com/vi/6_2JAzxuTNM/0.jpg" 
 alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
+
+## Science
+
+We found some inspiration in these articles:
+
+* [Folding Flat Silhouettes and Wrapping Polyhedral Packages: New Results in
+Computational Origami](http://erikdemaine.org/papers/CGTA2000/paper.pdf)
+* [The Polygon Containment Problem](http://www.cs.princeton.edu/~chazelle/pubs/PolygContainmentProb.pdf)
+* [Articles by Robert J. Lang](http://www.langorigami.com/articles)
+
+Also, Wolfram Alpha was useful in manual computations.
